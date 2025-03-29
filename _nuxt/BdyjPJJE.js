@@ -1,0 +1,1 @@
+import{t as s,x as o,v as t}from"./N7brWnht.js";const a={class:"home"},l=Object.assign({name:"HomePage"},{__name:"index",setup(n){return(r,e)=>(t(),s("div",a,e[0]||(e[0]=[o("h1",null,"Welcome to The Pearson Pub",-1),o("p",null,"This is your Nuxt 3 project homepage.",-1)])))}});export{l as default};
