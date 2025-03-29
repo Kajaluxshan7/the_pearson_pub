@@ -1,5 +1,12 @@
+/* In a global CSS file, e.g., assets/css/global.css */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .home {
-  padding: 2rem;
   text-align: center;
 }
 h1 {
@@ -8,5 +15,19 @@ h1 {
 }
 p {
   font-size: 1.2rem;
-  color: black;
+  color: yellow;
+}
+/* Hide scrollbar for WebKit-based browsers (Chrome, Safari, newer Edge) */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+html {
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Hide scrollbar for IE and Edge */
+html {
+  -ms-overflow-style: none; /* IE and Edge */
 }

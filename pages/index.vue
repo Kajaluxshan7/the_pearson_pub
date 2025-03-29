@@ -1,9 +1,6 @@
 <template>
-  <div>
-    <!-- Include the fixed navigation -->
-    <Navbar />
-    
-    <!-- Hero section -->
+  <div>    
+    <!-- Hero Section -->
     <Hero />
 
     <!-- About Section -->
@@ -19,27 +16,67 @@
 </template>
 
 <script setup>
-import Navbar from '~/components/Navbar.vue'
 import Hero from '~/components/Hero.vue'
 </script>
 
 <style scoped>
+/* About section styling */
 .about {
-  padding: 4rem 0;
+  padding: 5rem 0;
   background: #f9f9f9;
   text-align: center;
+  animation: fadeIn 1s ease-in-out;
 }
-.about .container {
+
+.container {
   max-width: 800px;
-  margin: auto;
+  margin: 0 auto;
   padding: 0 20px;
 }
+
 .about h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+  position: relative;
 }
+
+.about h2::after {
+  content: "";
+  width: 60px;
+  height: 4px;
+  background-color: #ff5722;
+  display: block;
+  margin: 0.5rem auto;
+}
+
 .about p {
-  font-size: 1rem;
+  font-size: 1.1rem;
+  line-height: 1.8;
   color: #555;
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .about h2 {
+    font-size: 2rem;
+  }
+  .about p {
+    font-size: 1rem;
+  }
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
