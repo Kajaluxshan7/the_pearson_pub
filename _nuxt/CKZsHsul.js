@@ -1,1 +1,0 @@
-import{_ as s,c as o,a as n,o as t}from"./Bi7MhJ24.js";const a={class:"menu-page"},c={__name:"menu",setup(_){return(p,e)=>(t(),o("div",a,e[0]||(e[0]=[n("h1",null,"Menu",-1),n("p",null,"This is the menu page. Content coming soon!",-1)])))}},u=s(c,[["__scopeId","data-v-73de7f3c"]]);export{u as default};
