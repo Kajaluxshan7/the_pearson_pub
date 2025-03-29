@@ -17,7 +17,7 @@
 .hero {
   position: relative;
   height: 100vh;
-  background-image: url('../assets/images/home_background.jpg'); /* Place your hero background image in assets/images */
+  background-image: url('/images/home_background.jpg'); /* Place your hero background image in assets/images */
   background-size: cover;
   background-position: center;
   display: flex;
