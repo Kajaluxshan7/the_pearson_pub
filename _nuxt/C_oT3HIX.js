@@ -1,0 +1,1 @@
+import{_ as t,c as a,a as e,o as s}from"./wx3W1bq-.js";const n={class:"about-page"},r={__name:"about",setup(_){return(c,o)=>(s(),a("div",n,o[0]||(o[0]=[e("h1",null,"About Us",-1),e("p",null,"This is the about page. More information will be added soon!",-1)])))}},p=t(r,[["__scopeId","data-v-302c19e9"]]);export{p as default};
