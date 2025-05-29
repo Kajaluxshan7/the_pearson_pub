@@ -1,28 +1,25 @@
 <template>
   <div class="menu-page">
-    <!-- Page Header -->
-    <!-- <section class="menu-header">
-      <h1>Our Menu & Entertainment</h1>
-      <p>
-        Discover our delicious dishes, daily specials, and weekly entertainment
-        events.
-      </p>
-    </section> -->
-    
-    <section class="offer-card">
-      <Offer />
-    </section>
-    
-    <section class="daily-offer">
-      <OfferSlideshow />
-    </section>
+    <transition name="fade-slide" appear>
+      <section class="offer-card">
+        <Offer />
+      </section>
+    </transition>
 
-    <section class="menu-card">
-      <MenuCard />
-    </section>
+    <transition name="fade-slide" appear>
+      <section class="daily-offer">
+        <OfferSlideshow />
+      </section>
+    </transition>
 
+    <transition name="fade-slide" appear>
+      <section class="menu-card">
+        <MenuCard />
+      </section>
+    </transition>
   </div>
 </template>
+
 
 <script setup>
 import OfferSlideshow from "@/components/Slideshow.vue";
@@ -76,4 +73,16 @@ import Offer from "@/components/Offers.vue";
   margin-top: -2rem;
   color: #f39c12;
 }
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.6s ease;
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
 </style>

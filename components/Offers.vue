@@ -1,22 +1,24 @@
 <template>
   <div class="offer-container">
     <h2 class="offer-title">Today's Offers</h2>
-    <div class="offers-list">
-      <div
-        v-for="offer in offers"
-        :key="offer.id"
-        class="offer-card"
-        :style="{ backgroundImage: 'url(' + offer.image + ')' }"
-      >
-      <div class="price-tag">\${{ offer.price }}</div>
-
-        <img :src="offer.image" alt="Offer" class="hover-image" />
-
-        <div class="offer-details">
-          <h3 class="offer-name">{{ offer.name }}</h3>
-        </div>
+<div class="offers-list">
+  <transition-group name="list" tag="div" class="offers-list-inner">
+    <div
+      v-for="(offer, index) in offers"
+      :key="offer.id"
+      class="offer-card"
+      :style="{ backgroundImage: 'url(' + offer.image + ')', animationDelay: (index * 0.3) + 's' }"
+    >
+      <div class="overlay"></div>
+      <div class="price-tag">${{ offer.price }}</div>
+      <img :src="offer.image" alt="Offer" class="offer-image" />
+      <div class="offer-details">
+        <h3 class="offer-name">{{ offer.name }}</h3>
       </div>
     </div>
+  </transition-group>
+</div>
+
   </div>
 </template>
 
@@ -29,16 +31,14 @@ export default {
           id: 1,
           name: "Grilled Salmon",
           price: 15.99,
-          description:
-            "A delicious grilled salmon served with fresh vegetables.",
+          description: "A delicious grilled salmon served with fresh vegetables.",
           image: "/images/menu/76b52f7a-dec8-4ca5-bd44-ca6c53200ae6.jpeg",
         },
         {
           id: 2,
           name: "Vegetable Pizza",
           price: 12.99,
-          description:
-            "A healthy and tasty vegetable pizza with a crisp crust.",
+          description: "A healthy and tasty vegetable pizza with a crisp crust.",
           image: "/menu/veg-pizza.jpg",
         },
         {
@@ -71,98 +71,31 @@ export default {
   flex-wrap: wrap;
   justify-content: center;
 }
+
 .offer-card {
   width: 300px;
   height: 400px;
   position: relative;
   border-radius: 28px;
   overflow: hidden;
-  background-color: #121212;
-  color: #fff;
-  padding: 30px 20px;
+  background-size: cover;
+  background-position: center;
   margin: 15px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  transition: transform 0.3s ease;
-  z-index: 1;
-}
-
-.offer-card::before {
-  content: "";
-  position: absolute;
-  top: -35px;
-  right: -35px;
-  width: 128px;
-  height: 128px;
-  background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 50%;
-  transition: transform 0.5s ease;
-  z-index: 0;
-}
-
-.offer-card:hover {
-  transform: translateY(-5px);
-}
-
-
-.offer-card:hover::before {
-  transform: scale(10);
-  background-color: rgba(255, 255, 255, 0.1); 
-}
-
-.offer-details {
-  position: relative;
-  z-index: 2;
-}
-
-.offer-name {
-  font-size: 1.6em;
-  font-weight: bold;
+  padding: 30px 20px;
   color: #fff;
-  margin: 0 0 10px;
 }
 
-.offer-price {
-  font-size: 1.2em;
-  color: #f9b234;
-  font-weight: bold;
-}
-
-.offer-description {
-  font-size: 0.95em;
-  color: #ddd;
-  margin-top: 8px;
-}
-
-.hover-image {
+.overlay {
   position: absolute;
-  top: 55px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-20px);
-  width: 170px;
-  height: 170px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 3px solid white;
-  opacity: 0;
-  transition: all 0.4s ease;
-  z-index: 3;
-}
-
-.offer-card:hover .hover-image {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
-}
-
-.offers-list .offer-card:nth-child(2n)::before,
-.offers-list .offer-card:nth-child(3n)::before,
-.offers-list .offer-card:nth-child(4n)::before,
-.offers-list .offer-card:nth-child(5n)::before,
-.offers-list .offer-card:nth-child(6n)::before {
-  background-color: transparent; 
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(18, 18, 18, 0.6); 
+  z-index: 1;
 }
 
 .price-tag {
@@ -175,8 +108,89 @@ export default {
   border-radius: 20px;
   font-weight: bold;
   font-size: 1em;
-  z-index: 3;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
+
+.offer-image {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 170px;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid white;
+  z-index: 2;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.4);
+}
+
+.offer-details {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin-top: 190px;
+}
+
+.offer-name {
+  font-size: 1.6em;
+  font-weight: bold;
+  color: #fff;
+  margin: 0;
+}
+
+.offer-card:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+}
+.offers-list-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.list-enter-active {
+  animation: fadeSlideIn 0.6s forwards;
+}
+.list-leave-active {
+  animation: fadeSlideOut 0.3s forwards;
+}
+
+@keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+}
+
+.offer-card {
+  animation-fill-mode: both;
+}
+
+.offer-card:hover {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.offer-card {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
 
 </style>

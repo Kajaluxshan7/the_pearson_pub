@@ -66,7 +66,23 @@ export default {
   margin: auto;
   width: 80%;
   height: 500px;
+
+  /* Add fade-in animation */
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 1s ease-out forwards;
+  animation-delay: 0.5s;
+  animation-fill-mode: forwards;
 }
+
+/* Animation keyframes */
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 .offer-slide-1 {
   text-align: center;
@@ -76,7 +92,7 @@ export default {
 
 .offer-slide {
   text-align: center;
-  height: 300px;
+  height: 500px;
   position: relative;
 }
 

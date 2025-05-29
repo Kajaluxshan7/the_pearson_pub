@@ -13,7 +13,8 @@
     </div>
 
     <div class="menu-card">
-      <div class="menu-grid">
+      <transition-group name="fade-in-up" tag="div">
+      <div class="menu-grid" >
         <ul class="menu-list" v-for="(column, index) in splitMenu" :key="index">
           <li
             v-for="item in column"
@@ -24,12 +25,13 @@
             <img :src="item.image" :alt="item.name" class="menu-image" />
             <div class="menu-details">
               <h3 class="menu-name">{{ item.name }}</h3>
-              <p class="menu-category">{{ item.category }}</p>
+              <!-- <p class="menu-category">{{ item.category }}</p> -->
               <p class="menu-price">${{ item.price }}</p>
             </div>
           </li>
         </ul>
       </div>
+    </transition-group>
       <div class="pagination">
         <button @click="prevPage" :disabled="currentPage === 1">
           &#11144;
@@ -57,7 +59,7 @@
         @click="previewImage"
       />
       <h2>{{ selectedItem.name }}</h2>
-      <p class="model-category">Category: {{ selectedItem.category }}</p>
+      <!-- <p class="model-category">Category: {{ selectedItem.category }}</p> -->
       <p class="model-price">Price: ${{ selectedItem.price }}</p>
       <p class="modal-description">
         This is a delicious {{ selectedItem.name }} served fresh and perfect for
@@ -395,8 +397,10 @@ export default {
   font-size: 1em;
 }
 .category-buttons button.active {
-  background: #e67e22;
+  background: #f9b234;
   color: white;
+  font-weight: 550;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 .menu-card {
   background: #fff;
@@ -414,7 +418,7 @@ export default {
   list-style: none;
   padding: 0;
   width: 48%;
-  height: 700px;
+  height: 600px;
 }
 .menu-item {
   display: flex;
@@ -445,7 +449,7 @@ export default {
 .menu-price {
   font-size: 1.1em;
   font-weight: bold;
-  color: #e67e22;
+  color: #f9b234;
 }
 .pagination {
   display: flex;
@@ -459,7 +463,7 @@ export default {
   padding: 5px 12px 8px 12px;
   border: none;
   cursor: pointer;
-  background: #e67e22;
+  background: #f9b234;
   color: white;
   font-size: 20px;
   border-radius: 5px;
@@ -562,5 +566,41 @@ export default {
   color: black;
 }
 
+.fade-in-up-enter-active {
+  transition: all 0.4s ease;
+  height: 600px;
+
+}
+
+.fade-in-up-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.fade-in-up-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.menu-item {
+  animation: fade-in-scale 0.3s ease forwards;
+}
+
+.menu-item:nth-child(1) { animation-delay: 0.05s; }
+.menu-item:nth-child(2) { animation-delay: 0.1s; }
+.menu-item:nth-child(3) { animation-delay: 0.15s; }
+.menu-item:nth-child(4) { animation-delay: 0.2s; }
+.menu-item:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes fade-in-scale {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 </style>
   
