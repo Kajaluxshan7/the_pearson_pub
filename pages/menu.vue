@@ -1,14 +1,18 @@
 <template>
   <div class="menu-page">
     <!-- Page Header -->
-    <section class="menu-header">
+    <!-- <section class="menu-header">
       <h1>Our Menu & Entertainment</h1>
       <p>
         Discover our delicious dishes, daily specials, and weekly entertainment
         events.
       </p>
+    </section> -->
+    
+    <section class="offer-card">
+      <Offer />
     </section>
-
+    
     <section class="daily-offer">
       <OfferSlideshow />
     </section>
@@ -17,9 +21,6 @@
       <MenuCard />
     </section>
 
-    <section class="offer-card">
-      <Offer />
-    </section>
   </div>
 </template>
 
@@ -37,7 +38,7 @@ import Offer from "@/components/Offers.vue";
 
 .menu-header {
   position: relative;
-  background-image: url(../public/images/home_background.jpg); /* Replace with your image */
+  background-image: url(../public/images/home_background.jpg); 
   background-size: cover;
   background-position: center;
   padding: 50px;
