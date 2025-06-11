@@ -22,11 +22,11 @@
 </template>
   
   <script>
-import { Swiper, SwiperSlide } from "swiper/vue";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
+// import { Swiper, SwiperSlide } from "swiper/vue";
+// import "swiper/css";
+// import "swiper/css/navigation";
+// import "swiper/css/pagination";
+// import { Navigation, Pagination, Autoplay } from "swiper/modules";
 
 export default {
   components: {
@@ -36,22 +36,20 @@ export default {
   setup() {
     const offers = [
       {
-        id: 1,
-        image:
-          "/images/menu/76b52f7a-dec8-4ca5-bd44-ca6c53200ae6-removebg-preview.png",
-        title: "Buy One Get One Free!",
-        description: "Enjoy our special pizza offer!",
+        id: 1,        image: "/images/food/wings-special.jpg",
+        title: "Wing Wednesdays",
+        description: "Half-price wings all day Wednesday!",
       },
       {
         id: 2,
-        image: "/images/menu/76b52f7a-dec8-4ca5-bd44-ca6c53200ae6.jpeg",
-        title: "Weekend Special Discount",
-        description: "Get 20% off on all pasta dishes!",
+        image: "/images/drinks/happy-hour.jpg",
+        title: "Happy Hour Special",
+        description: "$5 Draft Beers from 3PM-6PM Daily",
       },
       {
         id: 3,
-        image: "/images/menu/76b52f7a-dec8-4ca5-bd44-ca6c53200ae6.jpeg",
-        title: "Free Dessert",
+        image: "/images/food/fish-and-chips.jpg",
+        title: "Fish & Chips Friday",
         description: "Order two main courses and get a free dessert!",
       },
     ];
@@ -67,7 +65,6 @@ export default {
   width: 80%;
   height: 500px;
 
-  /* Add fade-in animation */
   opacity: 0;
   transform: translateY(20px);
   animation: fadeInUp 1s ease-out forwards;
@@ -75,7 +72,6 @@ export default {
   animation-fill-mode: forwards;
 }
 
-/* Animation keyframes */
 @keyframes fadeInUp {
   to {
     opacity: 1;

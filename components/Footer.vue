@@ -1,23 +1,62 @@
 <template>
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-content">
-        <div class="logo">
-          <NuxtLink to="/">The Pearson Pub</NuxtLink>
+  <footer class="bg-gray-900 text-white pt-12 pb-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div class="space-y-4">
+          <h3 class="text-xl font-bold text-primary-500">The Pearson Pub</h3>
+          <p class="text-gray-400">A traditional pub atmosphere in the heart of Whitby</p>
+          <div class="flex space-x-4">
+            <a href="https://facebook.com" target="_blank" rel="noopener" class="text-gray-400 hover:text-primary-500">
+              <UIcon name="i-heroicons-facebook" class="w-6 h-6" />
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener" class="text-gray-400 hover:text-primary-500">
+              <UIcon name="i-heroicons-instagram" class="w-6 h-6" />
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener" class="text-gray-400 hover:text-primary-500">
+              <UIcon name="i-heroicons-twitter" class="w-6 h-6" />
+            </a>
+          </div>
         </div>
-        <div class="footer-links">
-          <NuxtLink to="/">Home</NuxtLink>
-          <NuxtLink to="/menu">Menu</NuxtLink>
-          <NuxtLink to="/about">About</NuxtLink>
-          <NuxtLink to="/contact">Contact</NuxtLink>
+
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold">Hours of Operation</h3>
+          <div class="text-sm text-gray-400 space-y-2">
+            <p>Mon-Tue: 11:00am - 12:00am</p>
+            <p>Wed-Sat: 11:00am - 2:00am</p>
+            <p>Sunday: 11:00am - 12:00am</p>
+          </div>
         </div>
-        <div class="social">
-          <a href="https://facebook.com" target="_blank" rel="noopener">FB</a>
-          <a href="https://instagram.com" target="_blank" rel="noopener">IG</a>
-          <a href="https://twitter.com" target="_blank" rel="noopener">TW</a>
+
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold">Live Entertainment</h3>
+          <div class="text-sm text-gray-400 space-y-2">
+            <p>Fridays: Live Bands 9:30pm - 1:30am</p>
+            <p>Saturdays: Live Bands 9:30pm - 1:30am</p>
+            <p>Sundays: Karaoke 10:00pm - 2:00am</p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold">Contact Us</h3>
+          <div class="text-sm text-gray-400 space-y-2">
+            <p>101 MARY ST W</p>
+            <p>WHITBY, ON, L1N 2R4</p>
+            <p>Phone: 905-430-5699</p>
+            <p>Email: thepearsonpub@rogers.com</p>
+          </div>
         </div>
       </div>
-      <div class="footer-bottom">
+
+      <nav class="py-4 border-t border-gray-800">
+        <div class="flex flex-wrap justify-center space-x-6 text-sm">
+          <NuxtLink to="/" class="text-gray-400 hover:text-primary-500">Home</NuxtLink>
+          <NuxtLink to="/menu" class="text-gray-400 hover:text-primary-500">Menu</NuxtLink>
+          <NuxtLink to="/about" class="text-gray-400 hover:text-primary-500">About</NuxtLink>
+          <NuxtLink to="/contact" class="text-gray-400 hover:text-primary-500">Contact</NuxtLink>
+        </div>
+      </nav>
+
+      <div class="text-center text-sm text-gray-400 mt-8">
         <p>&copy; {{ currentYear }} The Pearson Pub. All Rights Reserved.</p>
       </div>
     </div>
@@ -25,7 +64,7 @@
 </template>
 
 <script setup>
-const currentYear = new Date().getFullYear();
+const currentYear = new Date().getFullYear()
 </script>
 
 <style scoped>

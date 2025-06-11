@@ -1,29 +1,34 @@
 <template>
   <div class="app-container">
     <Header />
-    <main>
+    <main> <!-- Removed pt-20 class -->
       <NuxtPage />
     </main>
     <Footer />
   </div>
 </template>
 
-<script setup>
-import Header from '~/components/Header.vue'
-import Footer from '~/components/Footer.vue'
-</script>
-
 <style>
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  margin: 0; /* Remove any default margins */
-  padding: 0; /* Remove any default padding */
 }
+
 main {
   flex: 1;
-  margin: 0;
-  padding: 0;
+  padding-top: 5rem; /* Single padding definition */
+  min-height: calc(100vh - 5rem);
+}
+
+html {
+  scroll-padding-top: 5rem;
+  scroll-behavior: smooth;
+}
+
+@media (max-width: 768px) {
+  main {
+    padding-top: 4rem;
+  }
 }
 </style>

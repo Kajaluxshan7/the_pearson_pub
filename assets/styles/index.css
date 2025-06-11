@@ -1,33 +1,41 @@
-/* In a global CSS file, e.g., assets/css/global.css */
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: white;
+  color: #1f2937;
 }
 
+body {
+  overflow-y: scroll;
+}
+
+/* Centered content helper */
 .home {
   text-align: center;
 }
+
+/* Headings */
 h1 {
-  color: green;
+  color: #f9b234;
   font-size: 2.5rem;
+  line-height: 1.2;
+  margin-bottom: 1rem;
 }
+
+/* Paragraphs */
 p {
   font-size: 1.2rem;
-  color: yellow;
+  color: #f9c74f; /* more readable yellow */
+  line-height: 1.5;
+  margin-bottom: 1rem;
 }
-/* Hide scrollbar for WebKit-based browsers (Chrome, Safari, newer Edge) */
+
+/* Hide scrollbar while keeping scroll functionality */
+/* WebKit browsers */
 ::-webkit-scrollbar {
-  display: none;
-}
-
-/* Hide scrollbar for Firefox */
-html {
-  scrollbar-width: none; /* Firefox */
-}
-
-/* Hide scrollbar for IE and Edge */
-html {
-  -ms-overflow-style: none; /* IE and Edge */
+  width: 0 !important;
+  height: 0 !important;
 }

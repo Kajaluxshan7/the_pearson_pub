@@ -11,15 +11,18 @@
     "deploy": "gh-pages -d .output/public"
   },
   "dependencies": {
+    "@nuxt/ui": "^2.14.1",
     "nodemailer": "^6.10.0",
-    "nuxt": "^3.16.1",
-    "nuxt-app": "file:",
-    "swiper": "^11.2.6",
-    "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "nuxt": "^3.9.0",
+    "swiper": "^11.0.5",
+    "vue": "^3.4.0",
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
     "@types/nodemailer": "^6.4.17",
-    "gh-pages": "^6.3.0"
+    "gh-pages": "^6.3.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0"
   }
 }
