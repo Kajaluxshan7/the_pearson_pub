@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 
+const colorMode = useColorMode()
 const isOpen = ref(false)
 
 const navigationItems = [
@@ -11,155 +12,201 @@ const navigationItems = [
   { name: 'Contact', path: '/contact' }
 ]
 
-// Close mobile menu when route changes
 const route = useRoute()
-watch(() => route.path, () => {
-  isOpen.value = false
+const activeIndex = computed(() => navigationItems.findIndex(item => item.path === route.path))
+
+const toggleMenu = () => {
+  isOpen.value = !isOpen.value
+  if (isOpen.value) {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = ''
+  }
+}
+
+// Close menu on route change
+watch(route, () => {
+  if (isOpen.value) {
+    isOpen.value = false
+    document.body.style.overflow = ''
+  }
 })
+
+// Add scroll-based header visibility
+const isHeaderVisible = ref(true)
+const lastScrollPosition = ref(0)
+const scrollThreshold = 50
+
+const handleScroll = () => {
+  if (process.client) {
+    const currentScrollPosition = window.scrollY
+
+    if (currentScrollPosition < 0) return
+
+    // Show header when:
+    // 1. Scrolling up
+    // 2. At top of page
+    // 3. Menu is open
+    // 4. Scrolled less than threshold
+    isHeaderVisible.value = 
+      currentScrollPosition < lastScrollPosition.value || 
+      currentScrollPosition < scrollThreshold ||
+      isOpen.value
+
+    lastScrollPosition.value = currentScrollPosition
+  }
+}
+
+onMounted(() => {
+  if (process.client) {
+    window.addEventListener('scroll', handleScroll)
+    lastScrollPosition.value = window.scrollY
+  }
+})
+
+onUnmounted(() => {
+  if (process.client) {
+    window.removeEventListener('scroll', handleScroll)
+    document.body.style.overflow = ''
+  }
+})
+
+const whatsappLink = 'https://wa.me/1234567890' // Replace with your WhatsApp number
 </script>
 
 <template>
-  <header
-    class="bg-gradient-to-b from-gray-900 to-gray-800/95 backdrop-blur-sm fixed w-full z-50 border-b border-amber-600/20 shadow-md"
-  >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-20">
+  <!-- Header Spacer -->
+  <div class="h-16"></div>
 
-        <!-- Logo + site name -->
-        <NuxtLink to="/" class="flex items-center space-x-3 group">
+  <header
+    :class=" [
+      'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+      { 
+        '-translate-y-full': !isHeaderVisible && !isOpen,
+        'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-md': true
+      }
+    ]"
+  >
+    <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo -->
+        <NuxtLink to="/" class="flex items-center space-x-2">
           <img
-            src="../public/images/pub/logo.png"
-            alt="The Pearson Pub Logo"
-            class="h-14 w-auto transition-transform duration-300 group-hover:scale-105 drop-shadow-lg"
+            src="/images/pub/logo.png"
+            alt="The Pearson Pub"
+            class="h-10 w-auto"
           />
-          <div class="hidden sm:flex flex-col">
-            <span
-              class="text-amber-400 text-xl font-bold font-serif select-none"
-            >
-              The Pearson Pub
-            </span>
-            <span class="text-gray-400 text-xs tracking-wider select-none">
-              EST. 1984
-            </span>
-          </div>
         </NuxtLink>
 
         <!-- Desktop Navigation -->
-        <nav
-          class="hidden md:flex items-center space-x-10"
-          aria-label="Primary navigation"
-        >
+        <div class="hidden md:flex items-center space-x-6">
           <NuxtLink
-            v-for="item in navigationItems"
-            :key="item.path"
+            v-for="(item, index) in navigationItems"
+            :key="index"
             :to="item.path"
-            class="text-gray-300 hover:text-amber-400 transition-all duration-300 px-3 py-2 text-base font-medium relative group uppercase tracking-wide"
-            active-class="text-amber-400"
+            class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 relative group"
+            :class=" [
+              index === activeIndex 
+                ? 'text-yellow-600 dark:text-yellow-400'
+                : 'text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400'
+            ]"
           >
             {{ item.name }}
-            <span
-              class="absolute bottom-0 left-0 w-full h-0.5 bg-amber-400 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 opacity-70"
-            ></span>
+            <div
+              v-if="index === activeIndex"
+              class="absolute bottom-0 left-0 w-full h-0.5 bg-yellow-500 transform origin-left transition-transform duration-200"
+            ></div>
           </NuxtLink>
-        </nav>
 
-        <!-- Mobile Menu Button -->
-        <div class="md:hidden">
-          <UButton
-            color="amber"
-            variant="ghost"
-            @click="isOpen = !isOpen"
-            aria-label="Toggle mobile menu"
-            class="inline-flex items-center justify-center p-2 rounded-md text-amber-400 hover:text-amber-300 hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-amber-400"
+          <!-- Dark Mode Toggle -->
+          <button
+            class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+            @click="colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'"
+          >
+            <UIcon
+              :name="colorMode.value === 'dark' ? 'i-heroicons-moon' : 'i-heroicons-sun'"
+              class="w-5 h-5"
+            />
+          </button>
+        </div>
+
+        <div class="md:hidden flex items-center space-x-4">
+          <!-- Dark Mode Toggle Mobile -->
+          <button
+            class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+            @click="colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'"
+          >
+            <UIcon
+              :name="colorMode.value === 'dark' ? 'i-heroicons-moon' : 'i-heroicons-sun'"
+              class="w-5 h-5"
+            />
+          </button>
+
+          <!-- Mobile Menu Button -->
+          <button
+            class="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+            @click="toggleMenu"
           >
             <UIcon
               :name="isOpen ? 'i-heroicons-x-mark' : 'i-heroicons-bars-3'"
-              class="h-6 w-6"
+              class="w-6 h-6"
             />
-          </UButton>
+          </button>
         </div>
       </div>
-    </div>
 
-    <!-- Mobile Navigation -->
-    <transition
-      enter-active-class="transition duration-200 ease-out"
-      enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100"
-      leave-active-class="transition duration-100 ease-in"
-      leave-from-class="opacity-100 scale-100"
-      leave-to-class="opacity-0 scale-95"
-    >
-      <div
-        v-if="isOpen"
-        class="md:hidden bg-gray-800 shadow-lg border-t border-gray-700"
-        role="menu"
-        aria-orientation="vertical"
-        aria-label="Mobile navigation"
+      <!-- Mobile Navigation -->
+      <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-4"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-4"
       >
-        <div class="px-2 pt-2 pb-3 space-y-1">
-          <NuxtLink
-            v-for="item in navigationItems"
-            :key="item.path"
-            :to="item.path"
-            class="text-gray-300 hover:text-amber-400 hover:bg-gray-700/50 block px-3 py-2 rounded-md text-base font-medium transition-all duration-200"
-            active-class="text-amber-400 bg-gray-700"
-            @click="isOpen = false"
-            role="menuitem"
-          >
-            {{ item.name }}
-          </NuxtLink>
-        </div>
-
         <div
-          class="px-4 py-3 border-t border-gray-700 bg-gray-800/50 backdrop-blur-sm flex justify-between items-center"
+          v-if="isOpen"
+          class="md:hidden absolute top-16 inset-x-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg rounded-b-lg"
         >
-          <div class="text-sm text-gray-400 select-none">
-            <p class="font-medium">Call us: 905-430-5699</p>
-          </div>
-          <div class="flex space-x-4">
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener"
-              class="text-gray-400 hover:text-amber-400 transition-colors duration-200"
-              aria-label="Facebook"
+          <div class="px-2 pt-2 pb-3 space-y-1">
+            <NuxtLink
+              v-for="(item, index) in navigationItems"
+              :key="index"
+              :to="item.path"
+              class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+              :class=" [
+                index === activeIndex 
+                  ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+              ]"
+              @click="toggleMenu"
             >
-              <UIcon name="i-heroicons-facebook" class="w-5 h-5" />
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener"
-              class="text-gray-400 hover:text-amber-400 transition-colors duration-200"
-              aria-label="Instagram"
-            >
-              <UIcon name="i-heroicons-instagram" class="w-5 h-5" />
-            </a>
+              {{ item.name }}
+            </NuxtLink>
           </div>
         </div>
-      </div>
-    </transition>
+      </transition>
+    </nav>
   </header>
+
+  <!-- WhatsApp Button -->
+  <a
+    :href="whatsappLink"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="fixed bottom-6 right-6 z-50 bg-green-500 text-white rounded-full p-3 shadow-lg hover:bg-green-600 transition-colors duration-200"
+    aria-label="Chat on WhatsApp"
+  >
+    <UIcon
+      name="i-simple-icons-whatsapp"
+      class="w-6 h-6"
+    />
+  </a>
 </template>
 
 <style scoped>
-/* Nav link underline animation */
-nav a::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: currentColor;
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.3s ease;
-}
-
-nav a:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 </style>

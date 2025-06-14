@@ -1,259 +1,201 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-amber-50 to-white">
-    <!-- Hero Section -->
-    <section class="relative py-16 bg-amber-900 text-white overflow-hidden">
-      <div class="absolute inset-0 z-0">
-        <img
-          src="../public/images/menu/76b52f7a-dec8-4ca5-bd44-ca6c53200ae6.jpeg"
-          alt="Menu background"
-          class="w-full h-full object-cover opacity-20"
-        />
-        <div class="absolute inset-0 bg-gradient-to-b from-amber-900/80 to-amber-900/95"></div>
-      </div>
-      <div class="relative z-10 max-w-7xl mx-auto px-6 text-center">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">Our Menu</h1>
-        <p class="text-xl text-amber-100 max-w-2xl mx-auto">
-          Discover our carefully crafted selection of pub favorites and seasonal
-          specialties
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24">
+    <div class="container mx-auto px-4 pb-12">
+      <!-- Page Title -->
+      <div 
+        class="text-center mb-12 opacity-0 animate-fade-in"
+        :class="{ 'opacity-100': !isLoading }"
+      >
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Our Menu</h1>
+        <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          Discover our carefully curated selection of dishes, from daily specials to time-honored classics
         </p>
       </div>
-    </section>
 
-    <div class="max-w-7xl mx-auto px-6 py-12">
-      <!-- Menu Categories Navigation -->
-      <nav class="mb-12 overflow-x-auto" ref="categoryNav">
-        <ul class="flex space-x-6 min-w-max px-4">
-          <li v-for="category in categories" :key="category.id">
-            <button
-              @click="activeCategory = category.id"
-              :class="[
-                'px-6 py-3 rounded-full transition-all duration-300',
-                activeCategory === category.id
-                  ? 'bg-amber-600 text-white shadow-lg'
-                  : 'bg-amber-50 text-amber-900 hover:bg-amber-100'
-              ]"
-            >
-              {{ category.name }}
-            </button>
-          </li>
-        </ul>
-      </nav>
-
-      <!-- Daily Specials -->
-      <section
-        v-if="activeCategory === 'specials'"
-        class="mb-16"
-        ref="specialsRef"
-        :class="{ 'animate-fade-in-up': isVisible.specials }"
-      >
-        <h2 class="text-2xl font-bold text-amber-900 mb-8">Today's Specials</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <UCard
-            v-for="(special, index) in dailySpecials"
-            :key="special.id"
-            class="transform transition-all duration-300 hover:scale-102 hover:shadow-xl"
-            :style="getAnimationStyle(index)"
+      <!-- Pearson's Famous Dishes -->
+      <div v-if="pearsonFamous.length" class="mb-16">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+          <UIcon name="i-heroicons-star" class="w-6 h-6 text-yellow-500 mr-2" />
+          Pearson's Famous Dishes
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
+            v-for="item in pearsonFamous"
+            :key="item.id"
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
           >
-            <div class="relative">
+            <div class="aspect-w-16 aspect-h-9 relative">
               <img
-                :src="special.image"
-                :alt="special.name"
-                class="w-full h-48 object-cover rounded-t-xl"
+                :src="item.image || '/images/food/placeholder.jpg'"
+                :alt="item.name"
+                class="object-cover w-full h-full"
               />
               <div class="absolute top-4 right-4">
-                <UBadge color="white" class="font-semibold">
-                  {{ special.price }}
-                </UBadge>
+                <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  Famous
+                </span>
               </div>
             </div>
             <div class="p-6">
-              <h3 class="text-xl font-semibold mb-2">{{ special.name }}</h3>
-              <p class="text-gray-600">{{ special.description }}</p>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                {{ item.name }}
+              </h3>
+              <p class="text-gray-600 dark:text-gray-400 mb-4">
+                {{ item.description }}
+              </p>
+              <div class="flex justify-between items-center">
+                <span class="text-lg font-bold text-yellow-600 dark:text-yellow-400">
+                  £{{ item.price.toFixed(2) }}
+                </span>
+                <span 
+                  v-if="!item.isAvailable"
+                  class="text-red-500 text-sm font-medium"
+                >
+                  Currently Unavailable
+                </span>
+              </div>
             </div>
-          </UCard>
+          </div>
         </div>
-      </section>
-
-      <!-- Regular Menu Items -->
-      <!-- Replace the existing menu sections template with this -->
-<section class="space-y-16">
-  <transition-group
-    name="menu-transition"
-    tag="div"
-    class="space-y-16"
-  >
-    <div
-      v-for="section in filteredMenuItems"
-      :key="section.id"
-      ref="menuSectionRefs"
-      :class="{ 'animate-fade-in-up': isVisible[section.id] }"
-    >
-      <h2 class="text-2xl font-bold text-amber-900 mb-8 flex items-center">
-        <UIcon :name="section.icon" class="w-6 h-6 mr-3" />
-        {{ section.name }}
-      </h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <MenuCard
-          v-for="item in section.items"
-          :key="item.id"
-          :item="item"
-          :style="getAnimationStyle(section.items.indexOf(item))"
-          class="transform transition-all duration-300 hover:scale-102"
-        />
       </div>
-    </div>
-  </transition-group>
-</section>
-    </div>
 
-    <!-- Sticky CTA -->
-    <div
-      class="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-amber-900 to-amber-800 text-white py-4 transform transition-transform duration-300"
-      :class="{ 'translate-y-full': !showCTA }"
-      v-show="showCTA"
-    >
-      <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
-        <p class="text-lg">Ready to order?</p>
-        <div class="flex space-x-4">
+      <!-- Menu Categories -->
+      <div class="space-y-12">
+        <div class="flex overflow-x-auto py-4 -mx-4 px-4 space-x-4 sticky top-16 bg-gray-50 dark:bg-gray-900 z-10">
           <UButton
-            to="/contact"
-            color="white"
-            variant="solid"
-            size="lg"
+            v-for="category in menuCategories"
+            :key="category.id"
+            :color="activeCategory === category.id ? 'yellow' : 'gray'"
+            :variant="activeCategory === category.id ? 'solid' : 'soft'"
+            class="whitespace-nowrap"
+            @click="activeCategory = category.id"
           >
-            Book a Table
-          </UButton>
-          <UButton
-            color="white"
-            variant="outline"
-            size="lg"
-            @click="scrollToTop"
-          >
-            Back to Top
+            {{ category.name }}
           </UButton>
         </div>
+
+        <TransitionGroup
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="opacity-0 transform translate-y-4"
+          enter-to-class="opacity-100 transform translate-y-0"
+          leave-active-class="transition-all duration-300 ease-in"
+          leave-from-class="opacity-100 transform translate-y-0"
+          leave-to-class="opacity-0 transform translate-y-4"
+        >
+          <div
+            v-for="category in menuCategories"
+            :key="category.id"
+            v-show="activeCategory === category.id"
+            class="space-y-8"
+          >
+            <div class="text-center mb-8">
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                {{ category.name }}
+              </h2>
+              <p class="text-gray-600 dark:text-gray-400">
+                {{ category.description }}
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div
+                v-for="item in filterMenuItems(category.items)"
+                :key="item.id"
+                class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div v-if="item.image" class="aspect-w-16 aspect-h-9">
+                  <img
+                    :src="item.image"
+                    :alt="item.name"
+                    class="object-cover w-full h-full"
+                  />
+                </div>
+                <div class="p-6">
+                  <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                      {{ item.name }}
+                    </h3>
+                    <span class="text-lg font-bold text-yellow-600 dark:text-yellow-400">
+                      £{{ item.price.toFixed(2) }}
+                    </span>
+                  </div>
+                  <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    {{ item.description }}
+                  </p>
+                  <div class="flex flex-wrap gap-2">
+                    <span
+                      v-for="allergen in item.allergens"
+                      :key="allergen"
+                      class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded"
+                    >
+                      Contains {{ allergen }}
+                    </span>
+                    <span
+                      v-if="item.dietaryInfo?.isVegetarian"
+                      class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 rounded"
+                    >
+                      Vegetarian
+                    </span>
+                    <span
+                      v-if="item.dietaryInfo?.isVegan"
+                      class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 rounded"
+                    >
+                      Vegan
+                    </span>
+                    <span
+                      v-if="item.dietaryInfo?.isGlutenFree"
+                      class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 rounded"
+                    >
+                      Gluten Free
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TransitionGroup>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useAnimations } from '~/composables/useAnimations'
-import type { Ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import type { MenuItem } from '~/types/menu'
 
-interface MenuItem {
-  id: string
-  name: string
-  description: string
-  price: string
-  image?: string
-  category: string
-}
+const { menuCategories, getFeaturedItems, getPearsonFamousItems } = useMenu()
 
-interface MenuSection {
-  id: string
-  name: string
-  category: string
-  icon: string
-  items: MenuItem[]
-}
+const activeCategory = ref(menuCategories.value[0]?.id || '')
+const isLoading = ref(true)
+const showFeatured = ref(true)
 
-const { useElementAnimation } = useAnimations({
-  duration: 800,
-  delay: 100
-})
-
-const specialsRef = ref<HTMLElement | null>(null)
-const menuSectionRefs = ref<HTMLElement[]>([])
-const categoryNav = ref<HTMLElement | null>(null)
-const showCTA = ref(false)
-const activeCategory = ref('all')
-
-const { isVisible, style: getAnimationStyle } = useElementAnimation(specialsRef)
-
-// Categories
-const categories = [
-  { id: 'all', name: 'All Menu' },
-  { id: 'specials', name: "Today's Specials" },
-  { id: 'starters', name: 'Starters' },
-  { id: 'mains', name: 'Main Courses' },
-  { id: 'drinks', name: 'Drinks' }
-]
-
-// Daily Specials Data
-const dailySpecials = [
-  {
-    id: 'special1',
-    name: "Chef's Special Burger",
-    description: 'Hand-crafted beef patty with special sauce and fresh toppings',
-    price: '$16.99',
-    image: '../public/images/food/foods.jpg'
-  },
-  // ... more specials
-]
-
-// Menu Sections Data
-const menuSections = [
-  {
-    id: 'starters',
-    name: 'Starters',
-    category: 'starters',
-    icon: 'i-heroicons-fire',
-    items: [
-      // ... menu items
-    ]
-  },
-  // ... more sections
-]
-
-// Scroll handling
-const handleScroll = () => {
-  showCTA.value = window.scrollY > 500
-}
-
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
+const pearsonFamous = computed(() => getPearsonFamousItems.value)
+const featuredItems = computed(() => getFeaturedItems.value)
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
+  setTimeout(() => {
+    isLoading.value = false
+  }, 500)
 })
 
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
+const filterMenuItems = (items: MenuItem[]) => {
+  return items.filter(item => item.isVisible)
+}
 </script>
 
 <style scoped>
-.menu-transition-enter-active,
-.menu-transition-leave-active {
-  transition: all 0.5s ease;
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
 }
 
-.menu-transition-enter-from,
-.menu-transition-leave-to {
-  opacity: 0;
-  transform: translateY(30px);
-}
-
-/* Custom scale factor for hover effect */
-.hover\:scale-102:hover {
-  transform: scale(1.02);
-}
-
-/* Smooth scrolling for the whole page */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Hide scrollbar but keep functionality */
-.overflow-x-auto {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.overflow-x-auto::-webkit-scrollbar {
-  display: none;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

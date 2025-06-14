@@ -1,34 +1,103 @@
 <template>
-  <div class="app-container">
+  <!-- Loading Screen -->
+  <div
+    v-if="isLoading"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900"
+  >
+    <div class="w-16 h-16 border-4 border-yellow-500 rounded-full animate-spin border-t-transparent"></div>
+  </div>
+
+  <div v-else class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <!-- Header -->
     <Header />
-    <main> <!-- Removed pt-20 class -->
+
+    <!-- Main Content -->
+    <main class="flex-grow">
       <NuxtPage />
     </main>
+
+    <!-- Footer -->
     <Footer />
+
+    <!-- Scroll to Top Button -->
+    <ClientOnly>
+      <UButton
+        v-show="scrollY > 500"
+        icon="i-heroicons-arrow-up"
+        color="yellow"
+        variant="solid"
+        class="fixed bottom-20 right-6 rounded-full shadow-lg"
+        size="lg"
+        @click="scrollToTop"
+      />
+    </ClientOnly>
   </div>
 </template>
 
-<style>
-.app-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+<script setup lang="ts">
+const colorMode = useColorMode()
+colorMode.preference = 'light'
 
-main {
-  flex: 1;
-  padding-top: 5rem; /* Single padding definition */
-  min-height: calc(100vh - 5rem);
-}
+// Loading state
+const isLoading = ref(true)
 
-html {
-  scroll-padding-top: 5rem;
-  scroll-behavior: smooth;
-}
+// Scroll position
+const scrollY = ref(0)
 
-@media (max-width: 768px) {
-  main {
-    padding-top: 4rem;
+// Update scroll position
+const updateScroll = () => {
+  if (process.client) {
+    scrollY.value = window.scrollY
   }
+}
+
+// Scroll to top function
+const scrollToTop = () => {
+  if (process.client) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false
+  }, 1000)
+
+  if (process.client) {
+    window.addEventListener('scroll', updateScroll)
+    updateScroll()
+  }
+})
+
+onUnmounted(() => {
+  if (process.client) {
+    window.removeEventListener('scroll', updateScroll)
+  }
+})
+</script>
+
+<style>
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.3s;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 </style>

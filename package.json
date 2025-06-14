@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-app",
+  "name": "the-pearson-pub",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,21 +8,32 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "deploy": "gh-pages -d .output/public"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@iconify-json/heroicons": "^1.2.2",
+    "@iconify-json/simple-icons": "^1.2.38",
     "@nuxt/ui": "^2.14.1",
-    "nodemailer": "^6.10.0",
+    "@types/nodemailer": "^6.4.17",
+    "@vueuse/core": "^10.7.2",
+    "nodemailer": "^7.0.3",
     "nuxt": "^3.9.0",
     "swiper": "^11.0.5",
     "vue": "^3.4.0",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "@types/nodemailer": "^6.4.17",
-    "gh-pages": "^6.3.0",
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32",
-    "tailwindcss": "^3.4.0"
+    "@nuxtjs/color-mode": "^3.3.2",
+    "@nuxtjs/eslint-config-typescript": "^12.1.0",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.56.0",
+    "nuxt-icon": "^0.6.8",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3"
   }
 }
