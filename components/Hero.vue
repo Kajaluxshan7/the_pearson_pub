@@ -1,136 +1,118 @@
 <template>
-  <section class="hero">
-    <div class="hero-content">
-      <h1 class="animate-fade-in mb-6">Welcome to The Pearson Pub</h1>
-      <p class="animate-fade-in mb-8" style="--stagger-delay: 0.2s">
-        A traditional pub atmosphere with modern amenities
-      </p>
-      
-      <div class="flex justify-center gap-4 mb-12">
-        <UButton
-          to="/menu"
-          color="amber"
-          variant="solid"
-          size="xl"
-          class="hero-button animate-fade-in"
-          style="--stagger-delay: 0.4s"
-        >
-          View Our Menu
-        </UButton>
-        <UButton
-          to="/contact"
-          color="white"
-          variant="outline"
-          size="xl"
-          class="hero-button animate-fade-in"
-          style="--stagger-delay: 0.5s"
-        >
-          Book a Table
-        </UButton>
-      </div>
+  <section class="relative min-h-[80vh] flex items-center justify-center py-32 lg:py-48">
+    <!-- Background Image with Overlay -->
+    <div class="absolute inset-0 z-0">
+      <img
+        src="/images/pub/hero-background.jpg"
+        alt="Pub Background"
+        class="w-full h-full object-cover"
+      />
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-        <div 
-          v-for="(feature, index) in features" 
-          :key="feature.title"
-          class="feature-card animate-fade-in"
-          :style="{ '--stagger-delay': `${0.6 + index * 0.1}s` }"
+    <div 
+      class="container mx-auto px-4 relative z-10 text-center"
+      :class="{ 'opacity-100 translate-y-0': isVisible, 'opacity-0 translate-y-4': !isVisible }"
+      style="transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1)"
+    >
+      <!-- Hero Content -->
+      <div class="max-w-4xl mx-auto space-y-8">
+        <h1 
+          class="text-4xl md:text-6xl font-bold text-white leading-tight"
+          style="text-shadow: 0 2px 4px rgba(0,0,0,0.3)"
         >
-          <UIcon 
-            :name="feature.icon" 
-            class="w-8 h-8 mb-3 text-amber-400"
+          Welcome to The Pearson Pub
+        </h1>
+        
+        <p 
+          class="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto"
+          style="text-shadow: 0 1px 2px rgba(0,0,0,0.3)"
+        >
+          A traditional pub atmosphere with modern amenities
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <UButton
+            to="/menu"
+            color="yellow"
+            variant="solid"
+            size="xl"
+            class="w-full sm:w-auto transform transition hover:scale-105"
+          >
+            Explore Our Menu
+          </UButton>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+          <!-- Entertainment Card -->
+          <div 
+            class="bg-white/10 backdrop-blur-md rounded-lg p-6 transform transition-all duration-300 hover:scale-105"
+          >
+            <UIcon 
+              name="i-heroicons-musical-note"
+              class="w-8 h-8 text-yellow-400 mx-auto mb-3"
+            />
+            <h3 class="text-white font-semibold text-xl mb-2">Live Entertainment</h3>
+            <p class="text-gray-200 text-sm">
+              Enjoy live music every weekend with our featured local bands and artists
+            </p>
+          </div>
+
+          <!-- Events Card -->
+          <div 
+            class="bg-white/10 backdrop-blur-md rounded-lg p-6 transform transition-all duration-300 hover:scale-105"
+          >
+            <UIcon 
+              name="i-heroicons-star"
+              class="w-8 h-8 text-yellow-400 mx-auto mb-3"
+            />
+            <h3 class="text-white font-semibold text-xl mb-2">Special Events</h3>
+            <p class="text-gray-200 text-sm">
+              Join us for sports screenings, quiz nights, and themed celebrations
+            </p>
+          </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <UIcon
+            name="i-heroicons-chevron-down"
+            class="w-8 h-8 text-white opacity-75"
           />
-          <h3>{{ feature.title }}</h3>
-          <p>{{ feature.description }}</p>
         </div>
       </div>
     </div>
   </section>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 
-const features = ref([
-  {
-    title: 'Live Entertainment',
-    description: 'Live bands every Friday & Saturday, Karaoke on Sundays',
-    icon: 'i-heroicons-musical-note'
-  },
-  {
-    title: '14 Beers on Tap',
-    description: 'Featuring local craft beers and classic favorites',
-    icon: 'i-heroicons-beer-mug'
-  },
-  {
-    title: 'Sports Bar',
-    description: 'Multiple TVs showing your favorite sports events',
-    icon: 'i-heroicons-tv'
-  }
-])
+const isVisible = ref(false)
+
+onMounted(() => {
+  setTimeout(() => {
+    isVisible.value = true
+  }, 100)
+})
 </script>
 
 <style scoped>
-.hero {
-  position: relative;
-  min-height: 100vh;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)),
-    url('/images/pub/hero-background.jpg');
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
 }
 
-.hero-content {
-  position: relative;
-  text-align: center;
-  color: #fff;
-  z-index: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.animate-fade-in {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: heroContentFadeIn 1s var(--stagger-delay, 0s) forwards;
-}
-
-@keyframes heroContentFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+@keyframes bounce {
+  0%, 100% {
+    transform: translate(-50%, 0);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  50% {
+    transform: translate(-50%, 10px);
   }
 }
 
-.feature-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.hero-button {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hero-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.animate-bounce {
+  animation: bounce 2s infinite;
 }
 </style>
