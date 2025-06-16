@@ -1,8 +1,6 @@
 <template>
-  <div class="min-h-screen">      <!-- Hero Section -->
-    <HomeHero />
-
-    <!-- Quick Info Section -->
+  <div class="min-h-screen">    
+    <Hero />
     <section 
       class="py-12 bg-gray-50"
       :class="{ 'opacity-0 transform translate-y-8': !isVisible.quickInfo, 'animate-fade-in-up': isVisible.quickInfo }"
@@ -84,6 +82,8 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import Hero from '../components/home/Hero.vue'  
+
 
 // Quick info cards data
 const quickInfoCards = [

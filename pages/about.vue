@@ -20,7 +20,10 @@
     <!-- History Section -->
     <section 
       class="py-16"
-      :class="{ 'opacity-0 transform translate-y-8': !isVisible.history, 'animate-fade-in-up': isVisible.history }"
+      :class="{
+        'opacity-0 transform translate-y-8 transition duration-700': !historyAnimation.isInView,
+        'opacity-100 transform translate-y-0 transition duration-700': historyAnimation.isInView
+      }"
       ref="historyRef"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -48,7 +51,10 @@
     <!-- Values Section -->
     <section 
       class="py-16 bg-white"
-      :class="{ 'opacity-0 transform translate-y-8': !isVisible.values, 'animate-fade-in-up': isVisible.values }"
+      :class="{
+        'opacity-0 transform translate-y-8 transition duration-700': !valuesAnimation.isInView,
+        'opacity-100 transform translate-y-0 transition duration-700': valuesAnimation.isInView
+      }"
       ref="valuesRef"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -59,6 +65,7 @@
             :key="index"
             class="text-center p-6"
           >
+            <!-- Replace UIcon with your icon component or svg -->
             <UIcon 
               :name="value.icon" 
               class="w-12 h-12 text-yellow-500 mx-auto mb-4"
@@ -73,18 +80,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useAnimations } from '~/composables/useAnimations'
+import { ref } from 'vue'
+import { useAnimations } from '../composables/useAnimations'
 
-const { observeElement } = useAnimations()
+const { useElementAnimation } = useAnimations()
 
-const isVisible = ref({
-  history: false,
-  values: false
-})
+const historyRef = ref<HTMLElement | null>(null)
+const valuesRef = ref<HTMLElement | null>(null)
 
-const historyRef = ref(null)
-const valuesRef = ref(null)
+const historyAnimation = useElementAnimation(historyRef)
+const valuesAnimation = useElementAnimation(valuesRef)
 
 const values = [
   {
@@ -103,28 +108,21 @@ const values = [
     description: 'Building connections that last'
   }
 ]
-
-onMounted(() => {
-  observeElement(historyRef.value, () => isVisible.value.history = true)
-  observeElement(valuesRef.value, () => isVisible.value.values = true)
-})
 </script>
 
 <style scoped>
-.aspect-w-16 {
-  position: relative;
-  padding-bottom: 56.25%;
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.aspect-w-16 img {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  object-fit: cover;
+.animate-fade-in-up {
+  animation: fade-in-up 0.7s ease forwards;
 }
 </style>
-

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRoute } from "vue-router";
+import { useColorMode } from "#imports";
 
 const colorMode = useColorMode();
 const isOpen = ref(false);
@@ -14,28 +15,28 @@ const navigationItems = [
 ];
 
 const route = useRoute();
+
 const activeIndex = computed(() =>
   navigationItems.findIndex((item) => item.path === route.path)
 );
 
 const toggleMenu = () => {
   isOpen.value = !isOpen.value;
-  if (isOpen.value) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = "";
-  }
+  document.body.style.overflow = isOpen.value ? "hidden" : "";
 };
 
 // Close menu on route change
-watch(route, () => {
-  if (isOpen.value) {
-    isOpen.value = false;
-    document.body.style.overflow = "";
+watch(
+  () => route.path,
+  () => {
+    if (isOpen.value) {
+      isOpen.value = false;
+      document.body.style.overflow = "";
+    }
   }
-});
+);
 
-// Add scroll-based header visibility
+// Header visibility on scroll
 const isHeaderVisible = ref(true);
 const lastScrollPosition = ref(0);
 const scrollThreshold = 50;
@@ -46,11 +47,6 @@ const handleScroll = () => {
 
     if (currentScrollPosition < 0) return;
 
-    // Show header when:
-    // 1. Scrolling up
-    // 2. At top of page
-    // 3. Menu is open
-    // 4. Scrolled less than threshold
     isHeaderVisible.value =
       currentScrollPosition < lastScrollPosition.value ||
       currentScrollPosition < scrollThreshold ||
@@ -74,8 +70,7 @@ onUnmounted(() => {
   }
 });
 
-const whatsappLink = "https://wa.me/1234567890"; // Replace with your WhatsApp number
-</script>
+const whatsappLink = "https://wa.me/+94762676832"; </script>
 
 <template>
   <!-- Header Spacer -->
@@ -124,10 +119,8 @@ const whatsappLink = "https://wa.me/1234567890"; // Replace with your WhatsApp n
           <!-- Dark Mode Toggle -->
           <button
             class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-            @click="
-              colorMode.preference =
-                colorMode.value === 'dark' ? 'light' : 'dark'
-            "
+            @click="colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'"
+            aria-label="Toggle dark mode"
           >
             <UIcon
               :name="
@@ -144,10 +137,8 @@ const whatsappLink = "https://wa.me/1234567890"; // Replace with your WhatsApp n
           <!-- Dark Mode Toggle Mobile -->
           <button
             class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-            @click="
-              colorMode.preference =
-                colorMode.value === 'dark' ? 'light' : 'dark'
-            "
+            @click="colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'"
+            aria-label="Toggle dark mode"
           >
             <UIcon
               :name="
@@ -163,6 +154,7 @@ const whatsappLink = "https://wa.me/1234567890"; // Replace with your WhatsApp n
           <button
             class="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
             @click="toggleMenu"
+            aria-label="Toggle menu"
           >
             <UIcon
               :name="isOpen ? 'i-heroicons-x-mark' : 'i-heroicons-bars-3'"
