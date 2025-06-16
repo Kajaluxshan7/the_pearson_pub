@@ -1,201 +1,179 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-24">
-    <div class="container mx-auto px-4 pb-12">
-      <!-- Page Title -->
-      <div 
-        class="text-center mb-12 opacity-0 animate-fade-in"
-        :class="{ 'opacity-100': !isLoading }"
-      >
-        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Our Menu</h1>
-        <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Discover our carefully curated selection of dishes, from daily specials to time-honored classics
+  <div class="min-h-screen bg-gray-50">
+    <!-- Menu Hero Section -->
+    <section class="relative py-20 bg-gray-900 text-white">
+      <div class="absolute inset-0 overflow-hidden">
+        <NuxtImg 
+          src="/images/food/foods.jpg" 
+          alt="Our Menu" 
+          class="w-full h-full object-cover opacity-30"
+          format="webp"
+          quality="80"
+        />
+      </div>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-6">Our Menu</h1>
+        <p class="text-xl max-w-3xl mx-auto">
+          Discover our delicious selection of pub favorites and craft beverages
         </p>
       </div>
+    </section>
 
-      <!-- Pearson's Famous Dishes -->
-      <div v-if="pearsonFamous.length" class="mb-16">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-          <UIcon name="i-heroicons-star" class="w-6 h-6 text-yellow-500 mr-2" />
-          Pearson's Famous Dishes
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div
-            v-for="item in pearsonFamous"
-            :key="item.id"
-            class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-          >
-            <div class="aspect-w-16 aspect-h-9 relative">
-              <img
-                :src="item.image || '/images/food/placeholder.jpg'"
-                :alt="item.name"
-                class="object-cover w-full h-full"
-              />
-              <div class="absolute top-4 right-4">
-                <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                  Famous
-                </span>
-              </div>
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                {{ item.name }}
-              </h3>
-              <p class="text-gray-600 dark:text-gray-400 mb-4">
-                {{ item.description }}
-              </p>
-              <div class="flex justify-between items-center">
-                <span class="text-lg font-bold text-yellow-600 dark:text-yellow-400">
-                  £{{ item.price.toFixed(2) }}
-                </span>
-                <span 
-                  v-if="!item.isAvailable"
-                  class="text-red-500 text-sm font-medium"
-                >
-                  Currently Unavailable
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Menu Categories -->
-      <div class="space-y-12">
-        <div class="flex overflow-x-auto py-4 -mx-4 px-4 space-x-4 sticky top-16 bg-gray-50 dark:bg-gray-900 z-10">
+    <!-- Menu Categories Navigation -->
+    <section class="py-8 bg-white sticky top-0 z-10 shadow-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-center space-x-4 overflow-x-auto pb-2">
           <UButton
-            v-for="category in menuCategories"
+            v-for="category in categories"
             :key="category.id"
             :color="activeCategory === category.id ? 'yellow' : 'gray'"
-            :variant="activeCategory === category.id ? 'solid' : 'soft'"
-            class="whitespace-nowrap"
+            variant="ghost"
             @click="activeCategory = category.id"
           >
             {{ category.name }}
           </UButton>
         </div>
-
-        <TransitionGroup
-          enter-active-class="transition-all duration-300 ease-out"
-          enter-from-class="opacity-0 transform translate-y-4"
-          enter-to-class="opacity-100 transform translate-y-0"
-          leave-active-class="transition-all duration-300 ease-in"
-          leave-from-class="opacity-100 transform translate-y-0"
-          leave-to-class="opacity-0 transform translate-y-4"
-        >
-          <div
-            v-for="category in menuCategories"
-            :key="category.id"
-            v-show="activeCategory === category.id"
-            class="space-y-8"
-          >
-            <div class="text-center mb-8">
-              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                {{ category.name }}
-              </h2>
-              <p class="text-gray-600 dark:text-gray-400">
-                {{ category.description }}
-              </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div
-                v-for="item in filterMenuItems(category.items)"
-                :key="item.id"
-                class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div v-if="item.image" class="aspect-w-16 aspect-h-9">
-                  <img
-                    :src="item.image"
-                    :alt="item.name"
-                    class="object-cover w-full h-full"
-                  />
-                </div>
-                <div class="p-6">
-                  <div class="flex justify-between items-start mb-2">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                      {{ item.name }}
-                    </h3>
-                    <span class="text-lg font-bold text-yellow-600 dark:text-yellow-400">
-                      £{{ item.price.toFixed(2) }}
-                    </span>
-                  </div>
-                  <p class="text-gray-600 dark:text-gray-400 mb-4">
-                    {{ item.description }}
-                  </p>
-                  <div class="flex flex-wrap gap-2">
-                    <span
-                      v-for="allergen in item.allergens"
-                      :key="allergen"
-                      class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded"
-                    >
-                      Contains {{ allergen }}
-                    </span>
-                    <span
-                      v-if="item.dietaryInfo?.isVegetarian"
-                      class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 rounded"
-                    >
-                      Vegetarian
-                    </span>
-                    <span
-                      v-if="item.dietaryInfo?.isVegan"
-                      class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 rounded"
-                    >
-                      Vegan
-                    </span>
-                    <span
-                      v-if="item.dietaryInfo?.isGlutenFree"
-                      class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 rounded"
-                    >
-                      Gluten Free
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </TransitionGroup>
       </div>
-    </div>
+    </section>
+
+    <!-- Menu Items Section -->
+    <section class="py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div 
+          v-for="category in filteredCategories" 
+          :key="category.id"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
+          <div 
+            v-for="item in category.items" 
+            :key="item.id"
+            class="transition-all duration-300"
+            :class="{ 
+              'opacity-0 translate-y-8': !isVisible[item.id], 
+              'opacity-100 translate-y-0': isVisible[item.id] 
+            }"
+          >
+            <MenuCard :item="item" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Special Dietary Requirements -->
+    <section class="py-12 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-2xl font-bold mb-4">Dietary Information</h2>
+        <p class="text-gray-600 mb-8">
+          We cater to various dietary requirements. Please ask our staff for allergen information.
+        </p>
+        <div class="flex justify-center space-x-4 flex-wrap">
+          <span 
+            v-for="(info, index) in dietaryInfo" 
+            :key="index"
+            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 m-2"
+          >
+            <UIcon 
+              :name="info.icon" 
+              class="w-4 h-4 mr-2 text-yellow-500"
+            />
+            {{ info.label }}
+          </span>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import type { MenuItem } from '~/types/menu'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { useMenu } from '~/composables/useMenu'
+import type { MenuItem, MenuCategory } from '~/types/menu'
 
-const { menuCategories, getFeaturedItems, getPearsonFamousItems } = useMenu()
-
-const activeCategory = ref(menuCategories.value[0]?.id || '')
-const isLoading = ref(true)
-const showFeatured = ref(true)
-
-const pearsonFamous = computed(() => getPearsonFamousItems.value)
-const featuredItems = computed(() => getFeaturedItems.value)
-
-onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false
-  }, 500)
+// Page meta
+useHead({
+  title: 'Menu - The Pearson Pub',
+  meta: [
+    { name: 'description', content: 'Explore our delicious menu of pub favorites and craft beverages at The Pearson Pub.' }
+  ]
 })
 
-const filterMenuItems = (items: MenuItem[]) => {
-  return items.filter(item => item.isVisible)
+const { menuCategories } = useMenu()
+
+// State
+const activeCategory = ref<string>('')
+const isVisible = ref<Record<string, boolean>>({})
+const observer = ref<IntersectionObserver | null>(null)
+
+// Computed
+const categories = computed<MenuCategory[]>(() => 
+  Array.isArray(menuCategories.value) ? menuCategories.value : []
+)
+
+const filteredCategories = computed(() => 
+  categories.value.filter(category => category.id === activeCategory.value)
+)
+
+// Constants
+const dietaryInfo = [
+  { icon: 'i-heroicons-leaf', label: 'Vegetarian Options' },
+  { icon: 'i-heroicons-no-symbol', label: 'Gluten-Free Options' },
+  { icon: 'i-heroicons-heart', label: 'Vegan Options' },
+  { icon: 'i-heroicons-exclamation-circle', label: 'Allergen Information Available' }
+]
+
+// Methods
+const setupIntersectionObserver = () => {
+  observer.value = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const itemId = entry.target.getAttribute('data-item-id')
+        if (itemId) {
+          isVisible.value[itemId] = entry.isIntersecting
+        }
+      })
+    },
+    { threshold: 0.1 }
+  )
 }
+
+const observeMenuItems = () => {
+  if (!observer.value) return
+
+  // Clean up previous observations
+  observer.value.disconnect()
+
+  // Observe new elements
+  nextTick(() => {
+    const menuItems = document.querySelectorAll('[data-item-id]')
+    menuItems.forEach(item => {
+      observer.value?.observe(item)
+    })
+  })
+}
+
+// Lifecycle
+onMounted(() => {
+  if (categories.value.length > 0) {
+    activeCategory.value = categories.value[0].id
+  }
+  
+  setupIntersectionObserver()
+  observeMenuItems()
+
+  // Initialize visibility state
+  categories.value.forEach(category => {
+    category.items.forEach(item => {
+      isVisible.value[item.id] = false
+    })
+  })
+})
+
+onUnmounted(() => {
+  observer.value?.disconnect()
+})
+
+// Watch for category changes to re-observe items
+watch(activeCategory, () => {
+  nextTick(observeMenuItems)
+})
 </script>
-
-<style scoped>
-.animate-fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>

@@ -5,14 +5,18 @@
         <!-- Branding and Social Links -->
         <div class="space-y-6">
           <div class="flex items-center space-x-3">
-            <img src="/images/pub/logo.png" alt="Pearson Pub Logo" class="h-12 w-auto">
+            <img
+              src="/images/pub/logo.png"
+              alt="Pearson Pub Logo"
+              class="h-12 w-auto"
+            />
             <h3 class="text-xl font-bold text-yellow-500">The Pearson Pub</h3>
           </div>
-          
+
           <p class="text-gray-400">
             A traditional pub atmosphere in the heart of Whitby
           </p>
-          
+
           <div class="flex space-x-4">
             <UButton
               v-for="link in socialLinks"
@@ -61,17 +65,26 @@
           <h3 class="text-lg font-semibold">Contact Us</h3>
           <div class="space-y-4 text-gray-400">
             <div class="flex items-start space-x-3">
-              <UIcon name="i-heroicons-map-pin" class="w-5 h-5 text-yellow-500 flex-shrink-0 mt-1" />
+              <UIcon
+                name="i-heroicons-map-pin"
+                class="w-5 h-5 text-yellow-500 flex-shrink-0 mt-1"
+              />
               <p>101 MARY ST WHITBY, ON, L1N 2R4</p>
             </div>
-            
+
             <div class="flex items-center space-x-3">
-              <UIcon name="i-heroicons-phone" class="w-5 h-5 text-yellow-500 flex-shrink-0" />
+              <UIcon
+                name="i-heroicons-phone"
+                class="w-5 h-5 text-yellow-500 flex-shrink-0"
+              />
               <p>905-430-5699</p>
             </div>
-            
+
             <div class="flex items-center space-x-3">
-              <UIcon name="i-heroicons-envelope" class="w-5 h-5 text-yellow-500 flex-shrink-0" />
+              <UIcon
+                name="i-heroicons-envelope"
+                class="w-5 h-5 text-yellow-500 flex-shrink-0"
+              />
               <p>thepearsonpub@rogers.com</p>
             </div>
           </div>
@@ -80,7 +93,9 @@
 
       <!-- Entertainment Schedule -->
       <div class="border-t border-gray-800 pt-8 pb-4">
-        <h3 class="text-lg font-semibold mb-4 text-center">Weekly Entertainment</h3>
+        <h3 class="text-lg font-semibold mb-4 text-center">
+          Weekly Entertainment
+        </h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <UCard
             v-for="event in entertainmentSchedule"
@@ -97,7 +112,9 @@
       </div>
 
       <!-- Copyright -->
-      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+      <div
+        class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400"
+      >
         <p>© {{ currentYear }} The Pearson Pub. All rights reserved.</p>
       </div>
     </UContainer>
@@ -105,32 +122,40 @@
 </template>
 
 <script setup lang="ts">
-const currentYear = new Date().getFullYear()
+const currentYear = new Date().getFullYear();
 
 const socialLinks = [
-  { name: 'Facebook', icon: 'i-heroicons-facebook', url: 'https://facebook.com' },
-  { name: 'Instagram', icon: 'i-heroicons-instagram', url: 'https://instagram.com' },
-  { name: 'Twitter', icon: 'i-heroicons-twitter', url: 'https://twitter.com' }
-]
+  {
+    name: "Facebook",
+    icon: "i-simple-icons-facebook",
+    url: "https://facebook.com",
+  },
+  {
+    name: "Instagram",
+    icon: "i-simple-icons-instagram",
+    url: "https://instagram.com",
+  },
+  { name: "Twitter", icon: "i-simple-icons-x", url: "https://twitter.com" },
+];
 
 const quickLinks = [
-  { name: 'Home', path: '/' },
-  { name: 'Menu', path: '/menu' },
-  { name: 'About', path: '/about' },
-  { name: 'Contact', path: '/contact' }
-]
+  { name: "Home", path: "/" },
+  { name: "Menu", path: "/menu" },
+  { name: "About", path: "/about" },
+  { name: "Contact", path: "/contact" },
+];
 
 const businessHours = [
-  { days: 'Monday - Tuesday', hours: '11:00 AM - 12:00 AM' },
-  { days: 'Wednesday - Saturday', hours: '11:00 AM - 2:00 AM' },
-  { days: 'Sunday', hours: '11:00 AM - 12:00 AM' }
-]
+  { days: "Monday - Tuesday", hours: "11:00 AM - 12:00 AM" },
+  { days: "Wednesday - Saturday", hours: "11:00 AM - 2:00 AM" },
+  { days: "Sunday", hours: "11:00 AM - 12:00 AM" },
+];
 
 const entertainmentSchedule = [
-  { day: 'Friday', event: 'Live Bands', time: '9:30 PM - 1:30 AM' },
-  { day: 'Saturday', event: 'Live Bands', time: '9:30 PM - 1:30 AM' },
-  { day: 'Sunday', event: 'Karaoke Night', time: '10:00 PM - 2:00 AM' }
-]
+  { day: "Friday", event: "Live Bands", time: "9:30 PM - 1:30 AM" },
+  { day: "Saturday", event: "Live Bands", time: "9:30 PM - 1:30 AM" },
+  { day: "Sunday", event: "Karaoke Night", time: "10:00 PM - 2:00 AM" },
+];
 </script>
 
 <style scoped>

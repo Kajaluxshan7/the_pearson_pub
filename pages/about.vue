@@ -1,92 +1,113 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-amber-50 to-white py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
-      <div class="text-center mb-16">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">About The Pearson Pub</h1>
-        <div class="w-24 h-1 bg-primary-500 mx-auto"></div>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Hero Section -->
+    <section class="relative py-20 bg-gray-900 text-white">
+      <div class="absolute inset-0 overflow-hidden">
+        <img 
+          src="/images/pub/interior-main.jpg" 
+          alt="Pub Interior" 
+          class="w-full h-full object-cover opacity-30"
+        />
       </div>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-6">Our Story</h1>
+        <p class="text-xl max-w-3xl mx-auto">
+          Discover the heritage and heart behind The Pearson Pub
+        </p>
+      </div>
+    </section>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div class="space-y-6 text-lg text-gray-700 leading-relaxed">
-          <p>
-            The vintage appearance of our home-style pub on the corner of Brock and
-            Mary St. has become a well-known landmark to local residents and travelers
-            alike.
-          </p>
-          <p>
-            Come inside and enjoy our traditional pub atmosphere that many call home to
-            gatherings of family, friends, and coworkers for all occasions. We pride
-            ourselves on our friendly service and adaptability to our customers'
-            needs.
-          </p>
-          <p>
-            Grab a seat along our wall of TVs and enjoy your favorite sports event with
-            your preferred beer from our selection of 14 different taps, while enjoying our
-            trademark wings and other cravings from our menu, offering a wide variety of
-            quality flavorful foods.
-          </p>
-          <p>
-            We offer live entertainment 4 nights a week and daily specials to suit your
-            taste and budget.
-          </p>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <UCard class="col-span-2">
-            <div class="aspect-w-16 aspect-h-9 overflow-hidden rounded-lg">
-              <img src="../public/images/pub/interior-main.jpg" alt="Pub Interior" class="object-cover">
-            </div>
-          </UCard>
-          
-          <UCard>
-            <div class="text-center p-6 space-y-4">
-              <UIcon name="i-heroicons-beer-mug" class="w-12 h-12 text-primary-500 mx-auto"/>
-              <h3 class="text-xl font-semibold">14 Beers on Tap</h3>
-              <p class="text-gray-600">Extensive selection of craft and traditional beers</p>
-            </div>
-          </UCard>
-
-          <UCard>
-            <div class="text-center p-6 space-y-4">
-              <UIcon name="i-heroicons-musical-note" class="w-12 h-12 text-primary-500 mx-auto"/>
-              <h3 class="text-xl font-semibold">Live Entertainment</h3>
-              <p class="text-gray-600">4 nights of live music and karaoke weekly</p>
-            </div>
-          </UCard>
+    <!-- History Section -->
+    <section 
+      class="py-16"
+      :class="{ 'opacity-0 transform translate-y-8': !isVisible.history, 'animate-fade-in-up': isVisible.history }"
+      ref="historyRef"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 class="text-3xl font-bold mb-6">Our Heritage</h2>
+            <p class="text-gray-600 mb-4">
+              Founded in the heart of the community, The Pearson Pub has been a gathering place for friends and families since [Year].
+            </p>
+            <p class="text-gray-600">
+              [Add your pub's history and story here]
+            </p>
+          </div>
+          <div class="relative h-96">
+            <img 
+              src="/images/pub/interior-bar.jpg" 
+              alt="Pub Bar" 
+              class="w-full h-full object-cover rounded-lg shadow-lg"
+            />
+          </div>
         </div>
       </div>
+    </section>
 
-      <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <UCard>
-          <div class="text-center p-6 space-y-4">
-            <UIcon name="i-heroicons-tv" class="w-12 h-12 text-primary-500 mx-auto"/>
-            <h3 class="text-xl font-semibold">Sports Bar</h3>
-            <p class="text-gray-600">Multiple TVs showing your favorite sports events</p>
+    <!-- Values Section -->
+    <section 
+      class="py-16 bg-white"
+      :class="{ 'opacity-0 transform translate-y-8': !isVisible.values, 'animate-fade-in-up': isVisible.values }"
+      ref="valuesRef"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-center mb-12">Our Values</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div 
+            v-for="(value, index) in values" 
+            :key="index"
+            class="text-center p-6"
+          >
+            <UIcon 
+              :name="value.icon" 
+              class="w-12 h-12 text-yellow-500 mx-auto mb-4"
+            />
+            <h3 class="text-xl font-semibold mb-2">{{ value.title }}</h3>
+            <p class="text-gray-600">{{ value.description }}</p>
           </div>
-        </UCard>
-
-        <UCard>
-          <div class="text-center p-6 space-y-4">
-            <UIcon name="i-heroicons-ticket" class="w-12 h-12 text-primary-500 mx-auto"/>
-            <h3 class="text-xl font-semibold">Daily Specials</h3>
-            <p class="text-gray-600">Great deals on food and drinks every day</p>
-          </div>
-        </UCard>
-
-        <UCard>
-          <div class="text-center p-6 space-y-4">
-            <UIcon name="i-heroicons-users" class="w-12 h-12 text-primary-500 mx-auto"/>
-            <h3 class="text-xl font-semibold">Private Events</h3>
-            <p class="text-gray-600">Perfect venue for gatherings and celebrations</p>
-          </div>
-        </UCard>
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
-<script setup>
-// Component logic here if needed
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useAnimations } from '~/composables/useAnimations'
+
+const { observeElement } = useAnimations()
+
+const isVisible = ref({
+  history: false,
+  values: false
+})
+
+const historyRef = ref(null)
+const valuesRef = ref(null)
+
+const values = [
+  {
+    icon: 'i-heroicons-heart',
+    title: 'Hospitality',
+    description: 'Welcoming every guest like family'
+  },
+  {
+    icon: 'i-heroicons-star',
+    title: 'Quality',
+    description: 'Excellence in every pour and plate'
+  },
+  {
+    icon: 'i-heroicons-users',
+    title: 'Community',
+    description: 'Building connections that last'
+  }
+]
+
+onMounted(() => {
+  observeElement(historyRef.value, () => isVisible.value.history = true)
+  observeElement(valuesRef.value, () => isVisible.value.values = true)
+})
 </script>
 
 <style scoped>

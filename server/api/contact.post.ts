@@ -1,43 +1,75 @@
 // server/api/contact.post.ts
+import { H3Event } from "h3";
 import nodemailer from "nodemailer";
-import { EventHandlerRequest, H3Event } from "h3";
 
-export default async (event: H3Event) => {
-  const body = await useBody(event);
-  const { name, email, message } = body;
-
-  // Configure your SMTP transport settings.
-  // It's best to use environment variables to store sensitive info.
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST, // e.g., 'smtp.example.com'
-    port: Number(process.env.SMTP_PORT || 465),
-    secure: true, // true for port 465, false for others
-    auth: {
-      user: process.env.SMTP_USER, // SMTP username
-      pass: process.env.SMTP_PASS, // SMTP password
-    },
-  });
-
+export default defineEventHandler(async (event: H3Event) => {
   try {
-    await transporter.sendMail({
-      from: `"Contact Form" <${process.env.SMTP_USER}>`,
-      to: process.env.RECEIVER_EMAIL, // Where you want to receive emails
-      subject: "New Message from Contact Form",
-      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
-      html: `<p><strong>Name:</strong> ${name}</p>
-             <p><strong>Email:</strong> ${email}</p>
-             <p><strong>Message:</strong><br/>${message}</p>`,
+    const body = await readBody(event);
+    const { firstName, lastName, email, message } = body;
+
+    // Validate required fields
+    if (!firstName || !lastName || !email || !message) {
+      throw createError({
+        statusCode: 400,
+        message: "All fields are required",
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw createError({
+        statusCode: 400,
+        message: "Invalid email format",
+      });
+    }
+
+    // Create mail transporter (using ethereal for development)
+    const transport = nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      auth: {
+        user: "ethereal.user@ethereal.email",
+        pass: "ethereal.pass",
+      },
     });
 
-    return { success: true, message: "Email sent successfully" };
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return { success: false, error: "Failed to send email" };
-  }
-};
-import { readBody } from "h3";
+    // Prepare email content
+    const mailOptions = {
+      from: `"${firstName} ${lastName}" <${email}>`,
+      to: "contact@pearsonpub.com",
+      subject: "New Contact Form Submission - The Pearson Pub",
+      text: `
+        Name: ${firstName} ${lastName}
+        Email: ${email}
+        Message: ${message}
+      `,
+      html: `
+        &lt;h2&gt;New Contact Form Submission&lt;/h2&gt;
+        &lt;p&gt;&lt;strong&gt;Name:&lt;/strong&gt; ${firstName} ${lastName}&lt;/p&gt;
+        &lt;p&gt;&lt;strong&gt;Email:&lt;/strong&gt; ${email}&lt;/p&gt;
+        &lt;p&gt;&lt;strong&gt;Message:&lt;/strong&gt;&lt;/p&gt;
+        &lt;p&gt;${message.replace(/\n/g, "&lt;br&gt;")}&lt;/p&gt;
+      `,
+    };
 
-function useBody(event: H3Event<EventHandlerRequest>) {
-    return readBody(event);
-}
+    // Send email
+    await transport.sendMail(mailOptions);
+
+    return {
+      statusCode: 200,
+      body: {
+        success: true,
+        message: "Message sent successfully",
+      },
+    };
+  } catch (error: any) {
+    console.error("Contact form error:", error);
+
+    throw createError({
+      statusCode: error.statusCode || 500,
+      message: error.message || "An error occurred while sending the message",
+    });
+  }
+});
 
