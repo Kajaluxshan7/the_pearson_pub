@@ -1,7 +1,6 @@
 <template>
-  <div class="min-h-screen">    
-    <!-- Hero Section -->
-    <Hero />
+  <div class="min-h-screen">      <!-- Hero Section -->
+    <HomeHero />
 
     <!-- Quick Info Section -->
     <section 

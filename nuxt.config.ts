@@ -29,13 +29,38 @@ export default defineNuxtConfig({
     pageTransition: { name: "page", mode: "out-in" },
   },
 
-  modules: ["@nuxt/ui", "@nuxtjs/color-mode", "nuxt-icon"],
-
-  css: ["~/assets/styles/index.css"],
+  modules: ["@nuxt/ui", "@nuxt/image", "nuxt-icon"],
 
   ui: {
     global: true,
-    icons: ["heroicons", "simple-icons"],
+    icons: ["heroicons"],
+    input: {
+      default: {
+        size: "lg",
+        color: "white",
+      },
+    },
+  },
+
+  css: ["~/assets/styles/index.css"],
+
+  image: {
+    provider: "ipx",
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1536,
+    },
+    presets: {
+      default: {
+        modifiers: {
+          format: "webp",
+        },
+      },
+    },
   },
 
   colorMode: {
@@ -60,6 +85,7 @@ export default defineNuxtConfig({
 
   postcss: {
     plugins: {
+      "tailwindcss/nesting": {},
       tailwindcss: {},
       autoprefixer: {},
     },

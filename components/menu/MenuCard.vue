@@ -13,16 +13,20 @@
     >
       <template #header>
         <div class="relative overflow-hidden rounded-t-lg">
-          <UImage
+          <NuxtImg
             :src="item.image"
             class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-110"
             :alt="item.name"
+            format="webp"
+            quality="80"
           />
         </div>
       </template>
 
       <div class="text-center p-4">
-        <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ item.name }}</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">
+          {{ item.name }}
+        </h3>
         <UBadge color="yellow" variant="solid" class="text-lg">
           ${{ item.price }}
         </UBadge>
@@ -49,7 +53,9 @@
           </template>
 
           <div class="text-center p-4">
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ menuItem.name }}</h3>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">
+              {{ menuItem.name }}
+            </h3>
             <UBadge color="yellow" variant="solid" class="text-lg">
               ${{ menuItem.price }}
             </UBadge>
@@ -67,15 +73,15 @@
             base: 'flex items-center justify-center min-w-[32px] h-8 px-3 rounded text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
             default: {
               active: 'bg-yellow-500 text-white hover:bg-yellow-600',
-              inactive: 'text-gray-600 hover:bg-gray-100'
-            }
+              inactive: 'text-gray-600 hover:bg-gray-100',
+            },
           }"
         />
       </div>
     </div>
 
     <!-- Item Details Modal -->
-    <UModal v-model="isModalOpen" :ui="{ overlay: 'backdrop-blur-sm' }">
+    <UModal v-model="isModalOpen">
       <UCard v-if="selectedItem">
         <template #header>
           <div class="relative overflow-hidden rounded-t-lg">
@@ -89,7 +95,9 @@
 
         <div class="p-6 space-y-4">
           <div class="flex justify-between items-center">
-            <h2 class="text-2xl font-bold text-gray-800">{{ selectedItem.name }}</h2>
+            <h2 class="text-2xl font-bold text-gray-800">
+              {{ selectedItem.name }}
+            </h2>
             <UBadge color="yellow" variant="solid" class="text-xl">
               ${{ selectedItem.price }}
             </UBadge>
@@ -100,7 +108,10 @@
           <div v-if="selectedItem.ingredients" class="space-y-2">
             <h3 class="font-semibold text-gray-700">Ingredients:</h3>
             <ul class="list-disc list-inside text-gray-600">
-              <li v-for="ingredient in selectedItem.ingredients" :key="ingredient">
+              <li
+                v-for="ingredient in selectedItem.ingredients"
+                :key="ingredient"
+              >
                 {{ ingredient }}
               </li>
             </ul>
@@ -132,31 +143,35 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps(['item', 'items', 'category'])
+const props = defineProps(["item", "items", "category"]);
 
 // Pagination
-const itemsPerPage = 6
-const currentPage = ref(1)
-const totalPages = computed(() => Math.ceil((props.items?.length || 0) / itemsPerPage))
+const itemsPerPage = 6;
+const currentPage = ref(1);
+const totalPages = computed(() =>
+  Math.ceil((props.items?.length || 0) / itemsPerPage)
+);
 
 const paginatedItems = computed(() => {
-  if (!props.items) return []
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return props.items.slice(start, end)
-})
+  if (!props.items) return [];
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return props.items.slice(start, end);
+});
 
 // Modal
-const isModalOpen = ref(false)
-const selectedItem = ref(null)
+import type { MenuItem } from "~/types/menu";
 
-const showItemDetails = (item) => {
-  selectedItem.value = item
-  isModalOpen.value = true
-}
+const isModalOpen = ref(false);
+const selectedItem = ref<MenuItem | null>(null);
+
+const showItemDetails = (item: MenuItem) => {
+  selectedItem.value = item;
+  isModalOpen.value = true;
+};
 
 const closeModal = () => {
-  isModalOpen.value = false
-  selectedItem.value = null
-}
+  isModalOpen.value = false;
+  selectedItem.value = null;
+};
 </script>

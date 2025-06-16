@@ -6,6 +6,7 @@ export interface MenuItem {
   category: string;
   subCategory: string;
   image?: string;
+  ingredients?: string[];
   isAvailable: boolean;
   isVisible: boolean;
   isFeatured: boolean;

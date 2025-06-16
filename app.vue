@@ -1,23 +1,21 @@
 <template>
-  <!-- Loading Screen -->
-  <div
+  <!-- Loading Screen -->  <div
     v-if="isLoading"
     class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900"
   >
-    <div class="w-16 h-16 border-4 border-yellow-500 rounded-full animate-spin border-t-transparent"></div>
+    <USkeleton class="h-16 w-16 rounded-full">
+      <div class="w-16 h-16 border-4 border-yellow-500 rounded-full animate-spin border-t-transparent"></div>
+    </USkeleton>
   </div>
 
-  <div v-else class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-    <!-- Header -->
-    <Header />
+  <div v-else class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">    <!-- Header -->
+    <LayoutsHeader />
 
     <!-- Main Content -->
     <main class="flex-grow">
       <NuxtPage />
-    </main>
-
-    <!-- Footer -->
-    <Footer />
+    </main>    <!-- Footer -->
+    <LayoutsFooter />
 
     <!-- Scroll to Top Button -->
     <ClientOnly>

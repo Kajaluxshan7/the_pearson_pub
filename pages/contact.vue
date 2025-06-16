@@ -1,312 +1,256 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-16 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-2xl mx-auto">
-      <div class="text-center mb-12 animate-fade-in">
-        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          Contact Us
-        </h1>
-        <p class="text-lg text-gray-600 dark:text-gray-300">
-          Have a question or feedback? We'd love to hear from you.
+  <div class="min-h-screen bg-gray-50">
+    <!-- Contact Hero Section -->
+    <section class="relative py-20 bg-gray-900 text-white">
+      <div class="absolute inset-0 overflow-hidden">
+        <NuxtImg 
+          src="/images/pub/interior-main.jpg" 
+          alt="Contact Us" 
+          class="w-full h-full object-cover opacity-30"
+          format="webp"
+          quality="80"
+        />
+      </div>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-6">Contact Us</h1>
+        <p class="text-xl max-w-3xl mx-auto">
+          Get in touch with us for reservations, inquiries, or feedback
         </p>
       </div>
+    </section>
 
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 animate-fade-in-up">
-        <form @submit.prevent="handleSubmit" class="space-y-6">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <UFormGroup
-              label="First Name"
-              required
-              :error="form.errors.firstName"
-            >
-              <UInput
-                v-model="form.firstName"
-                placeholder="John"
-                icon="i-heroicons-user"
-                :ui="{
-                  base: 'relative block w-full disabled:cursor-not-allowed disabled:opacity-75 focus:outline-none border-0',
-                  form: 'form-input',
-                  width: 'w-full',
-                  input: 'block w-full ps-11',
-                  icon: {
-                    base: 'flex-shrink-0 text-gray-400 dark:text-gray-500',
-                    padding: 'ps-3'
-                  }
-                }"
-                :class="{'border-red-300 dark:border-red-500': form.errors.firstName}"
-                @input="form.errors.firstName = ''"
-              />
-            </UFormGroup>
-
-            <UFormGroup
-              label="Last Name"
-              required
-              :error="form.errors.lastName"
-            >
-              <UInput
-                v-model="form.lastName"
-                placeholder="Doe"
-                icon="i-heroicons-user"
-                :ui="{
-                  base: 'relative block w-full disabled:cursor-not-allowed disabled:opacity-75 focus:outline-none border-0',
-                  form: 'form-input',
-                  width: 'w-full',
-                  input: 'block w-full ps-11',
-                  icon: {
-                    base: 'flex-shrink-0 text-gray-400 dark:text-gray-500',
-                    padding: 'ps-3'
-                  }
-                }"
-                :class="{'border-red-300 dark:border-red-500': form.errors.lastName}"
-                @input="form.errors.lastName = ''"
-              />
-            </UFormGroup>
-          </div>
-
-          <UFormGroup
-            label="Email"
-            required
-            :error="form.errors.email"
+    <!-- Contact Form Section -->
+    <section class="py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <!-- Contact Information -->
+          <div 
+            class="transition-all duration-500"
+            :class="{ 
+              'opacity-0 translate-x-8': !isVisible.info, 
+              'opacity-100 translate-x-0': isVisible.info 
+            }"
+            ref="infoRef"
           >
-            <UInput
-              v-model="form.email"
-              type="email"
-              placeholder="john@example.com"
-              icon="i-heroicons-envelope"
-              :ui="{
-                base: 'relative block w-full disabled:cursor-not-allowed disabled:opacity-75 focus:outline-none border-0',
-                form: 'form-input',
-                width: 'w-full',
-                input: 'block w-full ps-11',
-                icon: {
-                  base: 'flex-shrink-0 text-gray-400 dark:text-gray-500',
-                  padding: 'ps-3'
-                }
-              }"
-              :class="{'border-red-300 dark:border-red-500': form.errors.email}"
-              @input="form.errors.email = ''"
-            />
-          </UFormGroup>
+            <h2 class="text-3xl font-bold mb-8">Get in Touch</h2>
+            <div class="space-y-6">
+              <div v-for="(item, index) in contactInfo" :key="index" class="flex items-start space-x-4">
+                <UIcon :name="item.icon" class="w-6 h-6 text-yellow-500 mt-1" />
+                <div>
+                  <h3 class="font-semibold">{{ item.title }}</h3>
+                  <p class="text-gray-600">{{ item.value }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-          <UFormGroup
-            label="Message"
-            required
-            :error="form.errors.message"
+          <!-- Contact Form -->
+          <div 
+            class="transition-all duration-500"
+            :class="{ 
+              'opacity-0 -translate-x-8': !isVisible.form, 
+              'opacity-100 translate-x-0': isVisible.form 
+            }"
+            ref="formRef"
           >
-            <UTextarea
-              v-model="form.message"
-              placeholder="Your message here..."
-              rows="5"
-              :ui="{
-                base: 'relative block w-full disabled:cursor-not-allowed disabled:opacity-75 focus:outline-none border-0',
-                form: 'form-textarea',
-                width: 'w-full'
-              }"
-              :class="{'border-red-300 dark:border-red-500': form.errors.message}"
-              @input="form.errors.message = ''"
-            />
-          </UFormGroup>
+            <form @submit.prevent="submitForm">
+              <div class="space-y-6">                <UFormGroup
+                  label="Name"
+                  required
+                  :error="formErrors.name"
+                >
+                  <UInput 
+                    v-model="form.name"
+                    placeholder="Your name"
+                    :error="!!formErrors.name"
+                  />
+                </UFormGroup>
 
-          <div class="flex justify-end">
-            <UButton
-              type="submit"
-              color="yellow"
-              variant="solid"
-              :loading="isLoading"
-              :disabled="isLoading"
-              size="lg"
-              class="w-full sm:w-auto"
-            >
-              <template #leading>
-                <UIcon name="i-heroicons-paper-airplane" />
-              </template>
-              {{ isLoading ? 'Sending...' : 'Send Message' }}
-            </UButton>
-          </div>
-        </form>
-      </div>
+                <UFormGroup
+                  label="Email"
+                  required
+                  :error="formErrors.email"
+                >
+                  <UInput 
+                    v-model="form.email"
+                    type="email"
+                    placeholder="Your email"
+                    :error="!!formErrors.email"
+                  />
+                </UFormGroup>
 
-      <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-8 animate-fade-in">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform transition-all duration-300 hover:scale-105">
-          <div class="flex items-center mb-4">
-            <UIcon
-              name="i-heroicons-map-pin"
-              class="w-6 h-6 text-yellow-500 mr-2"
-            />
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-              Visit Us
-            </h3>
-          </div>
-          <p class="text-gray-600 dark:text-gray-300">
-            123 Pub Street<br />
-            Whitby<br />
-            North Yorkshire<br />
-            YO21 1AB
-          </p>
-        </div>
+                <UFormGroup
+                  label="Subject"
+                  required
+                  :error="formErrors.subject"
+                >
+                  <UInput 
+                    v-model="form.subject"
+                    placeholder="Subject"
+                    :error="!!formErrors.subject"
+                  />
+                </UFormGroup>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform transition-all duration-300 hover:scale-105">
-          <div class="flex items-center mb-4">
-            <UIcon
-              name="i-heroicons-phone"
-              class="w-6 h-6 text-yellow-500 mr-2"
-            />
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-              Contact Info
-            </h3>
+                <UFormGroup
+                  label="Message"
+                  required
+                  :error="formErrors.message"
+                >
+                  <UTextarea
+                    v-model="form.message"
+                    placeholder="Your message"
+                    :rows="6"
+                    :error="!!formErrors.message"
+                  />
+                </UFormGroup>
+
+                <UButton
+                  type="submit"
+                  color="yellow"
+                  :loading="loading"
+                  :disabled="loading"
+                  block
+                >
+                  {{ loading ? 'Sending...' : 'Send Message' }}
+                </UButton>
+              </div>
+            </form>
           </div>
-          <p class="text-gray-600 dark:text-gray-300">
-            Phone: <a href="tel:01947123456" class="hover:text-yellow-500 transition-colors">01947 123 456</a><br />
-            Email: <a href="mailto:info@pearsonpub.com" class="hover:text-yellow-500 transition-colors">info@pearsonpub.com</a>
-          </p>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  layout: 'default',
-  title: 'Contact Us'
+import { ref, onMounted, computed } from 'vue'
+// Page meta
+useHead({
+  title: 'Contact Us - The Pearson Pub',
+  meta: [
+    { name: 'description', content: 'Get in touch with The Pearson Pub. Contact us for reservations, inquiries, or feedback.' }
+  ]
 })
 
-const toast = useToast()
-const isLoading = ref(false)
-
-const form = reactive({
-  firstName: '',
-  lastName: '',
+// Form state
+const form = ref({
+  name: '',
   email: '',
-  message: '',
-  errors: {
-    firstName: '',
-    lastName: '',
-    email: '',
-    message: ''
-  }
+  subject: '',
+  message: ''
 })
 
-const validateEmail = (email: string) => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+// Validation rules
+const formErrors = ref<Record<string, string>>({})
+const { $validateForm } = useNuxtApp()
+
+// UI state
+const loading = ref(false)
+const isVisible = ref({
+  info: false,
+  form: false
+})
+
+// Contact information
+const contactInfo = [
+  {
+    icon: 'i-heroicons-map-pin',
+    title: 'Address',
+    value: '123 Pub Street, Cityville, ST 12345'
+  },
+  {
+    icon: 'i-heroicons-phone',
+    title: 'Phone',
+    value: '(555) 123-4567'
+  },
+  {
+    icon: 'i-heroicons-envelope',
+    title: 'Email',
+    value: 'info@pearsonpub.com'
+  },
+  {
+    icon: 'i-heroicons-clock',
+    title: 'Opening Hours',
+    value: 'Mon-Sun: 11:00 AM - 12:00 AM'
+  }
+]
+
+// Intersection Observer setup
+const infoRef = ref(null)
+const formRef = ref(null)
+
+const setupIntersectionObserver = () => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const target = entry.target === infoRef.value ? 'info' : 'form'
+        if (entry.isIntersecting) {
+          isVisible.value[target] = true
+        }
+      })
+    },
+    { threshold: 0.1 }
+  )
+
+  if (infoRef.value) observer.observe(infoRef.value)
+  if (formRef.value) observer.observe(formRef.value)
+
+  return observer
 }
 
-const validateForm = () => {
-  let isValid = true
-  
-  // Reset errors
-  Object.keys(form.errors).forEach(key => {
-    form.errors[key as keyof typeof form.errors] = ''
-  })
+// Form submission
+const submitForm = async () => {
+  try {    const { isValid, errors } = $validateForm(form.value)
+    if (!isValid) {
+      formErrors.value = errors
+      return
+    }
 
-  // Validate First Name
-  if (!form.firstName.trim()) {
-    form.errors.firstName = 'First name is required'
-    isValid = false
-  }
-
-  // Validate Last Name
-  if (!form.lastName.trim()) {
-    form.errors.lastName = 'Last name is required'
-    isValid = false
-  }
-
-  // Validate Email
-  if (!form.email.trim()) {
-    form.errors.email = 'Email is required'
-    isValid = false
-  } else if (!validateEmail(form.email)) {
-    form.errors.email = 'Please enter a valid email address'
-    isValid = false
-  }
-
-  // Validate Message
-  if (!form.message.trim()) {
-    form.errors.message = 'Message is required'
-    isValid = false
-  }
-
-  return isValid
-}
-
-const handleSubmit = async () => {
-  if (!validateForm()) {
-    toast.add({
-      id: 'validation-error',
-      title: 'Form Error',
-      description: 'Please check the form for errors',
-      icon: 'i-heroicons-exclamation-circle',
-      color: 'red'
-    })
-    return
-  }
-
-  try {
-    isLoading.value = true
+    loading.value = true
     
-    const response = await $fetch('/api/contact', {
+    await $fetch('/api/contact', {
       method: 'POST',
-      body: {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        email: form.email,
-        message: form.message
-      }
-    })
-
-    toast.add({
-      id: 'success',
-      title: 'Message Sent',
-      description: 'Thank you for your message. We\'ll get back to you soon!',
-      icon: 'i-heroicons-check-circle',
-      color: 'green'
+      body: form.value
     })
 
     // Reset form
-    form.firstName = ''
-    form.lastName = ''
-    form.email = ''
-    form.message = ''
-    
-  } catch (error: any) {
+    form.value = {
+      name: '',
+      email: '',
+      subject: '',
+      message: ''      };
+      
+      formErrors.value = {};
+
+      // Show success message
+    const toast = useToast()
     toast.add({
-      id: 'error',
+      title: 'Success!',
+      description: 'Your message has been sent successfully.',
+      color: 'green'
+    })
+  } catch (error) {
+    // Show error message
+    const toast = useToast()
+    toast.add({
       title: 'Error',
-      description: error.message || 'Something went wrong. Please try again.',
-      icon: 'i-heroicons-x-circle',
+      description: 'Failed to send message. Please try again.',
       color: 'red'
     })
+    console.error('Failed to send message:', error)
   } finally {
-    isLoading.value = false
+    loading.value = false
   }
 }
+
+// Lifecycle
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  observer = setupIntersectionObserver()
+})
+
+onUnmounted(() => {
+  observer?.disconnect()
+})
 </script>
-
-<style scoped>
-.animate-fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>
