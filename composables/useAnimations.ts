@@ -52,7 +52,7 @@ export const useAnimations = (config: AnimationConfig = {}) => {
   };
 
   const createIntersectionObserver = (
-    refs: Record<keyof AnimationState, Ref>,
+    refs: Ref<HTMLElement | null>,
     isVisible: Ref<AnimationState>
   ) => {
     const options: IntersectionObserverInit = {

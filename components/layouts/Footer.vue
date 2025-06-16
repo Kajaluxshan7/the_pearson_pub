@@ -22,7 +22,7 @@
               v-for="link in socialLinks"
               :key="link.name"
               :icon="link.icon"
-              color="white"
+              color=""
               variant="ghost"
               :to="link.url"
               target="_blank"
