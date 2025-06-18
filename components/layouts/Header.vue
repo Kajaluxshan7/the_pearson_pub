@@ -70,7 +70,7 @@ onUnmounted(() => {
   }
 });
 
-const whatsappLink = "https://wa.me/+94762676832"; </script>
+const callLink = "tel:+19054305699"; </script>
 
 <template>
   <!-- Header Spacer -->
@@ -87,15 +87,6 @@ const whatsappLink = "https://wa.me/+94762676832"; </script>
   >
     <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
-        <!-- Logo -->
-        <NuxtLink to="/" class="flex items-center space-x-2">
-          <img
-            src="/images/pub/logo.png"
-            alt="The Pearson Pub"
-            class="h-10 w-auto"
-          />
-        </NuxtLink>
-
         <!-- Desktop Navigation -->
         <div class="hidden md:flex items-center space-x-6">
           <NuxtLink
@@ -198,16 +189,16 @@ const whatsappLink = "https://wa.me/+94762676832"; </script>
     </nav>
   </header>
 
-  <!-- WhatsApp Button -->
   <a
-    :href="whatsappLink"
-    target="_blank"
-    rel="noopener noreferrer"
-    class="fixed bottom-6 right-6 z-50 bg-green-500 text-white rounded-full p-3 shadow-lg hover:bg-green-600 transition-colors duration-200"
-    aria-label="Chat on WhatsApp"
-  >
-    <UIcon name="i-simple-icons-whatsapp" class="w-6 h-6" />
-  </a>
+  :href="callLink"
+  target="_blank"
+  rel="noopener noreferrer"
+  class="fixed bottom-5 right-5 z-50 bg-yellow-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-yellow-600 transition-colors duration-200"
+  aria-label="Call Us"
+>
+  <UIcon name="i-heroicons-phone" class="w-5 h-5" />
+</a>
+
 </template>
 
 <style scoped>

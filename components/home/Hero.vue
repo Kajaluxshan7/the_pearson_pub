@@ -1,5 +1,5 @@
 <template>
-  <section class="relative min-h-[80vh] flex items-center justify-center py-32 lg:py-48">
+  <section class="relative min-h-[90vh] flex items-center justify-center py-32 lg:py-48">
     <!-- Background Image with Overlay -->
     <div class="absolute inset-0 z-0">
       <img
@@ -72,14 +72,6 @@
               Join us for sports screenings, quiz nights, and themed celebrations
             </p>
           </div>
-        </div>
-
-        <!-- Scroll Indicator -->
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <UIcon
-            name="i-heroicons-chevron-down"
-            class="w-8 h-8 text-white opacity-75"
-          />
         </div>
       </div>
     </div>
