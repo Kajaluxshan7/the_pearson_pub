@@ -18,17 +18,17 @@
     <LayoutsFooter />
 
     <!-- Scroll to Top Button -->
-    <ClientOnly>
-      <UButton
-        v-show="scrollY > 500"
-        icon="i-heroicons-arrow-up"
-        color="yellow"
-        variant="solid"
-        class="fixed bottom-20 right-6 rounded-full shadow-lg"
-        size="lg"
-        @click="scrollToTop"
-      />
-    </ClientOnly>
+<ClientOnly>
+  <UButton
+    v-show="scrollY > 500"
+    icon="i-heroicons-arrow-up"
+    color="yellow"
+    variant="solid"
+    class="fixed bottom-10 left-1/2 transform -translate-x-1/2 rounded-full shadow-lg"
+    size="xs"
+    @click="scrollToTop"
+  />
+</ClientOnly>
   </div>
 </template>
 
