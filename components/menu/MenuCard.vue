@@ -59,6 +59,9 @@
             <UBadge color="yellow" variant="solid" class="text-lg">
               ${{ menuItem.price }}
             </UBadge>
+            <UBadge :color="menuItem.isAvailable ? 'green' : 'red'" variant="subtle" class="ml-2">
+              {{ menuItem.isAvailable ? 'Available' : 'Not Available' }}
+            </UBadge>
           </div>
         </UCard>
       </div>
@@ -85,11 +88,36 @@
       <UCard v-if="selectedItem">
         <template #header>
           <div class="relative overflow-hidden rounded-t-lg">
-            <UImage
-              :src="selectedItem.image"
-              class="w-full h-64 object-cover"
-              :alt="selectedItem.name"
-            />
+            <template v-if="selectedItem && selectedItem.images && selectedItem.images.length > 1">
+              <div class="relative w-full h-64">
+                <NuxtImg
+                  v-for="(img, idx) in selectedItem.images"
+                  :key="img"
+                  v-show="carouselIndex === idx"
+                  :src="img"
+                  class="w-full h-64 object-cover absolute top-0 left-0 transition-opacity duration-500"
+                  :alt="selectedItem.name + ' image ' + (idx+1)"
+                  format="webp"
+                  quality="80"
+                />
+                <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2">
+                  <span v-for="(img, idx) in selectedItem.images" :key="idx" class="w-2 h-2 rounded-full" :class="carouselIndex === idx ? 'bg-yellow-500' : 'bg-gray-300'" />
+                </div>
+              </div>
+            </template>
+            <template v-else>
+              <NuxtImg
+                v-if="selectedItem?.image"
+                :src="selectedItem?.image"
+                class="w-full h-64 object-cover"
+                :alt="selectedItem?.name"
+                format="webp"
+                quality="80"
+              />
+              <div v-else class="w-full h-64 flex items-center justify-center bg-gray-100 text-gray-400">
+                No Image
+              </div>
+            </template>
           </div>
         </template>
 
@@ -100,6 +128,9 @@
             </h2>
             <UBadge color="yellow" variant="solid" class="text-xl">
               ${{ selectedItem.price }}
+            </UBadge>
+            <UBadge :color="selectedItem.isAvailable ? 'green' : 'red'" variant="subtle" class="ml-2">
+              {{ selectedItem.isAvailable ? 'Available' : 'Not Available' }}
             </UBadge>
           </div>
 
@@ -128,6 +159,15 @@
               >
                 {{ allergen }}
               </UBadge>
+            </div>
+          </div>
+
+          <div v-if="selectedItem.dietaryInfo" class="space-y-2">
+            <h3 class="font-semibold text-gray-700">Dietary Info:</h3>
+            <div class="flex flex-wrap gap-2">
+              <UBadge v-if="selectedItem.dietaryInfo.isVegetarian" color="green" variant="subtle">Vegetarian</UBadge>
+              <UBadge v-if="selectedItem.dietaryInfo.isVegan" color="emerald" variant="subtle">Vegan</UBadge>
+              <UBadge v-if="selectedItem.dietaryInfo.isGlutenFree" color="blue" variant="subtle">Gluten Free</UBadge>
             </div>
           </div>
         </div>
@@ -174,4 +214,29 @@ const closeModal = () => {
   isModalOpen.value = false;
   selectedItem.value = null;
 };
+
+import { onMounted, onUnmounted, ref, computed } from 'vue';
+
+const carouselIndex = ref(0);
+let carouselInterval: any = null;
+
+watch(
+  () => isModalOpen.value,
+  (open) => {
+    if (open && selectedItem.value?.images && selectedItem.value.images.length > 1) {
+      carouselIndex.value = 0;
+      carouselInterval = setInterval(() => {
+        if (selectedItem.value && selectedItem.value.images) {
+          carouselIndex.value = (carouselIndex.value + 1) % selectedItem.value.images.length;
+        }
+      }, 2500);
+    } else {
+      clearInterval(carouselInterval);
+    }
+  }
+);
+
+onUnmounted(() => {
+  clearInterval(carouselInterval);
+});
 </script>

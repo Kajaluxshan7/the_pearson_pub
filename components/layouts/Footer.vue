@@ -1,23 +1,22 @@
 <template>
   <footer class="bg-gray-900 text-white">
     <UContainer class="py-12">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 text-center md:text-left">
         <!-- Branding and Social Links -->
         <div class="space-y-6">
-          <div class="flex items-center space-x-3">
+          <div class="flex flex-col items-center md:flex-row md:items-center md:space-x-3 space-y-2 md:space-y-0">
             <img
               src="/images/pub/logo.png"
               alt="Pearson Pub Logo"
-              class="h-12 w-auto"
+              class="h-12 w-auto mx-auto md:mx-0"
             />
-            <h3 class="text-xl font-bold text-yellow-500">The Pearson Pub</h3>
+            <h3 class="text-xl font-bold text-yellow-500 mt-2 md:mt-0">The Pearson Pub</h3>
           </div>
 
-          <p class="text-gray-400">
+          <p class="text-gray-400 max-w-xs mx-auto md:mx-0">
             A traditional pub atmosphere in the heart of Whitby
           </p>
-
-          <div class="flex space-x-4">
+          <div class="flex justify-center md:justify-start items-center space-x-4">
             <UButton
               v-for="link in socialLinks"
               :key="link.name"
@@ -64,28 +63,42 @@
         <div class="space-y-6">
           <h3 class="text-lg font-semibold">Contact Us</h3>
           <div class="space-y-4 text-gray-400">
-            <div class="flex items-start space-x-3">
+            <div class="flex flex-row items-start justify-center md:justify-start space-x-3">
               <UIcon
                 name="i-heroicons-map-pin"
                 class="w-5 h-5 text-yellow-500 flex-shrink-0 mt-1"
               />
-              <p>101 MARY ST WHITBY, ON, L1N 2R4</p>
+              <a
+                href="https://maps.google.com/?q=101+MARY+ST+WHITBY,+ON,+L1N+2R4"
+                target="_blank"
+                rel="noopener"
+                class="hover:text-yellow-500 underline"
+                >101 MARY ST WHITBY, ON, L1N 2R4</a
+              >
             </div>
 
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-row items-center justify-center md:justify-start space-x-3">
               <UIcon
                 name="i-heroicons-phone"
                 class="w-5 h-5 text-yellow-500 flex-shrink-0"
               />
-              <p>905-430-5699</p>
+              <a
+                href="tel:9054305699"
+                class="hover:text-yellow-500 underline"
+                >905-430-5699</a
+              >
             </div>
 
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-row items-center justify-center md:justify-start space-x-3">
               <UIcon
                 name="i-heroicons-envelope"
                 class="w-5 h-5 text-yellow-500 flex-shrink-0"
               />
-              <p>thepearsonpub@rogers.com</p>
+              <a
+                href="mailto:thepearsonpub@rogers.com"
+                class="hover:text-yellow-500 underline"
+                >thepearsonpub@rogers.com</a
+              >
             </div>
           </div>
         </div>
@@ -164,12 +177,40 @@ const entertainmentSchedule = [
   color: #fff;
   padding: 2rem 0;
   font-size: 0.9rem;
-  margin-top: auto; /* ensures footer stays at the bottom when used in a flex layout */
+  margin-top: auto;
 }
 .container {
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 20px;
+}
+@media (max-width: 768px) {
+  .container {
+    padding: 0 8px;
+  }
+  .grid {
+    gap: 2rem 0.5rem !important;
+  }
+  .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1.25rem !important;
+  }
+  .text-center.md\:text-left {
+    text-align: center !important;
+  }
+  .flex.md\:flex-row {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  .md\:items-center {
+    align-items: center !important;
+  }
+  .md\:space-x-3 {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .max-w-xs {
+    max-width: 90vw !important;
+  }
 }
 .footer-content {
   display: flex;

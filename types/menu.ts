@@ -6,6 +6,7 @@ export interface MenuItem {
   category: string;
   subCategory: string;
   image?: string;
+  images?: string[]; // Add this for carousel support
   ingredients?: string[];
   isAvailable: boolean;
   isVisible: boolean;
