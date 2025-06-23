@@ -7,4 +7,8 @@ declare module "#app" {
   }
 }
 
+// Export types
+export * from './events'
+export * from './menu'
+
 export {};

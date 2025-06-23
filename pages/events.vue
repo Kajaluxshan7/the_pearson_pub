@@ -1,164 +1,891 @@
 <template>
-    <div class="min-h-screen bg-gray-50">
-      <!-- Hero Section -->
-      <section class="relative py-20 bg-gray-900 text-white">
-        <div class="absolute inset-0 overflow-hidden">
-          <img
-            src="/images/entertainment/music.jpg"
-            alt="Events & Entertainment"
-            class="w-full h-full object-cover opacity-30"
-          />
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Hero Section -->
+    <section
+      class="relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
+    >
+      <div class="absolute inset-0">
+        <NuxtImg
+          src="/images/entertainment/music.jpg"
+          alt="Events & Entertainment"
+          class="w-full h-full object-cover opacity-40"
+          format="webp"
+          quality="80"
+        />
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-black/80 to-black/60"
+        ></div>
+      </div>
+
+      <!-- Decorative Elements -->
+      <div
+        class="absolute top-10 left-10 w-16 h-16 lg:w-24 lg:h-24 rounded-full border border-yellow-500/30 animate-pulse"
+      ></div>
+      <div
+        class="absolute bottom-20 right-10 w-20 h-20 lg:w-32 lg:h-32 rounded-full bg-yellow-500/20"
+      ></div>
+
+      <div
+        class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10"
+      >
+        <div class="inline-block mb-4">
+          <span
+            class="text-yellow-400 font-semibold text-sm lg:text-lg tracking-wide uppercase"
+            >Live Entertainment</span
+          >
+          <div class="w-12 lg:w-16 h-1 bg-yellow-500 mx-auto mt-2"></div>
         </div>
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 class="text-4xl md:text-5xl font-bold mb-6">
-            Events & Entertainment
-          </h1>
-          <p class="text-xl max-w-3xl mx-auto">
-            Join us for live music, pub quizzes, and special events
+        <h1
+          class="text-3xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-tight"
+          style="font-family: 'Cinzel', 'Georgia', serif"
+        >
+          Events &amp; <span class="text-yellow-400">Entertainment</span>
+        </h1>
+        <p
+          class="text-lg sm:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed"
+        >
+          Join us for <span class="text-yellow-300">live music</span>,
+          <span class="text-yellow-300">pub quizzes</span>, and
+          <span class="text-yellow-300">special events</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- Filters and Search Section -->
+    <section
+      class="py-6 lg:py-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          class="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between"
+        >
+          <!-- Search Bar -->
+          <div class="flex-1 max-w-md">
+            <div class="relative">
+              <UIcon
+                name="i-heroicons-magnifying-glass"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
+              />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search events..."
+                class="w-full pl-10 pr-4 py-3 rounded-full border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              />
+              <button
+                v-if="searchQuery"
+                @click="searchQuery = ''"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <UIcon name="i-heroicons-x-mark" class="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Filters -->
+          <div class="flex flex-wrap gap-2 lg:gap-3">
+            <button
+              v-for="category in categories"
+              :key="category.id"
+              :class="[
+                'px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 whitespace-nowrap',
+                selectedCategory === category.id
+                  ? 'bg-yellow-500 text-white shadow-lg scale-105'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-yellow-100 dark:hover:bg-yellow-900 hover:shadow-lg',
+              ]"
+              @click="
+                selectedCategory =
+                  selectedCategory === category.id ? 'all' : category.id
+              "
+            >
+              {{ category.name }}
+            </button>
+          </div>
+
+          <!-- View Toggle -->
+          <div
+            class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-full p-1"
+          >
+            <button
+              :class="[
+                'px-3 py-2 rounded-full text-sm font-medium transition-all',
+                viewMode === 'grid'
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
+              ]"
+              @click="viewMode = 'grid'"
+            >
+              <UIcon name="i-heroicons-squares-2x2" class="w-4 h-4" />
+            </button>
+            <button
+              :class="[
+                'px-3 py-2 rounded-full text-sm font-medium transition-all',
+                viewMode === 'list'
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
+              ]"
+              @click="viewMode = 'list'"
+            >
+              <UIcon name="i-heroicons-list-bullet" class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Filters Display -->
+        <div
+          v-if="selectedCategory !== 'all' || searchQuery"
+          class="flex flex-wrap gap-2 mt-4"
+        >
+          <span class="text-sm text-gray-600 dark:text-gray-300 mr-2"
+            >Active filters:</span
+          >
+          <UBadge
+            v-if="selectedCategory !== 'all'"
+            color="yellow"
+            variant="subtle"
+            class="cursor-pointer"
+            @click="selectedCategory = 'all'"
+          >
+            {{ categories.find((c: Category) => c.id === selectedCategory)?.name }}
+            <UIcon name="i-heroicons-x-mark" class="w-3 h-3 ml-1" />
+          </UBadge>
+          <UBadge
+            v-if="searchQuery"
+            color="blue"
+            variant="subtle"
+            class="cursor-pointer"
+            @click="searchQuery = ''"
+          >
+            "{{ searchQuery }}"
+            <UIcon name="i-heroicons-x-mark" class="w-3 h-3 ml-1" />
+          </UBadge>
+        </div>
+      </div>
+    </section>    <!-- Events Section -->
+    <section class="py-12 lg:py-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">        <!-- Results Summary -->
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h2
+              class="text-2xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2"
+              style="font-family: 'Cinzel', 'Georgia', serif"
+            >
+              <span v-if="searchQuery">Search Results</span>
+              <span v-else-if="selectedCategory !== 'all'"
+                >{{
+                  categories.find((c: Category) => c.id === selectedCategory)?.name
+                }}
+                Events</span
+              >
+              <span v-else>Upcoming Events</span>
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300">
+              {{ filteredEvents.length }} event{{
+                filteredEvents.length !== 1 ? "s" : ""
+              }}
+              found
+            </p>
+          </div>
+          <!-- View Mode Indicators -->
+          <div class="hidden sm:flex items-center gap-2">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Layout:</span>
+            <UBadge 
+              :color="viewMode === 'grid' ? 'yellow' : 'gray'" 
+              variant="subtle"
+              class="cursor-pointer"
+              @click="viewMode = 'grid'"
+            >
+              Grid
+            </UBadge>
+            <UBadge 
+              :color="viewMode === 'list' ? 'yellow' : 'gray'" 
+              variant="subtle"
+              class="cursor-pointer"
+              @click="viewMode = 'list'"
+            >
+              List
+            </UBadge>
+          </div>
+        </div>
+
+        <!-- Error State -->
+        <div v-if="error" class="text-center py-16">
+          <UIcon
+            name="i-heroicons-exclamation-triangle"
+            class="w-16 h-16 text-red-400 mx-auto mb-4"
+          />
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Something went wrong
+          </h3>
+          <p class="text-gray-600 dark:text-gray-300 mb-6">
+            {{ error }}
+          </p>
+          <UButton
+            color="red"
+            variant="outline"
+            @click="error = null"
+          >
+            Try Again
+          </UButton>
+        </div>
+
+        <!-- Loading State -->
+        <div v-else-if="isLoading" class="text-center py-16">
+          <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Loading Events...
+          </h3>
+          <p class="text-gray-600 dark:text-gray-300">
+            Please wait while we fetch the latest events for you.
           </p>
         </div>
-      </section>
-  
-      <!-- Events Grid -->
-      <section class="py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 class="text-3xl font-bold text-center mb-12">Upcoming Events</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <UCard v-for="event in events" :key="event.id">
-              <template #header>
-                <img
-                  :src="event.image"
-                  :alt="event.title"
-                  class="w-full h-48 object-cover"
-                />
-              </template>
-              <h3 class="text-xl font-bold mb-2">{{ event.title }}</h3>
-              <p class="text-gray-600 mb-4">{{ event.description }}</p>
-              <div class="flex items-center text-sm text-gray-500">
-                <NuxtIcon name="heroicons-calendar" class="w-5 h-5 mr-2" />
-                <span>{{ event.date }}</span>
-              </div>
-              <div class="flex items-center text-sm text-gray-500 mt-2">
-                <NuxtIcon name="heroicons-clock" class="w-5 h-5 mr-2" />
-                <span>{{ event.time }}</span>
-              </div>
-              <template #footer>
-                <UButton
-                  color="yellow"
-                  variant="solid"
-                  class="w-full"
-                  @click="showEventDetails(event)"
-                >
-                  Learn More
-                </UButton>
-              </template>
-            </UCard>
+
+        <!-- Events Grid/List -->
+        <div v-if="filteredEvents.length > 0">
+          <!-- Grid View -->
+          <div
+            v-if="viewMode === 'grid'"
+            class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8"
+          >            <div
+              v-for="(event, index) in paginatedEvents"
+              :key="event.id"
+              class="group transform transition-all duration-500 hover:scale-105 cursor-pointer"
+              :style="{ animationDelay: `${index * 100}ms` }"
+              @click="showEventDetails(event)"
+              @keydown.enter="showEventDetails(event)"
+              @keydown.space.prevent="showEventDetails(event)"
+              tabindex="0"
+              role="button"
+              :aria-label="`View details for ${event.title}`"
+            >
+              <UCard
+                class="overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 bg-white dark:bg-gray-800 border-0 h-full"
+              >
+                <template #header>
+                  <div class="relative overflow-hidden">                    <NuxtImg
+                      :src="event.image || '/images/entertainment/music.jpg'"
+                      :alt="event.title"
+                      class="w-full h-48 lg:h-56 object-cover group-hover:scale-110 transition-transform duration-500"
+                      format="webp"
+                      quality="75"
+                      loading="lazy"
+                      :placeholder="[400, 240, 75]"
+                    />
+                    <div
+                      class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"
+                    ></div>
+
+                    <!-- Badges -->
+                    <div class="absolute top-4 left-4 flex flex-col gap-2">
+                      <UBadge
+                        v-if="event.featured"
+                        color="yellow"
+                        variant="solid"
+                        class="font-semibold text-xs"
+                      >
+                        Featured
+                      </UBadge>
+                      <UBadge
+                        :color="getStatusColor(event.status)"
+                        variant="solid"
+                        class="font-semibold text-xs"
+                      >
+                        {{
+                          event.status.charAt(0).toUpperCase() +
+                          event.status.slice(1)
+                        }}
+                      </UBadge>
+                    </div>
+
+                    <div class="absolute top-4 right-4">
+                      <UBadge
+                        :color="getCategoryColor(event.category)"
+                        variant="subtle"
+                        class="font-semibold text-xs"
+                      >
+                        {{
+                          event.category.charAt(0).toUpperCase() +
+                          event.category.slice(1)
+                        }}
+                      </UBadge>
+                    </div>
+
+                    <!-- Price -->
+                    <div
+                      v-if="event.price && Object.keys(event.price).length > 0"
+                      class="absolute bottom-4 right-4 bg-black/70 text-white px-2 py-1 rounded-full"
+                    >
+                      <span class="text-xs font-semibold">
+                        From ${{ minPrice(event.price) }}
+                      </span>
+                    </div>
+                  </div>
+                </template>
+
+                <div class="p-4 lg:p-6 flex flex-col h-full">
+                  <h3
+                    class="text-xl lg:text-2xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors line-clamp-2"
+                  >
+                    {{ event.title }}
+                  </h3>
+
+                  <p
+                    class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed line-clamp-3 flex-grow"
+                  >
+                    {{ event.description }}
+                  </p>
+
+                  <div class="space-y-2 mb-4">
+                    <div
+                      class="flex items-center text-sm text-gray-500 dark:text-gray-400"
+                    >
+                      <UIcon
+                        name="i-heroicons-calendar"
+                        class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
+                      />
+                      <span class="font-medium">{{ event.date }}</span>
+                    </div>
+                    <div
+                      class="flex items-center text-sm text-gray-500 dark:text-gray-400"
+                    >
+                      <UIcon
+                        name="i-heroicons-clock"
+                        class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
+                      />
+                      <span class="font-medium">{{ event.time }}</span>
+                    </div>
+                    <div
+                      v-if="event.location"
+                      class="flex items-center text-sm text-gray-500 dark:text-gray-400"
+                    >
+                      <UIcon
+                        name="i-heroicons-map-pin"
+                        class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
+                      />
+                      <span class="font-medium">{{ event.location }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Rating -->
+                  <div
+                    v-if="event.averageRating"
+                    class="flex items-center gap-2 mb-4"
+                  >
+                    <div class="flex items-center">
+                      <UIcon
+                        v-for="star in 5"
+                        :key="star"
+                        name="i-heroicons-star-solid"
+                        :class="
+                          star <= Math.floor(event.averageRating)
+                            ? 'text-yellow-400'
+                            : 'text-gray-300'
+                        "
+                        class="w-4 h-4"
+                      />
+                    </div>
+                    <span class="text-xs text-gray-600 dark:text-gray-300">
+                      {{ event.averageRating.toFixed(1) }} ({{
+                        event.totalReviews
+                      }})
+                    </span>
+                  </div>
+
+                  <UButton
+                    color="yellow"
+                    variant="solid"
+                    class="w-full transform transition-all hover:scale-105 mt-auto"
+                    size="md"
+                  >
+                    View Details
+                  </UButton>
+                </div>
+              </UCard>
+            </div>
+          </div>
+
+          <!-- List View -->
+          <div v-else class="space-y-6">            <div
+              v-for="(event, index) in paginatedEvents"
+              :key="event.id"
+              class="group cursor-pointer"
+              :style="{ animationDelay: `${index * 100}ms` }"
+              @click="showEventDetails(event)"
+              @keydown.enter="showEventDetails(event)"
+              @keydown.space.prevent="showEventDetails(event)"
+              tabindex="0"
+              role="button"
+              :aria-label="`View details for ${event.title}`"
+            >
+              <UCard
+                class="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white dark:bg-gray-800 border-0"
+              >
+                <div class="flex flex-col lg:flex-row">
+                  <!-- Image -->
+                  <div class="lg:w-80 relative overflow-hidden">                    <NuxtImg
+                      :src="event.image || '/images/entertainment/music.jpg'"
+                      :alt="event.title"
+                      class="w-full h-48 lg:h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      format="webp"
+                      quality="75"
+                      loading="lazy"
+                      :placeholder="[400, 240, 75]"
+                    />
+
+                    <!-- Badges -->
+                    <div class="absolute top-4 left-4 flex flex-col gap-2">
+                      <UBadge
+                        v-if="event.featured"
+                        color="yellow"
+                        variant="solid"
+                        class="font-semibold text-xs"
+                      >
+                        Featured
+                      </UBadge>
+                      <UBadge
+                        :color="getStatusColor(event.status)"
+                        variant="solid"
+                        class="font-semibold text-xs"
+                      >
+                        {{
+                          event.status.charAt(0).toUpperCase() +
+                          event.status.slice(1)
+                        }}
+                      </UBadge>
+                    </div>
+                  </div>
+
+                  <!-- Content -->
+                  <div class="flex-1 p-6 lg:p-8">
+                    <div
+                      class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4"
+                    >
+                      <div class="flex-1">
+                        <div class="flex items-start justify-between mb-4">
+                          <div>
+                            <h3
+                              class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors mb-2"
+                            >
+                              {{ event.title }}
+                            </h3>
+                            <UBadge
+                              :color="getCategoryColor(event.category)"
+                              variant="subtle"
+                              class="font-semibold text-sm"
+                            >
+                              {{
+                                event.category.charAt(0).toUpperCase() +
+                                event.category.slice(1)
+                              }}
+                            </UBadge>
+                          </div>
+                          <div v-if="event.price && Object.keys(event.price).length > 0" class="text-right">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                              From
+                            </p>
+                            <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                              ${{ minPrice(event.price) }}
+                            </p>
+                          </div>
+                        </div>
+
+                        <p
+                          class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed"
+                        >
+                          {{ event.description }}
+                        </p>
+
+                        <div
+                          class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4"
+                        >
+                          <div
+                            class="flex items-center text-sm text-gray-500 dark:text-gray-400"
+                          >
+                            <UIcon
+                              name="i-heroicons-calendar"
+                              class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
+                            />
+                            <span class="font-medium">{{ event.date }}</span>
+                          </div>
+                          <div
+                            class="flex items-center text-sm text-gray-500 dark:text-gray-400"
+                          >
+                            <UIcon
+                              name="i-heroicons-clock"
+                              class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
+                            />
+                            <span class="font-medium">{{ event.time }}</span>
+                          </div>
+                          <div
+                            v-if="event.location"
+                            class="flex items-center text-sm text-gray-500 dark:text-gray-400"
+                          >
+                            <UIcon
+                              name="i-heroicons-map-pin"
+                              class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
+                            />
+                            <span class="font-medium">{{
+                              event.location
+                            }}</span>
+                          </div>
+                        </div>
+
+                        <!-- Tags and Performers -->
+                        <div class="flex flex-wrap gap-2 mb-4">
+                          <UBadge
+                            v-for="tag in event.tags?.slice(0, 3)"
+                            :key="tag"
+                            color="gray"
+                            variant="subtle"
+                            class="text-xs"
+                          >
+                            {{ tag }}
+                          </UBadge>
+                        </div>
+
+                        <!-- Rating -->
+                        <div
+                          v-if="event.averageRating"
+                          class="flex items-center gap-2"
+                        >
+                          <div class="flex items-center">
+                            <UIcon
+                              v-for="star in 5"
+                              :key="star"
+                              name="i-heroicons-star-solid"
+                              :class="
+                                star <= Math.floor(event.averageRating)
+                                  ? 'text-yellow-400'
+                                  : 'text-gray-300'
+                              "
+                              class="w-4 h-4"
+                            />
+                          </div>
+                          <span
+                            class="text-sm text-gray-600 dark:text-gray-300"
+                          >
+                            {{ event.averageRating.toFixed(1) }} ({{
+                              event.totalReviews
+                            }}
+                            reviews)
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="lg:ml-6">
+                        <UButton
+                          color="yellow"
+                          variant="solid"
+                          size="lg"
+                          class="w-full lg:w-auto"
+                        >
+                          View Details
+                        </UButton>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </UCard>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div v-if="totalPages > 1" class="flex justify-center mt-12">
+            <UPagination
+              v-model="currentPage"
+              :total="totalPages"
+              :ui="{
+                wrapper: 'flex items-center gap-1',
+                base: 'flex items-center justify-center min-w-[32px] h-8 px-3 rounded text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
+                default: {
+                  active: 'bg-yellow-500 text-white hover:bg-yellow-600',
+                  inactive:
+                    'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700',
+                },
+              }"
+            />
           </div>
         </div>
-      </section>
-  
-      <!-- Modal -->
-      <UModal v-model:show="isModalOpen" aria-label="Event Details">
-        <UCard v-if="selectedEvent" class="relative">
-          <template #header>
-            <img
-              :src="selectedEvent.image"
-              :alt="selectedEvent.title"
-              class="w-full h-64 object-cover"
-            />
-          </template>
-  
-          <!-- Close Button -->
+
+        <!-- No Results -->
+        <div v-else class="text-center py-16">
+          <UIcon
+            name="i-heroicons-calendar-x"
+            class="w-16 h-16 text-gray-400 mx-auto mb-4"
+          />
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            No events found
+          </h3>
+          <p class="text-gray-600 dark:text-gray-300 mb-6">
+            <span v-if="searchQuery || selectedCategory !== 'all'">
+              Try adjusting your search or filters to find more events.
+            </span>
+            <span v-else> Check back soon for upcoming events! </span>
+          </p>
           <UButton
-            class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-            variant="ghost"
-            size="sm"
-            aria-label="Close modal"
-            @click="isModalOpen = false"
+            v-if="searchQuery || selectedCategory !== 'all'"
+            color="yellow"
+            variant="outline"
+            @click="clearFilters"
           >
-            ×
+            Clear Filters
           </UButton>
-  
-          <h2 class="text-2xl font-bold mb-4">{{ selectedEvent.title }}</h2>
-          <p class="text-gray-600 mb-4">{{ selectedEvent.description }}</p>
-          <div class="space-y-2">
-            <div class="flex items-center text-gray-500">
-              <NuxtIcon name="heroicons-calendar" class="w-5 h-5 mr-2" />
-              <span>{{ selectedEvent.date }}</span>
-            </div>
-            <div class="flex items-center text-gray-500">
-              <NuxtIcon name="heroicons-clock" class="w-5 h-5 mr-2" />
-              <span>{{ selectedEvent.time }}</span>
-            </div>
-          </div>
-        </UCard>
-      </UModal>
+        </div>
+      </div>
+    </section>    <!-- Event Details Modal - Portrait -->
+    <EventDetailsModal
+      v-if="modalLayout === 'portrait'"
+      :event="selectedEvent"
+      :is-open="isEventModalOpen"
+      @close="closeEventModal"
+    />
+
+    <!-- Event Details Modal - Landscape -->
+    <EventDetailsModalLandscape
+      v-else
+      :event="selectedEvent"
+      :is-open="isEventModalOpen"
+      @close="closeEventModal"
+    />
+
+    <!-- Modal Layout Toggle (when modal is open) -->
+    <div
+      v-if="isEventModalOpen"
+      class="fixed bottom-6 right-6 z-[60] flex gap-2"
+    >
+      <UButton
+        @click="toggleModalLayout"
+        color="gray"
+        variant="solid"
+        size="sm"
+        class="shadow-lg backdrop-blur-sm"
+      >
+        <UIcon :name="modalLayout === 'portrait' ? 'i-heroicons-arrows-pointing-out' : 'i-heroicons-arrows-pointing-in'" class="w-4 h-4 mr-1" />
+        {{ modalLayout === 'portrait' ? 'Landscape' : 'Portrait' }}
+      </UButton>
     </div>
-  </template>
-  
-  <script setup lang="ts">
-  import { ref } from "vue"
-//   import UCard from "~/components/UCard.vue"
-//   import UButton from "~/components/UButton.vue"
-//   import UModal from "~/components/UModal.vue"
-//   import NuxtIcon from "~/components/NuxtIcon.vue"
-  
-  interface Event {
-    id: string
-    title: string
-    description: string
-    date: string
-    time: string
-    image: string
+
+    <!-- Weekly Schedule Section -->
+    <WeeklyEntertainment />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, onUnmounted, readonly } from "vue";
+import { useEvents } from "~/composables/useEvents";
+import EventDetailsModal from "~/components/events/EventDetailsModal.vue";
+import EventDetailsModalLandscape from "~/components/events/EventDetailsModalLandscape.vue";
+import type { Event } from "~/types/events";
+import type { Category } from "~/types/events-ui";
+
+// Use events composable
+const { events } = useEvents();
+
+// Reactive data
+const searchQuery = ref("");
+const selectedCategory = ref("all");
+const viewMode = ref<"grid" | "list">("grid");
+const currentPage = ref(1);
+const itemsPerPage = 8; // Changed to 8 as requested
+
+// Modal state
+const selectedEvent = ref<Event | null>(null);
+const isEventModalOpen = ref(false);
+const modalLayout = ref<'portrait' | 'landscape'>('portrait');
+
+// Categories with proper typing
+const categories = ref<Category[]>([
+  { id: "all", name: "All Events" },
+  { id: "music", name: "Music" },
+  { id: "quiz", name: "Quiz Night" },
+  { id: "food", name: "Food & Drink" },
+  { id: "special", name: "Special Events" },
+  { id: "entertainment", name: "Entertainment" },
+]);
+
+// Error handling
+const error = ref<string | null>(null);
+const isLoading = ref(false);
+
+// Computed properties with error handling
+const filteredEvents = computed(() => {
+  try {
+    let filtered = events.value || [];
+
+    // Filter by category
+    if (selectedCategory.value !== "all") {
+      filtered = filtered.filter(
+        (event: any) => event.category === selectedCategory.value
+      );
+    }
+
+    // Filter by search query
+    if (searchQuery.value) {
+      const query = searchQuery.value.toLowerCase();
+      filtered = filtered.filter(
+        (event: any) =>
+          event.title.toLowerCase().includes(query) ||
+          event.description.toLowerCase().includes(query) ||
+          event.tags?.some((tag: string) => tag.toLowerCase().includes(query)) ||
+          event.performers?.some((performer: string) =>
+            performer.toLowerCase().includes(query)
+          ) ||
+          event.location?.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  } catch (err) {
+    console.error('Error filtering events:', err);
+    error.value = 'Failed to filter events';
+    return [];
   }
-  
-  const isModalOpen = ref(false)
-  const selectedEvent = ref<Event | null>(null)
-  
-  const events = ref<Event[]>([
-    {
-      id: "1",
-      title: "Live Music Night",
-      description:
-        "Join us for a night of live acoustic music featuring local artists.",
-      date: "June 20, 2025",
-      time: "8:00 PM - 11:00 PM",
-      image: "/images/entertainment/music.jpg",
-    },
-    {
-      id: "2",
-      title: "Pub Quiz Night",
-      description: "Test your knowledge and win prizes at our weekly pub quiz!",
-      date: "June 22, 2025",
-      time: "7:30 PM - 10:00 PM",
-      image: "/images/pub/interior-main.jpg",
-    },
-    {
-      id: "3",
-      title: "Summer BBQ",
-      description:
-        "Celebrate summer with our special BBQ event featuring live music and games.",
-      date: "June 25, 2025",
-      time: "2:00 PM - 8:00 PM",
-      image: "/images/food/foods.jpg",
-    },
-  ])
-  
-  const showEventDetails = (event: Event) => {
-    selectedEvent.value = event
-    isModalOpen.value = true
+});
+
+const totalPages = computed(() =>
+  Math.ceil(filteredEvents.value.length / itemsPerPage)
+);
+
+const paginatedEvents = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredEvents.value.slice(start, end);
+});
+
+// Helper functions with proper error handling
+const getStatusColor = (status: string) => {
+  const statusColors = {
+    upcoming: "green",
+    ongoing: "blue", 
+    completed: "gray",
+    cancelled: "red"
+  } as const;
+  return statusColors[status as keyof typeof statusColors] || "gray";
+};
+
+const getCategoryColor = (category: string) => {
+  const categoryColors = {
+    music: "purple",
+    quiz: "blue",
+    food: "orange",
+    special: "pink",
+    entertainment: "indigo"
+  } as const;
+  return categoryColors[category as keyof typeof categoryColors] || "gray";
+};
+
+// Safe price calculation
+const minPrice = (priceObj: Record<string, number | undefined | null>): string => {
+  try {
+    const prices = Object.values(priceObj).filter((p): p is number => 
+      typeof p === 'number' && !isNaN(p) && p > 0
+    );
+    return prices.length > 0 ? Math.min(...prices).toFixed(2) : '0';
+  } catch (err) {
+    console.error('Error calculating minimum price:', err);
+    return '0';
   }
-  
-  // Page meta
-  useHead({
-    title: "Events & Entertainment - The Pearson Pub",
-    meta: [
-      {
-        name: "description",
-        content:
-          "Join us for live music, pub quizzes, and special events at The Pearson Pub.",
-      },
-    ],
-  })
-  </script>
-  
+};
+
+const clearFilters = () => {
+  searchQuery.value = "";
+  selectedCategory.value = "all";
+  currentPage.value = 1;
+};
+
+// Event modal functions with proper typing
+const showEventDetails = (event: Event, layout: 'portrait' | 'landscape' = 'portrait') => {
+  selectedEvent.value = event;
+  modalLayout.value = layout;
+  isEventModalOpen.value = true;
+};
+
+const closeEventModal = () => {
+  isEventModalOpen.value = false;
+  selectedEvent.value = null;
+};
+
+// Layout toggle for modal
+const toggleModalLayout = () => {
+  modalLayout.value = modalLayout.value === 'portrait' ? 'landscape' : 'portrait';
+};
+
+// Watch for filter changes to reset pagination
+watch([searchQuery, selectedCategory], () => {
+  currentPage.value = 1;
+});
+
+// Responsive view mode with performance optimization
+const checkViewMode = () => {
+  if (typeof window !== "undefined") {
+    if (window.innerWidth < 768) {
+      viewMode.value = "grid";
+    }
+  }
+};
+
+// Keyboard navigation support
+const handleKeyNavigation = (event: KeyboardEvent) => {
+  switch (event.key) {
+    case 'ArrowLeft':
+      if (currentPage.value > 1) {
+        currentPage.value--;
+      }
+      break;
+    case 'ArrowRight':
+      if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+      }
+      break;
+    case 'Home':
+      currentPage.value = 1;
+      break;
+    case 'End':
+      currentPage.value = totalPages.value;
+      break;
+  }
+};
+
+onMounted(() => {
+  checkViewMode();
+  window.addEventListener("resize", checkViewMode);
+  document.addEventListener("keydown", handleKeyNavigation);
+});
+
+onUnmounted(() => {
+  if (typeof window !== "undefined") {
+    window.removeEventListener("resize", checkViewMode);
+    document.removeEventListener("keydown", handleKeyNavigation);
+  }
+});
+
+// Page meta
+useHead({
+  title: "Events & Entertainment - The Pearson Pub",
+  meta: [
+    {
+      name: "description",
+      content:
+        "Join us for live music, pub quizzes, and special events at The Pearson Pub. Discover upcoming entertainment and book your table today.",
+    },
+  ],
+});
+</script>
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>

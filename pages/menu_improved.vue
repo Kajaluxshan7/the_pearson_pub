@@ -49,17 +49,19 @@
           <span class="text-yellow-300">craft beverages</span>
         </p>
       </div>
-    </section>    <!-- Enhanced Filters and Search Section -->
+    </section>
+
+    <!-- Enhanced Filters and Search Section -->
     <section
       class="py-6 lg:py-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col space-y-4">
-          <!-- Top Row: Search and View Toggle -->
+          <!-- Top Row: Search and Favorites -->
           <div
             class="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between"
           >
-            <!-- Search Bar -->
+            <!-- Search Bar with Filters -->
             <div class="flex-1 max-w-md">
               <div class="relative">
                 <UIcon
@@ -82,51 +84,157 @@
               </div>
             </div>
 
-            <!-- View Toggle and Sort -->
-            <div class="flex items-center gap-4">
-              <!-- View Toggle -->
-              <div
-                class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-full p-1"
+            <!-- Quick Actions -->
+            <div class="flex items-center gap-3">
+              <!-- View Favorites -->
+              <UButton
+                :color="showFavoritesOnly ? 'yellow' : 'gray'"
+                :variant="showFavoritesOnly ? 'solid' : 'outline'"
+                size="sm"
+                @click="toggleFavoritesOnly"
               >
-                <button
-                  :class="[
-                    'px-3 py-2 rounded-full text-sm font-medium transition-all',
-                    viewMode === 'grid'
-                      ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
-                  ]"
-                  @click="viewMode = 'grid'"
+                <UIcon name="i-heroicons-heart" class="w-4 h-4 mr-2" />
+                Favorites ({{ favoriteItems.size }})
+              </UButton>
+
+              <!-- Dietary Filters -->
+              <div class="relative">
+                <UButton
+                  color="gray"
+                  variant="outline"
+                  size="sm"
+                  @click="showDietaryFilter = !showDietaryFilter"
                 >
-                  <UIcon name="i-heroicons-squares-2x2" class="w-4 h-4" />
-                </button>
-                <button
-                  :class="[
-                    'px-3 py-2 rounded-full text-sm font-medium transition-all',
-                    viewMode === 'list'
-                      ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
-                  ]"
-                  @click="viewMode = 'list'"
+                  <UIcon
+                    name="i-heroicons-adjustments-horizontal"
+                    class="w-4 h-4 mr-2"
+                  />
+                  Dietary
+                  <UIcon name="i-heroicons-chevron-down" class="w-4 h-4 ml-2" />
+                </UButton>
+
+                <!-- Dietary Dropdown -->
+                <div
+                  v-if="showDietaryFilter"
+                  class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10"
+                  @click.stop
                 >
-                  <UIcon name="i-heroicons-list-bullet" class="w-4 h-4" />
-                </button>
+                  <div class="p-4 space-y-3">
+                    <h4
+                      class="font-semibold text-gray-900 dark:text-white text-sm"
+                    >
+                      Dietary Preferences
+                    </h4>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        v-model="dietaryFilters.vegetarian"
+                        type="checkbox"
+                        class="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
+                      />
+                      <span class="text-sm text-gray-700 dark:text-gray-300"
+                        >Vegetarian</span
+                      >
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        v-model="dietaryFilters.vegan"
+                        type="checkbox"
+                        class="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
+                      />
+                      <span class="text-sm text-gray-700 dark:text-gray-300"
+                        >Vegan</span
+                      >
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        v-model="dietaryFilters.glutenFree"
+                        type="checkbox"
+                        class="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
+                      />
+                      <span class="text-sm text-gray-700 dark:text-gray-300"
+                        >Gluten Free</span
+                      >
+                    </label>
+                  </div>
+                </div>
               </div>
 
-              <!-- Sort Options -->
-              <div class="flex items-center gap-2">
-                <span
-                  class="text-sm text-gray-600 dark:text-gray-300 hidden lg:block"
-                  >Sort by:</span
+              <!-- Price Range Filter -->
+              <div class="relative">
+                <UButton
+                  color="gray"
+                  variant="outline"
+                  size="sm"
+                  @click="showPriceFilter = !showPriceFilter"
                 >
-                <select
-                  v-model="sortBy"
-                  class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  <UIcon
+                    name="i-heroicons-currency-dollar"
+                    class="w-4 h-4 mr-2"
+                  />
+                  Price
+                  <UIcon name="i-heroicons-chevron-down" class="w-4 h-4 ml-2" />
+                </UButton>
+
+                <!-- Price Dropdown -->
+                <div
+                  v-if="showPriceFilter"
+                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10"
+                  @click.stop
                 >
-                  <option value="name">Name</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="featured">Featured First</option>
-                </select>
+                  <div class="p-4 space-y-3">
+                    <h4
+                      class="font-semibold text-gray-900 dark:text-white text-sm"
+                    >
+                      Price Range
+                    </h4>
+                    <div class="space-y-2">
+                      <label class="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          v-model="selectedPriceRange"
+                          type="radio"
+                          value="all"
+                          class="text-yellow-600 focus:ring-yellow-500"
+                        />
+                        <span class="text-sm text-gray-700 dark:text-gray-300"
+                          >All Prices</span
+                        >
+                      </label>
+                      <label class="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          v-model="selectedPriceRange"
+                          type="radio"
+                          value="under-15"
+                          class="text-yellow-600 focus:ring-yellow-500"
+                        />
+                        <span class="text-sm text-gray-700 dark:text-gray-300"
+                          >Under $15</span
+                        >
+                      </label>
+                      <label class="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          v-model="selectedPriceRange"
+                          type="radio"
+                          value="15-25"
+                          class="text-yellow-600 focus:ring-yellow-500"
+                        />
+                        <span class="text-sm text-gray-700 dark:text-gray-300"
+                          >$15 - $25</span
+                        >
+                      </label>
+                      <label class="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          v-model="selectedPriceRange"
+                          type="radio"
+                          value="over-25"
+                          class="text-yellow-600 focus:ring-yellow-500"
+                        />
+                        <span class="text-sm text-gray-700 dark:text-gray-300"
+                          >Over $25</span
+                        >
+                      </label>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -150,7 +258,6 @@
                   () => {
                     activeCategory = category.id;
                     showDropdown = false;
-                    currentPage = 1;
                   }
                 "
               >
@@ -161,9 +268,9 @@
               <div
                 v-if="secondaryCategories.length > 0"
                 class="relative"
+                @mouseleave="showDropdown = false"
               >
                 <button
-                  ref="moreButton"
                   @click="showDropdown = !showDropdown"
                   class="whitespace-nowrap px-4 lg:px-6 py-2 rounded-full font-semibold text-sm lg:text-base bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-yellow-100 dark:hover:bg-yellow-900 hover:shadow-lg"
                   aria-haspopup="true"
@@ -174,9 +281,7 @@
                 </button>
                 <div
                   v-if="showDropdown"
-                  ref="moreDropdown"
-                  class="absolute left-0 mt-2 w-48 min-w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-50 more-dropdown"
-                  style="top:100%;"
+                  class="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-10"
                 >
                   <button
                     v-for="category in secondaryCategories"
@@ -186,7 +291,6 @@
                       () => {
                         activeCategory = category.id;
                         showDropdown = false;
-                        currentPage = 1;
                       }
                     "
                   >
@@ -194,6 +298,23 @@
                   </button>
                 </div>
               </div>
+            </div>
+
+            <!-- Sort Options -->
+            <div class="flex items-center gap-2">
+              <span
+                class="text-sm text-gray-600 dark:text-gray-300 hidden lg:block"
+                >Sort by:</span
+              >
+              <select
+                v-model="sortBy"
+                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              >
+                <option value="name">Name</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="featured">Featured First</option>
+              </select>
             </div>
           </div>
 
@@ -203,6 +324,16 @@
               >Active filters:</span
             >
             <UBadge
+              v-if="showFavoritesOnly"
+              color="red"
+              variant="subtle"
+              class="cursor-pointer"
+              @click="showFavoritesOnly = false"
+            >
+              Favorites Only
+              <UIcon name="i-heroicons-x-mark" class="w-3 h-3 ml-1" />
+            </UBadge>
+            <UBadge
               v-if="searchQuery"
               color="blue"
               variant="subtle"
@@ -210,6 +341,27 @@
               @click="searchQuery = ''"
             >
               "{{ searchQuery }}"
+              <UIcon name="i-heroicons-x-mark" class="w-3 h-3 ml-1" />
+            </UBadge>
+            <UBadge
+              v-if="selectedPriceRange !== 'all'"
+              color="green"
+              variant="subtle"
+              class="cursor-pointer"
+              @click="selectedPriceRange = 'all'"
+            >
+              {{ getPriceRangeLabel(selectedPriceRange) }}
+              <UIcon name="i-heroicons-x-mark" class="w-3 h-3 ml-1" />
+            </UBadge>
+            <UBadge
+              v-for="(active, key) in activeDietaryFilters"
+              :key="key"
+              color="purple"
+              variant="subtle"
+              class="cursor-pointer"
+              @click="(dietaryFilters as any)[key] = false"
+            >
+              {{ key.charAt(0).toUpperCase() + key.slice(1) }}
               <UIcon name="i-heroicons-x-mark" class="w-3 h-3 ml-1" />
             </UBadge>
             <UButton
@@ -223,7 +375,9 @@
           </div>
         </div>
       </div>
-    </section>    <!-- Menu Items Section -->
+    </section>
+
+    <!-- Menu Items Section -->
     <section class="py-10 lg:py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div v-if="filteredCategories.length > 0">
@@ -248,34 +402,35 @@
                 {{ category.description }}
               </p>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                {{ paginatedItems(category).totalItems }} item{{
-                  paginatedItems(category).totalItems !== 1 ? "s" : ""
+                {{ category.items.length }} item{{
+                  category.items.length !== 1 ? "s" : ""
                 }}
               </p>
             </div>
 
-            <!-- Grid View -->
-            <div v-if="viewMode === 'grid'" :class="gridClasses">
+            <!-- Menu Items Grid -->
+            <div
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8"
+            >
               <div
-                v-for="(item, index) in paginatedItems(category).items"
+                v-for="(item, index) in category.items"
                 :key="item.id"
-                class="menu-card transition-all duration-500 transform hover:scale-105 cursor-pointer"
+                class="menu-card transition-all duration-500 transform hover:scale-105"
                 :style="{ animationDelay: `${index * 100}ms` }"
-                @click="() => showItemDetails(item)"
               >
-                <!-- Square Menu Item Card -->
+                <!-- Enhanced Menu Item Card -->
                 <UCard
-                  class="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0 h-full flex flex-col"
+                  class="group cursor-pointer hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0 h-full flex flex-col"
+                  @click="() => showItemDetails(item)"
                 >
                   <template #header>
-                    <div class="relative overflow-hidden aspect-square">                      <NuxtImg
-                        :src="getImageUrl(item)"
-                        class="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-110"
+                    <div class="relative overflow-hidden">
+                      <NuxtImg
+                        :src="item.image || '/images/food/default.jpg'"
+                        class="w-full h-48 lg:h-56 object-cover transform transition-transform duration-300 group-hover:scale-110"
                         :alt="item.name"
                         format="webp"
-                        quality="75"
-                        loading="lazy"
-                        :placeholder="[400, 400, 75]"
+                        quality="80"
                       />
 
                       <!-- Badges -->
@@ -304,15 +459,36 @@
                         >
                           Sold Out
                         </UBadge>
-                      </div>                      <!-- Dietary Icons -->
+                      </div>
+
+                      <!-- Favorite Button -->
+                      <button
+                        class="absolute top-3 right-3 p-2 rounded-full bg-white/80 hover:bg-white transition-all duration-300 group"
+                        @click.stop="toggleFavorite(item.id)"
+                      >
+                        <UIcon
+                          :name="
+                            favoriteItems.has(item.id)
+                              ? 'i-heroicons-heart-solid'
+                              : 'i-heroicons-heart'
+                          "
+                          :class="
+                            favoriteItems.has(item.id)
+                              ? 'text-red-500'
+                              : 'text-gray-600 group-hover:text-red-500'
+                          "
+                          class="w-5 h-5 transition-colors"
+                        />
+                      </button>
+
+                      <!-- Dietary Icons -->
                       <div class="absolute bottom-3 left-3 flex gap-1">
                         <UBadge
                           v-if="item.dietaryInfo?.isVegetarian"
                           color="green"
                           variant="subtle"
-                          class="text-xs flex items-center"
+                          class="text-xs"
                         >
-                          <UIcon name="i-heroicons-heart" class="w-3 h-3 mr-1" />
                           V
                         </UBadge>
                         <UBadge
@@ -334,158 +510,79 @@
                       </div>
 
                       <!-- Price Badge -->
-                      <div class="absolute bottom-3 right-3">
-                        <UBadge
-                          color="yellow"
-                          variant="solid"
-                          class="font-bold text-sm"
+                      <div
+                        class="absolute bottom-3 right-3 bg-black/70 text-white px-2 py-1 rounded-full"
+                      >
+                        <span class="text-sm font-semibold"
+                          >${{ item.price }}</span
                         >
-                          ${{ item.price }}
-                        </UBadge>
                       </div>
                     </div>
                   </template>
 
-                  <div class="p-4 flex flex-col flex-grow">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 flex-grow">
+                  <div class="p-4 lg:p-6 flex flex-col flex-grow">
+                    <h3
+                      class="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors"
+                    >
                       {{ item.name }}
                     </h3>
-                    
-                    <UButton
-                      color="yellow"
-                      variant="outline"
-                      size="sm"
-                      class="w-full mt-auto"
-                      :disabled="!item.isAvailable"
+
+                    <p
+                      class="text-sm lg:text-base text-gray-600 dark:text-gray-300 mb-4 line-clamp-3 flex-grow"
                     >
-                      View Details
-                    </UButton>
-                  </div>
-                </UCard>
-              </div>
-            </div>
+                      {{ item.description }}
+                    </p>
 
-            <!-- List View -->
-            <div v-else class="space-y-4">
-              <div
-                v-for="(item, index) in paginatedItems(category).items"
-                :key="item.id"
-                class="menu-card transition-all duration-500 cursor-pointer"
-                :style="{ animationDelay: `${index * 100}ms` }"
-                @click="() => showItemDetails(item)"
-              >
-                <UCard
-                  class="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0"
-                >
-                  <div class="flex flex-col sm:flex-row">
-                    <!-- Image -->
-                    <div class="sm:w-48 relative overflow-hidden">                      <NuxtImg
-                        :src="getImageUrl(item)"
-                        class="w-full h-48 sm:h-full object-cover transform transition-transform duration-300 group-hover:scale-110"
-                        :alt="item.name"
-                        format="webp"
-                        quality="75"
-                        loading="lazy"
-                        :placeholder="[400, 200, 75]"
-                      />
-
-                      <!-- Badges -->
-                      <div class="absolute top-3 left-3 flex flex-col gap-2">
+                    <!-- Allergens (if any) -->
+                    <div
+                      v-if="item.allergens && item.allergens.length > 0"
+                      class="mb-4"
+                    >
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        Contains:
+                      </p>
+                      <div class="flex flex-wrap gap-1">
                         <UBadge
-                          v-if="item.isFeatured"
-                          color="yellow"
-                          variant="solid"
-                          class="font-semibold text-xs"
+                          v-for="allergen in item.allergens.slice(0, 3)"
+                          :key="allergen"
+                          color="orange"
+                          variant="subtle"
+                          class="text-xs"
                         >
-                          Featured
+                          {{ allergen }}
                         </UBadge>
-                        <UBadge
-                          v-if="!item.isAvailable"
-                          color="gray"
-                          variant="solid"
-                          class="font-semibold text-xs"
+                        <span
+                          v-if="item.allergens.length > 3"
+                          class="text-xs text-gray-500"
                         >
-                          Sold Out
-                        </UBadge>
+                          +{{ item.allergens.length - 3 }} more
+                        </span>
                       </div>
                     </div>
 
-                    <!-- Content -->
-                    <div class="flex-1 p-6">
-                      <div class="flex justify-between items-start mb-4">
-                        <div class="flex-1">
-                          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                            {{ item.name }}
-                          </h3>
-                          <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                            {{ item.description }}
-                          </p>
-                          
-                          <!-- Dietary Info -->
-                          <div class="flex flex-wrap gap-2 mb-4">                            <UBadge
-                              v-if="item.dietaryInfo?.isVegetarian"
-                              color="green"
-                              variant="subtle"
-                              class="text-xs flex items-center"
-                            >
-                              <UIcon name="i-heroicons-heart" class="w-3 h-3 mr-1" />
-                              Vegetarian
-                            </UBadge>
-                            <UBadge
-                              v-if="item.dietaryInfo?.isVegan"
-                              color="emerald"
-                              variant="subtle"
-                              class="text-xs"
-                            >
-                              Vegan
-                            </UBadge>
-                            <UBadge
-                              v-if="item.dietaryInfo?.isGlutenFree"
-                              color="blue"
-                              variant="subtle"
-                              class="text-xs"
-                            >
-                              Gluten Free
-                            </UBadge>
-                          </div>
-                        </div>
+                    <div
+                      class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700"
+                    >
+                      <UBadge
+                        :color="item.isAvailable ? 'green' : 'red'"
+                        variant="subtle"
+                        class="text-xs"
+                      >
+                        {{ item.isAvailable ? "Available" : "Not Available" }}
+                      </UBadge>
 
-                        <!-- Price and Action -->
-                        <div class="text-right ml-4">
-                          <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-4">
-                            ${{ item.price }}
-                          </p>
-                          <UButton
-                            color="yellow"
-                            variant="solid"
-                            size="md"
-                            :disabled="!item.isAvailable"
-                          >
-                            View Details
-                          </UButton>
-                        </div>
-                      </div>
+                      <UButton
+                        color="yellow"
+                        variant="solid"
+                        size="sm"
+                        :disabled="!item.isAvailable"
+                      >
+                        View Details
+                      </UButton>
                     </div>
                   </div>
                 </UCard>
               </div>
-            </div>
-
-            <!-- Pagination -->
-            <div v-if="paginatedItems(category).totalPages > 1" class="flex justify-center mt-8">
-              <UPagination
-                v-model="currentPage"
-                :total="paginatedItems(category).totalPages"
-                :ui="{
-                  wrapper: 'flex items-center gap-1',
-                  base: 'flex items-center justify-center min-w-[32px] h-8 px-3 rounded text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
-                  default: {
-                    active: 'bg-yellow-500 text-white hover:bg-yellow-600',
-                    inactive:
-                      'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700',
-                  },
-                }"
-              />
             </div>
           </div>
         </div>
@@ -502,7 +599,8 @@
           <p class="text-gray-600 dark:text-gray-300 mb-6">
             Try adjusting your search or filters to find what you're looking
             for.
-          </p>          <UButton color="yellow" variant="outline" @click="clearAllFilters">
+          </p>
+          <UButton color="yellow" variant="outline" @click="clearAllFilters">
             Clear All Filters
           </UButton>
         </div>
@@ -521,7 +619,8 @@
                 selectedItem.images.length > 1
               "
             >
-              <div class="relative w-full h-64 lg:h-80">                <NuxtImg
+              <div class="relative w-full h-64 lg:h-80">
+                <NuxtImg
                   v-for="(img, idx) in selectedItem.images"
                   :key="img"
                   v-show="carouselIndex === idx"
@@ -530,8 +629,6 @@
                   :alt="selectedItem.name + ' image ' + (idx + 1)"
                   format="webp"
                   quality="80"
-                  loading="lazy"
-                  :placeholder="[400, 300, 75]"
                 />
 
                 <!-- Carousel Controls -->
@@ -566,15 +663,14 @@
                 </div>
               </div>
             </template>
-            <template v-else>              <NuxtImg
+            <template v-else>
+              <NuxtImg
                 v-if="selectedItem?.image"
                 :src="selectedItem?.image"
                 class="w-full h-64 lg:h-80 object-cover"
                 :alt="selectedItem?.name"
                 format="webp"
                 quality="80"
-                loading="lazy"
-                :placeholder="[400, 300, 75]"
               />
               <div
                 v-else
@@ -591,12 +687,31 @@
           <div
             class="flex flex-col lg:flex-row justify-between lg:items-start gap-4"
           >
-            <div class="flex-1">              <div class="flex items-start justify-between mb-4">
+            <div class="flex-1">
+              <div class="flex items-start justify-between mb-4">
                 <h2
                   class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white"
                 >
                   {{ selectedItem.name }}
                 </h2>
+                <button
+                  class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                  @click="toggleFavorite(selectedItem.id)"
+                >
+                  <UIcon
+                    :name="
+                      favoriteItems.has(selectedItem.id)
+                        ? 'i-heroicons-heart-solid'
+                        : 'i-heroicons-heart'
+                    "
+                    :class="
+                      favoriteItems.has(selectedItem.id)
+                        ? 'text-red-500'
+                        : 'text-gray-600'
+                    "
+                    class="w-6 h-6"
+                  />
+                </button>
               </div>
 
               <!-- Badges -->
@@ -700,12 +815,13 @@
             <h3 class="font-semibold text-gray-900 dark:text-white text-lg">
               Dietary Information
             </h3>
-            <div class="flex flex-wrap gap-2">              <UBadge
+            <div class="flex flex-wrap gap-2">
+              <UBadge
                 v-if="selectedItem.dietaryInfo.isVegetarian"
                 color="green"
                 variant="subtle"
               >
-                <UIcon name="i-heroicons-heart" class="w-4 h-4 mr-1" />
+                <UIcon name="i-heroicons-leaf" class="w-4 h-4 mr-1" />
                 Vegetarian
               </UBadge>
               <UBadge
@@ -806,14 +922,18 @@ const activeCategory = ref("");
 const searchQuery = ref("");
 const sortBy = ref("name");
 const showDropdown = ref(false);
+const showDietaryFilter = ref(false);
+const showPriceFilter = ref(false);
+const showFavoritesOnly = ref(false);
 const selectedPriceRange = ref("all");
-const currentPage = ref(1);
-const viewMode = ref<"grid" | "list">("grid");
 const dietaryFilters = ref({
   vegetarian: false,
   vegan: false,
   glutenFree: false,
 });
+
+// Favorites
+const favoriteItems = ref(new Set<string>());
 
 // Modal
 const isModalOpen = ref(false);
@@ -839,6 +959,7 @@ const activeDietaryFilters = computed(() => {
 const hasActiveFilters = computed(() => {
   return (
     searchQuery.value ||
+    showFavoritesOnly.value ||
     selectedPriceRange.value !== "all" ||
     Object.values(dietaryFilters.value).some((filter) => filter)
   );
@@ -865,6 +986,12 @@ const filteredCategories = computed(() => {
           ))
     );
   }
+
+  // Apply favorites filter
+  if (showFavoritesOnly.value) {
+    items = items.filter((item) => favoriteItems.value.has(item.id));
+  }
+
   // Apply price filter
   if (selectedPriceRange.value !== "all") {
     items = items.filter((item) => {
@@ -915,26 +1042,21 @@ const filteredCategories = computed(() => {
 });
 
 // Methods
-const getImageUrl = (item: MenuItem) => {
-  // Return item image if it exists, otherwise return a fallback image based on category
-  if (item.image) {
-    return item.image;
+const toggleFavorite = (itemId: string) => {
+  if (favoriteItems.value.has(itemId)) {
+    favoriteItems.value.delete(itemId);
+  } else {
+    favoriteItems.value.add(itemId);
   }
-  
-  // Category-based fallback images
-  const fallbackImages = {
-    'daily-specials': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=600&q=80',
-    'all-day-menu': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80',
-    'appetizers': 'https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=600&q=80',
-    'salads': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80',
-    'burgers': 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80',
-    'mains': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80',
-    'desserts': 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=80',
-    'beverages': 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=600&q=80',
-    'default': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80'
-  };
-  
-  return fallbackImages[item.category as keyof typeof fallbackImages] || fallbackImages.default;
+  // Save to localStorage
+  localStorage.setItem(
+    "favoriteItems",
+    JSON.stringify([...favoriteItems.value])
+  );
+};
+
+const toggleFavoritesOnly = () => {
+  showFavoritesOnly.value = !showFavoritesOnly.value;
 };
 
 const showItemDetails = (item: MenuItem) => {
@@ -968,26 +1090,6 @@ const previousImage = () => {
   }
 };
 
-const paginatedItems = (category: MenuCategory) => {
-  const itemsPerPage = 8;
-  const totalItems = category.items.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const startIndex = (currentPage.value - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const items = category.items.slice(startIndex, endIndex);
-
-  return {
-    items,
-    totalItems,
-    totalPages,
-    currentPage: currentPage.value,
-  };
-};
-
-const gridClasses = computed(() => {
-  return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6";
-});
-
 const getPriceRangeLabel = (range: string) => {
   switch (range) {
     case "under-15":
@@ -1003,6 +1105,7 @@ const getPriceRangeLabel = (range: string) => {
 
 const clearAllFilters = () => {
   searchQuery.value = "";
+  showFavoritesOnly.value = false;
   selectedPriceRange.value = "all";
   dietaryFilters.value = {
     vegetarian: false,
@@ -1025,8 +1128,10 @@ const dietaryInfo = [
 // Auto-close dropdowns when clicking outside
 const handleClickOutside = (event: Event) => {
   const target = event.target as Element;
-  if (!target.closest(".relative") && !target.closest(".more-dropdown")) {
+  if (!target.closest(".relative")) {
     showDropdown.value = false;
+    showDietaryFilter.value = false;
+    showPriceFilter.value = false;
   }
 };
 
@@ -1046,12 +1151,24 @@ watch(isModalOpen, (isOpen) => {
 
 onMounted(() => {
   // Set default category
-  const allDayMenu = categories.value.find((c: any) => c.id === "all-day-menu");
+  const allDayMenu = categories.value.find((c) => c.id === "all-day-menu");
   if (allDayMenu) {
     activeCategory.value = "all-day-menu";
   } else if (categories.value.length > 0) {
     activeCategory.value = categories.value[0].id;
   }
+
+  // Load favorites from localStorage
+  const savedFavorites = localStorage.getItem("favoriteItems");
+  if (savedFavorites) {
+    try {
+      const favArray = JSON.parse(savedFavorites);
+      favoriteItems.value = new Set(favArray);
+    } catch (e) {
+      console.error("Error loading favorites:", e);
+    }
+  }
+
   // Add click outside listener
   document.addEventListener("click", handleClickOutside);
 
@@ -1095,32 +1212,6 @@ useHead({
         "Explore our delicious menu of pub favorites and craft beverages at The Pearson Pub. Featuring vegetarian, vegan, and gluten-free options.",
     },
   ],
-});
-
-const moreButton = ref<HTMLElement | null>(null);
-const moreDropdown = ref<HTMLElement | null>(null);
-const moreDropdownStyle = ref({});
-
-watch(showDropdown, (val) => {
-  if (val) {
-    nextTick(() => {
-      if (moreButton.value) {
-        const rect = moreButton.value.getBoundingClientRect();
-        const dropdownWidth = 192; // w-48 = 12rem = 192px
-        const minWidth = rect.width;
-        let left = rect.left + window.scrollX;
-        // Prevent overflow on the right
-        if (left + dropdownWidth > window.innerWidth) {
-          left = window.innerWidth - dropdownWidth - 8; // 8px margin
-        }
-        moreDropdownStyle.value = {
-          top: `${rect.bottom + window.scrollY + 4}px`, // 4px offset
-          left: `${left}px`,
-          minWidth: `${minWidth}px`,
-        };
-      }
-    });
-  }
 });
 </script>
 

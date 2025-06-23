@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
-import { useRoute } from "vue-router";
 import { useColorMode } from "#imports";
 
 const colorMode = useColorMode();
@@ -16,9 +15,10 @@ const navigationItems = [
 
 const route = useRoute();
 
-const activeIndex = computed(() =>
-  navigationItems.findIndex((item) => item.path === route.path)
-);
+const activeIndex = computed(() => {
+  if (!route || !route.path) return -1;
+  return navigationItems.findIndex((item) => item.path === route.path);
+});
 
 const toggleMenu = () => {
   isOpen.value = !isOpen.value;
@@ -70,46 +70,53 @@ onUnmounted(() => {
   }
 });
 
-const callLink = "tel:+19054305699"; </script>
+const callLink = "tel:+19054305699";
+</script>
 
-<template>
-  <!-- Header Spacer -->
-  <div class="h-16"></div>
-
+<template>  <!-- Header Spacer -->
+  <div class="h-20"></div>
   <header
     :class="[
-      'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+      'fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out',
       {
         '-translate-y-full': !isHeaderVisible && !isOpen,
-        'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-md': true,
+        'bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl border-b border-gray-200/50 dark:border-gray-700/50': true,
       },
     ]"
-  >
-    <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <!-- Desktop Navigation -->
-        <div class="hidden md:flex items-center space-x-6">
+  >    <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-20">
+        <!-- Logo and Brand Name Left -->
+        <div class="flex items-center space-x-2">
+          <NuxtLink to="/" class="flex items-center space-x-2 group">
+            <span class="text-2xl lg:text-3xl font-extrabold text-yellow-600 dark:text-yellow-400 tracking-widest transition-all duration-300 group-hover:scale-105" style="font-family: 'Cinzel', 'Georgia', serif; letter-spacing: 0.08em;">The Pearson Pub</span>
+          </NuxtLink>
+        </div>        <!-- Desktop Navigation Center -->
+        <div class="hidden md:flex items-center space-x-8 flex-1 justify-center">
           <NuxtLink
             v-for="(item, index) in navigationItems"
             :key="index"
             :to="item.path"
-            class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 relative group"
+            class="relative px-4 py-2 text-sm lg:text-base font-semibold transition-all duration-300 group"
             :class="[
               index === activeIndex
                 ? 'text-yellow-600 dark:text-yellow-400'
-                : 'text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400',
+                : 'text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400',
             ]"
           >
             {{ item.name }}
             <div
-              v-if="index === activeIndex"
-              class="absolute bottom-0 left-0 w-full h-0.5 bg-yellow-500 transform origin-left transition-transform duration-200"
+              :class="[
+                'absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-yellow-500 to-yellow-600 transition-all duration-300 transform origin-center',
+                index === activeIndex ? 'w-full scale-x-100' : 'w-0 scale-x-0 group-hover:w-full group-hover:scale-x-100'
+              ]"
             ></div>
+            <!-- Hover effect background -->
+            <div class="absolute inset-0 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
           </NuxtLink>
-
-          <!-- Dark Mode Toggle -->
+        </div>        <!-- Dark Mode Toggle Right -->
+        <div class="hidden md:flex items-center space-x-4">
           <button
-            class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+            class="p-3 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 transition-all duration-300 hover:shadow-lg"
             @click="colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'"
             aria-label="Toggle dark mode"
           >
@@ -122,12 +129,10 @@ const callLink = "tel:+19054305699"; </script>
               class="w-5 h-5"
             />
           </button>
-        </div>
-
-        <div class="md:hidden flex items-center space-x-4">
+        </div>        <div class="md:hidden flex items-center space-x-4">
           <!-- Dark Mode Toggle Mobile -->
           <button
-            class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+            class="p-3 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 transition-all duration-300"
             @click="colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'"
             aria-label="Toggle dark mode"
           >
@@ -143,41 +148,40 @@ const callLink = "tel:+19054305699"; </script>
 
           <!-- Mobile Menu Button -->
           <button
-            class="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+            class="p-3 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 transition-all duration-300"
             @click="toggleMenu"
             aria-label="Toggle menu"
           >
             <UIcon
               :name="isOpen ? 'i-heroicons-x-mark' : 'i-heroicons-bars-3'"
-              class="w-6 h-6"
+              class="w-6 h-6 transition-transform duration-300"
+              :class="{ 'rotate-180': isOpen }"
             />
           </button>
         </div>
-      </div>
-
-      <!-- Mobile Navigation -->
+      </div>      <!-- Mobile Navigation -->
       <transition
-        enter-active-class="transition duration-200 ease-out"
-        enter-from-class="opacity-0 -translate-y-4"
-        enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition duration-150 ease-in"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 -translate-y-4"
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="opacity-0 -translate-y-8 scale-95"
+        enter-to-class="opacity-100 translate-y-0 scale-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100 translate-y-0 scale-100"
+        leave-to-class="opacity-0 -translate-y-8 scale-95"
       >
         <div
           v-if="isOpen"
-          class="md:hidden absolute top-16 inset-x-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg rounded-b-lg"
+          class="md:hidden absolute top-20 inset-x-0 bg-white/98 dark:bg-gray-900/98 backdrop-blur-xl shadow-2xl rounded-b-2xl border-t border-gray-200/50 dark:border-gray-700/50"
         >
-          <div class="px-2 pt-2 pb-3 space-y-1">
+          <div class="px-4 pt-4 pb-6 space-y-2">
             <NuxtLink
               v-for="(item, index) in navigationItems"
               :key="index"
               :to="item.path"
-              class="block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+              class="block px-4 py-3 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-105"
               :class="[
                 index === activeIndex
-                  ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20',
+                  ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 shadow-md'
+                  : 'text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20',
               ]"
               @click="toggleMenu"
             >

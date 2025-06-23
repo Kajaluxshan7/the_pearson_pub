@@ -33,6 +33,8 @@
 </template>
 
 <script setup lang="ts">
+import { useColorMode, onMounted, onUnmounted, ref } from '#imports'
+
 const colorMode = useColorMode()
 colorMode.preference = 'light'
 
