@@ -1,32 +1,49 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">    <!-- Advanced 3D Loading Screen -->
+    <LoadingScreen3D
+      v-if="loadingState.isLoading"
+      :progress="loadingState.progress"
+      :texts="[
+        'Loading exciting events...',
+        'Preparing entertainment lineup...',
+        'Setting up the party...',
+        'Almost time to rock...',
+        'Let the fun begin!'
+      ]"
+      title="The Pearson Pub"
+      subtitle="Entertainment & Events"
+      icon-name="i-heroicons-musical-note"
+      :error="loadingState.error"
+      @retry="startLoading"
+    />
+
     <!-- Hero Section -->
     <section
-      class="relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
+      class="hero-section relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
     >
+      <!-- 3D Background -->
+      <Background3D 
+        :intensity="1.5" 
+        :enable-particles="true" 
+        :enable-rays="true" 
+        :enable-morphing="true"
+        :particle-count="80"
+        color-scheme="blue"
+      />
+      
       <div class="absolute inset-0">
         <NuxtImg
           src="/images/entertainment/music.jpg"
           alt="Events & Entertainment"
-          class="w-full h-full object-cover opacity-40"
+          class="w-full h-full object-cover opacity-30"
           format="webp"
           quality="80"
         />
         <div
-          class="absolute inset-0 bg-gradient-to-r from-black/80 to-black/60"
+          class="absolute inset-0 bg-gradient-to-r from-black/85 to-black/65"
         ></div>
-      </div>
-
-      <!-- Decorative Elements -->
-      <div
-        class="absolute top-10 left-10 w-16 h-16 lg:w-24 lg:h-24 rounded-full border border-yellow-500/30 animate-pulse"
-      ></div>
-      <div
-        class="absolute bottom-20 right-10 w-20 h-20 lg:w-32 lg:h-32 rounded-full bg-yellow-500/20"
-      ></div>
-
-      <div
-        class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10"
+      </div>      <div
+        class="hero-content relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10"
       >
         <div class="inline-block mb-4">
           <span
@@ -49,11 +66,9 @@
           <span class="text-yellow-300">special events</span>
         </p>
       </div>
-    </section>
-
-    <!-- Filters and Search Section -->
+    </section>    <!-- Filters and Search Section -->
     <section
-      class="py-6 lg:py-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50"
+      class="filter-section py-6 lg:py-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
@@ -83,12 +98,11 @@
           </div>
 
           <!-- Category Filters -->
-          <div class="flex flex-wrap gap-2 lg:gap-3">
-            <button
+          <div class="flex flex-wrap gap-2 lg:gap-3">            <button
               v-for="category in categories"
               :key="category.id"
               :class="[
-                'px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 whitespace-nowrap',
+                'category-btn px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 whitespace-nowrap',
                 selectedCategory === category.id
                   ? 'bg-yellow-500 text-white shadow-lg scale-105'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-yellow-100 dark:hover:bg-yellow-900 hover:shadow-lg',
@@ -227,17 +241,30 @@
           >
             Try Again
           </UButton>
-        </div>
-
-        <!-- Loading State -->
-        <div v-else-if="isLoading" class="text-center py-16">
-          <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-500 mx-auto mb-4"></div>
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Loading Events...
-          </h3>
-          <p class="text-gray-600 dark:text-gray-300">
-            Please wait while we fetch the latest events for you.
-          </p>
+        </div>        <!-- Loading State with Skeleton Cards -->
+        <div v-else-if="isLoading || loadingState.showSkeletons">
+          <!-- Skeleton Results Summary -->
+          <div class="flex justify-between items-center mb-8">
+            <div>
+              <div class="h-8 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
+              <div class="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            </div>
+            <div class="hidden sm:flex items-center gap-2">
+              <div class="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div class="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div class="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            </div>
+          </div>
+          
+          <!-- Skeleton Events Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+            <SkeletonCard 
+              v-for="i in 9" 
+              :key="`skeleton-event-${i}`"
+              type="event"
+              :delay="i * 0.1"
+            />
+          </div>
         </div>
 
         <!-- Events Grid/List -->
@@ -249,7 +276,7 @@
           >            <div
               v-for="(event, index) in paginatedEvents"
               :key="event.id"
-              class="group transform transition-all duration-500 hover:scale-105 cursor-pointer"
+              class="event-card group transform transition-all duration-500 hover:scale-105 cursor-pointer"
               :style="{ animationDelay: `${index * 100}ms` }"
               @click="showEventDetails(event)"
               @keydown.enter="showEventDetails(event)"
@@ -408,7 +435,7 @@
           <div v-else class="space-y-6">            <div
               v-for="(event, index) in paginatedEvents"
               :key="event.id"
-              class="group cursor-pointer"
+              class="event-card group cursor-pointer"
               :style="{ animationDelay: `${index * 100}ms` }"
               @click="showEventDetails(event)"
               @keydown.enter="showEventDetails(event)"
@@ -663,23 +690,71 @@
         <UIcon :name="modalLayout === 'portrait' ? 'i-heroicons-arrows-pointing-out' : 'i-heroicons-arrows-pointing-in'" class="w-4 h-4 mr-1" />
         {{ modalLayout === 'portrait' ? 'Landscape' : 'Portrait' }}
       </UButton>
-    </div>
+    </div>    <!-- Weekly Schedule Section -->
+    <WeeklyEntertainment />    <!-- Floating Action Button -->
+    <FloatingActionButton
+      :actions="fabActions"
+      main-icon="i-heroicons-calendar-days"
+      @action="handleFABAction"
+    />
 
-    <!-- Weekly Schedule Section -->
-    <WeeklyEntertainment />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted, readonly } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { useEvents } from "~/composables/useEvents";
+import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
+import { use3DAnimations } from "~/composables/use3DAnimations";
+import { usePerformance } from "~/composables/usePerformance";
+import Background3D from "~/components/Background3D.vue";
+import LoadingScreen3D from "~/components/loading/LoadingScreen3D.vue";
+import SkeletonCard from "~/components/loading/SkeletonCard.vue";
+import FloatingActionButton from "~/components/ui/FloatingActionButton.vue";
 import EventDetailsModal from "~/components/events/EventDetailsModal.vue";
 import EventDetailsModalLandscape from "~/components/events/EventDetailsModalLandscape.vue";
 import type { Event } from "~/types/events";
 import type { Category } from "~/types/events-ui";
+import type { FABAction } from "~/components/ui/FloatingActionButton.vue";
 
-// Use events composable
+// Composables
 const { events } = useEvents();
+
+// Advanced loading with custom events texts
+const { loadingState, startLoading, finishLoading } = useAdvancedLoading({
+  duration: 2200,
+  showProgress: true,
+  customTexts: [
+    'Loading exciting events...',
+    'Preparing entertainment lineup...',
+    'Setting up the party...',
+    'Almost time to rock...',
+    'Let the fun begin!'
+  ]
+});
+
+// 3D Animations for events
+const { 
+  addFloatingElement, 
+  addParallaxElement, 
+  createMorphingEffect,
+  createLoadingAnimation,
+  createGSAPAnimation
+} = use3DAnimations({
+  enableParallax: true,
+  enableFloating: true,
+  enableRotation: true,
+  intensity: 1.5,
+  speed: 1.2
+});
+
+// Performance monitoring
+const { 
+  optimizeResource,
+  preloadImage,
+  isVisible,
+  metrics
+} = usePerformance();
 
 // Reactive data
 const searchQuery = ref("");
@@ -692,6 +767,46 @@ const itemsPerPage = 8; // Changed to 8 as requested
 const selectedEvent = ref<Event | null>(null);
 const isEventModalOpen = ref(false);
 const modalLayout = ref<'portrait' | 'landscape'>('portrait');
+
+// FAB Actions
+const fabActions = ref<FABAction[]>([
+  {
+    id: 'scroll-top',
+    label: 'Scroll to Top',
+    icon: 'i-heroicons-arrow-up',
+    action: () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  },
+  {
+    id: 'view-mode',
+    label: `Switch to ${viewMode.value === 'grid' ? 'List' : 'Grid'} View`,
+    icon: viewMode.value === 'grid' ? 'i-heroicons-list-bullet' : 'i-heroicons-squares-2x2',
+    action: () => {
+      viewMode.value = viewMode.value === 'grid' ? 'list' : 'grid';
+    }
+  },
+  {
+    id: 'filter-music',
+    label: 'Show Music Events',
+    icon: 'i-heroicons-musical-note',
+    action: () => {
+      selectedCategory.value = selectedCategory.value === 'music' ? 'all' : 'music';
+    }
+  },
+  {
+    id: 'search',
+    label: 'Focus Search',
+    icon: 'i-heroicons-magnifying-glass',
+    action: () => {
+      const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }
+]);
 
 // Categories with proper typing
 const categories = ref<Category[]>([
@@ -800,6 +915,23 @@ const showEventDetails = (event: Event, layout: 'portrait' | 'landscape' = 'port
   isEventModalOpen.value = true;
 };
 
+const handleFABAction = (actionId: string) => {
+  console.log(`FAB action triggered: ${actionId}`);
+  
+  // Update view mode label dynamically
+  const viewModeAction = fabActions.value.find(action => action.id === 'view-mode');
+  if (viewModeAction) {
+    viewModeAction.label = `Switch to ${viewMode.value === 'grid' ? 'List' : 'Grid'} View`;
+    viewModeAction.icon = viewMode.value === 'grid' ? 'i-heroicons-list-bullet' : 'i-heroicons-squares-2x2';
+  }
+  
+  // Update filter action label dynamically
+  const filterAction = fabActions.value.find(action => action.id === 'filter-music');
+  if (filterAction) {
+    filterAction.label = selectedCategory.value === 'music' ? 'Show All Events' : 'Show Music Events';
+  }
+};
+
 const closeEventModal = () => {
   isEventModalOpen.value = false;
   selectedEvent.value = null;
@@ -846,10 +978,106 @@ const handleKeyNavigation = (event: KeyboardEvent) => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
+  // Start loading animation
+  startLoading();
+  
+  // Simulate loading time for better UX
+  await new Promise(resolve => setTimeout(resolve, 1200));
+  
   checkViewMode();
   window.addEventListener("resize", checkViewMode);
   document.addEventListener("keydown", handleKeyNavigation);
+  
+  // Initialize 3D animations and enhanced interactions
+  if (process.client) {
+    nextTick(async () => {
+      // Finish loading
+      await finishLoading();
+      
+      // Enhanced GSAP animations with 3D effects
+      const nuxtApp = useNuxtApp();
+      const $gsap = (nuxtApp as any)?.$gsap;
+      
+      if ($gsap && $gsap.utils && typeof $gsap.from === "function") {
+        // Animate event cards with staggered 3D effects
+        $gsap.utils.toArray(".event-card").forEach((el: any, i: number) => {
+          // Add floating and morphing effects
+          addFloatingElement(el, 12, 0.0015, i * 0.3);
+          createMorphingEffect(el);
+          
+          // Enhanced GSAP animation with music-themed effects
+          createGSAPAnimation(el, {
+            from: {
+              opacity: 0,
+              y: 80,
+              rotationY: -25,
+              scale: 0.7,
+              transformPerspective: 1200
+            },
+            to: {
+              opacity: 1,
+              y: 0,
+              rotationY: 0,
+              scale: 1,
+              duration: 1.4,
+              delay: i * 0.15,
+              ease: "back.out(1.7)",
+              scrollTrigger: {
+                trigger: el,
+                start: "top 85%",
+                end: "bottom 15%",
+                toggleActions: "play none none reverse"
+              }
+            }
+          });
+        });
+        
+        // Animate filter section with music pulse effect
+        $gsap.from(".filter-section", {
+          opacity: 0,
+          y: -40,
+          duration: 1,
+          ease: "power3.out",
+          delay: 0.4
+        });
+        
+        // Animate hero content with rhythmic timing
+        $gsap.timeline()
+          .from(".hero-content h1", {
+            opacity: 0,
+            y: 60,
+            rotationX: 15,
+            duration: 1.2,
+            ease: "power3.out"
+          })
+          .from(".hero-content p", {
+            opacity: 0,
+            y: 40,
+            duration: 1,
+            ease: "power2.out"
+          }, "-=0.6");
+        
+        // Add pulsing animation to category buttons
+        $gsap.utils.toArray(".category-btn").forEach((el: any, i: number) => {
+          $gsap.to(el, {
+            scale: 1.05,
+            duration: 0.3,
+            ease: "power2.out",
+            paused: true,
+            repeat: -1,
+            yoyo: true
+          });
+        });
+      }
+      
+      // Add parallax effect to hero section
+      const heroSection = document.querySelector('.hero-section');
+      if (heroSection) {
+        addParallaxElement(heroSection as HTMLElement);
+      }
+    });
+  }
 });
 
 onUnmounted(() => {

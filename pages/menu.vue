@@ -1,32 +1,34 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">    <!-- Advanced 3D Loading Screen -->    
     <!-- Menu Hero Section -->
     <section
-      class="relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
+      class="hero-section relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
     >
+      <!-- 3D Background -->
+      <Background3D 
+        :intensity="1.2" 
+        :enable-particles="true" 
+        :enable-rays="true" 
+        :enable-morphing="true"
+        :particle-count="60"
+        color-scheme="golden"
+      />
+      
       <div class="absolute inset-0">
         <NuxtImg
           src="/images/food/foods.jpg"
           alt="Our Menu"
-          class="w-full h-full object-cover opacity-40"
+          class="w-full h-full object-cover opacity-30"
           format="webp"
           quality="80"
         />
         <div
-          class="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50"
+          class="absolute inset-0 bg-gradient-to-r from-black/80 to-black/60"
         ></div>
       </div>
 
-      <!-- Decorative Elements -->
       <div
-        class="absolute top-10 right-10 w-20 h-20 lg:w-32 lg:h-32 rounded-full border border-yellow-500/30 animate-pulse"
-      ></div>
-      <div
-        class="absolute bottom-20 left-10 w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-yellow-500/20"
-      ></div>
-
-      <div
-        class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10"
+        class="hero-content relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10"
       >
         <div class="inline-block mb-4">
           <span
@@ -51,7 +53,7 @@
       </div>
     </section>    <!-- Enhanced Filters and Search Section -->
     <section
-      class="py-6 lg:py-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50"
+      class="filter-section py-6 lg:py-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col space-y-4">
@@ -226,7 +228,31 @@
     </section>    <!-- Menu Items Section -->
     <section class="py-10 lg:py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div v-if="filteredCategories.length > 0">
+        <!-- Loading State with Skeleton Cards -->
+        <div v-if="loadingState.isLoading">
+          <div v-for="category in ['Starters', 'Mains', 'Desserts']" :key="`skeleton-category-${category}`" class="mb-16">
+            <!-- Skeleton Category Header -->
+            <div class="text-center mb-12">
+              <div class="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto mb-4"></div>
+              <div class="w-24 h-1 bg-gray-200 dark:bg-gray-700 mx-auto mb-4"></div>
+              <div class="h-4 w-96 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto mb-2"></div>
+              <div class="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto"></div>
+            </div>
+            
+            <!-- Skeleton Cards Grid -->
+            <div :class="gridClasses">
+              <SkeletonCard 
+                v-for="i in 6" 
+                :key="`skeleton-${category}-${i}`"
+                type="menu"
+                :delay="i * 0.1"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <!-- Actual Content -->
+        <div v-else-if="filteredCategories.length > 0">
           <div
             v-for="category in filteredCategories"
             :key="category.id"
@@ -259,7 +285,7 @@
               <div
                 v-for="(item, index) in paginatedItems(category).items"
                 :key="item.id"
-                class="menu-card transition-all duration-500 transform hover:scale-105 cursor-pointer"
+                class="menu-card menu-card-3d transition-all duration-500 transform hover:scale-105 cursor-pointer"
                 :style="{ animationDelay: `${index * 100}ms` }"
                 @click="() => showItemDetails(item)"
               >
@@ -307,13 +333,12 @@
                       </div>                      <!-- Dietary Icons -->
                       <div class="absolute bottom-3 left-3 flex gap-1">
                         <UBadge
-                          v-if="item.dietaryInfo?.isVegetarian"
-                          color="green"
+                          :color="item.dietaryInfo?.isVegetarian ? 'green' : 'gray'"
                           variant="subtle"
                           class="text-xs flex items-center"
                         >
                           <UIcon name="i-heroicons-heart" class="w-3 h-3 mr-1" />
-                          V
+                          {{ item.dietaryInfo?.isVegetarian ? 'V' : 'Not V' }}
                         </UBadge>
                         <UBadge
                           v-if="item.dietaryInfo?.isVegan"
@@ -370,7 +395,7 @@
               <div
                 v-for="(item, index) in paginatedItems(category).items"
                 :key="item.id"
-                class="menu-card transition-all duration-500 cursor-pointer"
+                class="menu-card menu-card-3d transition-all duration-500 cursor-pointer"
                 :style="{ animationDelay: `${index * 100}ms` }"
                 @click="() => showItemDetails(item)"
               >
@@ -422,14 +447,14 @@
                           </p>
                           
                           <!-- Dietary Info -->
-                          <div class="flex flex-wrap gap-2 mb-4">                            <UBadge
-                              v-if="item.dietaryInfo?.isVegetarian"
-                              color="green"
+                          <div class="flex flex-wrap gap-2 mb-4">
+                            <UBadge
+                              :color="item.dietaryInfo?.isVegetarian ? 'green' : 'gray'"
                               variant="subtle"
                               class="text-xs flex items-center"
                             >
                               <UIcon name="i-heroicons-heart" class="w-3 h-3 mr-1" />
-                              Vegetarian
+                              {{ item.dietaryInfo?.isVegetarian ? 'Vegetarian' : 'Not Vegetarian' }}
                             </UBadge>
                             <UBadge
                               v-if="item.dietaryInfo?.isVegan"
@@ -785,21 +810,59 @@
               class="text-sm lg:text-base font-medium text-gray-800 dark:text-gray-200 text-center"
               >{{ info.label }}</span
             >
-          </div>
-        </div>
+          </div>        </div>
       </div>
-    </section>
+    </section>    <!-- Floating Action Button -->
+    <FloatingActionButton
+      :actions="fabActions"
+      main-icon="i-heroicons-bars-3"
+      @action="handleFABAction"
+    />
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { useMenu } from "~/composables/useMenu";
+import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
+import { use3DAnimations } from "~/composables/use3DAnimations";
+import { usePerformance } from "~/composables/usePerformance";
+import Background3D from "~/components/Background3D.vue";
+import LoadingScreen3D from "~/components/loading/LoadingScreen3D.vue";
+import SkeletonCard from "~/components/loading/SkeletonCard.vue";
+import FloatingActionButton from "~/components/ui/FloatingActionButton.vue";
 import type { MenuItem, MenuCategory } from "~/types/menu";
+import type { FABAction } from "~/components/ui/FloatingActionButton.vue";
 
-// Composable
-const { menuCategories, getPrimaryCategories, getSecondaryCategories } =
-  useMenu();
+// Composables
+const { menuCategories, getPrimaryCategories, getSecondaryCategories } = useMenu();
+
+// 3D Animations
+const { 
+  addFloatingElement, 
+  addParallaxElement, 
+  createMorphingEffect,
+  createLoadingAnimation,
+  createGSAPAnimation
+} = use3DAnimations({
+  enableParallax: true,
+  enableFloating: true,
+  enableRotation: true,
+  intensity: 1.2,
+  speed: 1
+});
+
+// Performance monitoring
+const { 
+  optimizeResource,
+  preloadImage,
+  isVisible,
+  metrics
+} = usePerformance();
+
+// Loading state
+const { loadingState } = useAdvancedLoading();
 
 // Reactive data
 const activeCategory = ref("");
@@ -820,6 +883,47 @@ const isModalOpen = ref(false);
 const selectedItem = ref<MenuItem | null>(null);
 const carouselIndex = ref(0);
 let carouselInterval: NodeJS.Timeout | null = null;
+
+// FAB Actions
+const fabActions = ref<FABAction[]>([
+  {
+    id: 'scroll-top',
+    label: 'Scroll to Top',
+    icon: 'i-heroicons-arrow-up',
+    action: () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  },
+  {
+    id: 'view-mode',
+    label: `Switch to ${viewMode.value === 'grid' ? 'List' : 'Grid'} View`,
+    icon: viewMode.value === 'grid' ? 'i-heroicons-list-bullet' : 'i-heroicons-squares-2x2',
+    action: () => {
+      viewMode.value = viewMode.value === 'grid' ? 'list' : 'grid';
+    }
+  },
+  {
+    id: 'filter',
+    label: 'Quick Filters',
+    icon: 'i-heroicons-funnel',
+    action: () => {
+      // Toggle vegetarian filter as quick action
+      dietaryFilters.value.vegetarian = !dietaryFilters.value.vegetarian;
+    }
+  },
+  {
+    id: 'search',
+    label: 'Focus Search',
+    icon: 'i-heroicons-magnifying-glass',
+    action: () => {
+      const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }
+]);
 
 // Computed properties
 const categories = computed<MenuCategory[]>(() =>
@@ -943,6 +1047,17 @@ const showItemDetails = (item: MenuItem) => {
   carouselIndex.value = 0;
 };
 
+const handleFABAction = (actionId: string) => {
+  console.log(`FAB action triggered: ${actionId}`);
+  
+  // Update view mode label dynamically
+  const viewModeAction = fabActions.value.find(action => action.id === 'view-mode');
+  if (viewModeAction) {
+    viewModeAction.label = `Switch to ${viewMode.value === 'grid' ? 'List' : 'Grid'} View`;
+    viewModeAction.icon = viewMode.value === 'grid' ? 'i-heroicons-list-bullet' : 'i-heroicons-squares-2x2';
+  }
+};
+
 const closeModal = () => {
   isModalOpen.value = false;
   selectedItem.value = null;
@@ -1044,7 +1159,10 @@ watch(isModalOpen, (isOpen) => {
   }
 });
 
-onMounted(() => {
+onMounted(async () => {
+  // Simulate loading time for better UX
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
   // Set default category
   const allDayMenu = categories.value.find((c: any) => c.id === "all-day-menu");
   if (allDayMenu) {
@@ -1052,27 +1170,80 @@ onMounted(() => {
   } else if (categories.value.length > 0) {
     activeCategory.value = categories.value[0].id;
   }
+  
   // Add click outside listener
   document.addEventListener("click", handleClickOutside);
 
-  // GSAP animations (if available)
+  // Initialize 3D animations and enhanced interactions
   if (process.client) {
-    nextTick(() => {
+    nextTick(async () => {      
+      // Enhanced GSAP animations with 3D effects
       const nuxtApp = useNuxtApp();
       const $gsap = (nuxtApp as any)?.$gsap;
+      
       if ($gsap && $gsap.utils && typeof $gsap.from === "function") {
+        // Animate menu cards with staggered 3D effects
         $gsap.utils.toArray(".menu-card").forEach((el: any, i: number) => {
-          $gsap.from(el, {
-            opacity: 0,
-            y: 40,
-            duration: 0.7,
-            delay: i * 0.1,
-            scrollTrigger: {
-              trigger: el,
-              start: "top 80%",
+          // Add floating and morphing effects
+          addFloatingElement(el, 15, 0.002, i * 0.5);
+          createMorphingEffect(el);
+          
+          // Enhanced GSAP animation
+          createGSAPAnimation(el, {
+            from: {
+              opacity: 0,
+              y: 60,
+              rotationX: -15,
+              scale: 0.8,
+              transformPerspective: 1000
             },
+            to: {
+              opacity: 1,
+              y: 0,
+              rotationX: 0,
+              scale: 1,
+              duration: 1.2,
+              delay: i * 0.1,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: el,
+                start: "top 85%",
+                end: "bottom 15%",
+                toggleActions: "play none none reverse"
+              }
+            }
           });
         });
+        
+        // Animate filter section
+        $gsap.from(".filter-section", {
+          opacity: 0,
+          y: -30,
+          duration: 0.8,
+          ease: "power2.out",
+          delay: 0.3
+        });
+        
+        // Animate hero content
+        $gsap.timeline()
+          .from(".hero-content h1", {
+            opacity: 0,
+            y: 50,
+            duration: 1,
+            ease: "power3.out"
+          })
+          .from(".hero-content p", {
+            opacity: 0,
+            y: 30,
+            duration: 0.8,
+            ease: "power2.out"
+          }, "-=0.5");
+      }
+      
+      // Add parallax effect to hero section
+      const heroSection = document.querySelector('.hero-section');
+      if (heroSection) {
+        addParallaxElement(heroSection as HTMLElement);
       }
     });
   }
@@ -1131,5 +1302,121 @@ watch(showDropdown, (val) => {
   line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Enhanced 3D Card Effects */
+.menu-card-3d {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-card-3d:hover {
+  transform: translateY(-10px) rotateX(5deg) rotateY(5deg) scale(1.02);
+  box-shadow: 
+    0 25px 50px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.menu-card-3d::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.1) 0%,
+    transparent 50%,
+    rgba(255, 215, 0, 0.05) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.menu-card-3d:hover::before {
+  opacity: 1;
+}
+
+/* Floating animation for cards */
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.menu-card-3d.floating {
+  animation: cardFloat 3s ease-in-out infinite;
+}
+
+/* Loading state animation */
+.menu-card-3d.loading {
+  opacity: 0;
+  transform: translateY(30px) scale(0.9);
+  animation: cardAppear 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes cardAppear {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Shimmer effect for loading */
+.card-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Enhanced modal animations */
+.modal-enter-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-enter-from {
+  opacity: 0;
+  transform: scale(0.9) translateY(20px);
+}
+
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(1.1) translateY(-20px);
 }
 </style>
