@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
-import { useColorMode } from "#imports";
+import { useColorMode, useRoute } from "#imports";
 
 const colorMode = useColorMode();
 const isOpen = ref(false);

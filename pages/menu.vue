@@ -1,32 +1,35 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Advanced 3D Loading Screen -->
     <!-- Menu Hero Section -->
     <section
-      class="relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
+      class="hero-section relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
     >
+      <!-- 3D Background -->
+      <Background3D
+        :intensity="1.2"
+        :enable-particles="true"
+        :enable-rays="true"
+        :enable-morphing="true"
+        :particle-count="60"
+        color-scheme="golden"
+      />
+
       <div class="absolute inset-0">
         <NuxtImg
           src="/images/food/foods.jpg"
           alt="Our Menu"
-          class="w-full h-full object-cover opacity-40"
+          class="w-full h-full object-cover opacity-30"
           format="webp"
           quality="80"
         />
         <div
-          class="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50"
+          class="absolute inset-0 bg-gradient-to-r from-black/80 to-black/60"
         ></div>
       </div>
 
-      <!-- Decorative Elements -->
       <div
-        class="absolute top-10 right-10 w-20 h-20 lg:w-32 lg:h-32 rounded-full border border-yellow-500/30 animate-pulse"
-      ></div>
-      <div
-        class="absolute bottom-20 left-10 w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-yellow-500/20"
-      ></div>
-
-      <div
-        class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10"
+        class="hero-content relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10"
       >
         <div class="inline-block mb-4">
           <span
@@ -49,9 +52,10 @@
           <span class="text-yellow-300">craft beverages</span>
         </p>
       </div>
-    </section>    <!-- Enhanced Filters and Search Section -->
+    </section>
+    <!-- Enhanced Filters and Search Section -->
     <section
-      class="py-6 lg:py-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50"
+      class="filter-section py-6 lg:py-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col space-y-4">
@@ -82,52 +86,21 @@
               </div>
             </div>
 
-            <!-- View Toggle and Sort -->
-            <div class="flex items-center gap-4">
-              <!-- View Toggle -->
-              <div
-                class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-full p-1"
+            <!-- Sort Options -->
+            <div class="flex items-center gap-2">
+              <span
+                class="text-sm text-gray-600 dark:text-gray-300 hidden lg:block"
+                >Sort by:</span
               >
-                <button
-                  :class="[
-                    'px-3 py-2 rounded-full text-sm font-medium transition-all',
-                    viewMode === 'grid'
-                      ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
-                  ]"
-                  @click="viewMode = 'grid'"
-                >
-                  <UIcon name="i-heroicons-squares-2x2" class="w-4 h-4" />
-                </button>
-                <button
-                  :class="[
-                    'px-3 py-2 rounded-full text-sm font-medium transition-all',
-                    viewMode === 'list'
-                      ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
-                  ]"
-                  @click="viewMode = 'list'"
-                >
-                  <UIcon name="i-heroicons-list-bullet" class="w-4 h-4" />
-                </button>
-              </div>
-
-              <!-- Sort Options -->
-              <div class="flex items-center gap-2">
-                <span
-                  class="text-sm text-gray-600 dark:text-gray-300 hidden lg:block"
-                  >Sort by:</span
-                >
-                <select
-                  v-model="sortBy"
-                  class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                >
-                  <option value="name">Name</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="featured">Featured First</option>
-                </select>
-              </div>
+              <select
+                v-model="sortBy"
+                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              >
+                <option value="name">Name</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="featured">Featured First</option>
+              </select>
             </div>
           </div>
 
@@ -223,10 +196,35 @@
           </div>
         </div>
       </div>
-    </section>    <!-- Menu Items Section -->
+    </section>
+    <!-- Menu Items Section -->
     <section class="py-10 lg:py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div v-if="filteredCategories.length > 0">
+        <!-- Loading State with Skeleton Cards -->
+        <div v-if="backendLoading">
+          <div v-for="category in ['Starters', 'Mains', 'Desserts']" :key="`skeleton-category-${category}`" class="mb-16">
+            <!-- Skeleton Category Header -->
+            <div class="text-center mb-12">
+              <div class="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto mb-4"></div>
+              <div class="w-24 h-1 bg-gray-200 dark:bg-gray-700 mx-auto mb-4"></div>
+              <div class="h-4 w-96 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto mb-2"></div>
+              <div class="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto"></div>
+            </div>
+
+            <!-- Skeleton Cards Grid -->
+            <div :class="gridClasses">
+              <SkeletonCard
+                v-for="i in 6"
+                :key="`skeleton-${category}-${i}`"
+                type="menu"
+                :delay="i * 0.1"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Actual Content -->
+        <div v-else-if="filteredCategories.length > 0">
           <div
             v-for="category in filteredCategories"
             :key="category.id"
@@ -259,7 +257,7 @@
               <div
                 v-for="(item, index) in paginatedItems(category).items"
                 :key="item.id"
-                class="menu-card transition-all duration-500 transform hover:scale-105 cursor-pointer"
+                class="menu-card menu-card-3d transition-all duration-500 transform hover:scale-105 cursor-pointer"
                 :style="{ animationDelay: `${index * 100}ms` }"
                 @click="() => showItemDetails(item)"
               >
@@ -268,9 +266,10 @@
                   class="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0 h-full flex flex-col"
                 >
                   <template #header>
-                    <div class="relative overflow-hidden aspect-square">                      <NuxtImg
+                    <div class="relative overflow-hidden aspect-square">
+                      <NuxtImg
                         :src="getImageUrl(item)"
-                        class="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-110"
+                        class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-110"
                         :alt="item.name"
                         format="webp"
                         quality="75"
@@ -304,16 +303,17 @@
                         >
                           Sold Out
                         </UBadge>
-                      </div>                      <!-- Dietary Icons -->
+                      </div>
+                      <!-- Dietary Icons -->
                       <div class="absolute bottom-3 left-3 flex gap-1">
                         <UBadge
-                          v-if="item.dietaryInfo?.isVegetarian"
-                          color="green"
+                          :color="item.dietaryInfo?.isVegetarian ? 'green' : 'gray'"
                           variant="subtle"
                           class="text-xs flex items-center"
                         >
-                          <UIcon name="i-heroicons-heart" class="w-3 h-3 mr-1" />
-                          V
+                          <UIcon name="i-heroicons-sparkles" class="w-3 h-3 mr-1" />
+                          <!-- You can replace 'i-heroicons-sparkles' with a leaf icon if available in your icon set -->
+                          {{ item.dietaryInfo?.isVegetarian ? 'V' : 'Not V' }}
                         </UBadge>
                         <UBadge
                           v-if="item.dietaryInfo?.isVegan"
@@ -350,7 +350,7 @@
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 flex-grow">
                       {{ item.name }}
                     </h3>
-                    
+
                     <UButton
                       color="yellow"
                       variant="outline"
@@ -370,7 +370,7 @@
               <div
                 v-for="(item, index) in paginatedItems(category).items"
                 :key="item.id"
-                class="menu-card transition-all duration-500 cursor-pointer"
+                class="menu-card menu-card-3d transition-all duration-500 cursor-pointer"
                 :style="{ animationDelay: `${index * 100}ms` }"
                 @click="() => showItemDetails(item)"
               >
@@ -379,9 +379,10 @@
                 >
                   <div class="flex flex-col sm:flex-row">
                     <!-- Image -->
-                    <div class="sm:w-48 relative overflow-hidden">                      <NuxtImg
+                    <div class="sm:w-48 relative overflow-hidden">
+                      <NuxtImg
                         :src="getImageUrl(item)"
-                        class="w-full h-48 sm:h-full object-cover transform transition-transform duration-300 group-hover:scale-110"
+                        class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-110"
                         :alt="item.name"
                         format="webp"
                         quality="75"
@@ -420,16 +421,17 @@
                           <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
                             {{ item.description }}
                           </p>
-                          
+
                           <!-- Dietary Info -->
-                          <div class="flex flex-wrap gap-2 mb-4">                            <UBadge
-                              v-if="item.dietaryInfo?.isVegetarian"
-                              color="green"
+                          <div class="flex flex-wrap gap-2 mb-4">
+                            <UBadge
+                              :color="item.dietaryInfo?.isVegetarian ? 'green' : 'gray'"
                               variant="subtle"
                               class="text-xs flex items-center"
                             >
-                              <UIcon name="i-heroicons-heart" class="w-3 h-3 mr-1" />
-                              Vegetarian
+                              <UIcon name="i-heroicons-sparkles" class="w-3 h-3 mr-1" />
+                              <!-- You can replace 'i-heroicons-sparkles' with a leaf icon if available in your icon set -->
+                              {{ item.dietaryInfo?.isVegetarian ? 'Vegetarian' : 'Not Vegetarian' }}
                             </UBadge>
                             <UBadge
                               v-if="item.dietaryInfo?.isVegan"
@@ -470,7 +472,6 @@
                 </UCard>
               </div>
             </div>
-
             <!-- Pagination -->
             <div v-if="paginatedItems(category).totalPages > 1" class="flex justify-center mt-8">
               <UPagination
@@ -487,6 +488,19 @@
                 }"
               />
             </div>
+
+            <!-- Load More Button for Backend Pagination -->
+            <div v-if="pagination.items.page < pagination.items.totalPages" class="flex justify-center mt-8">
+              <UButton
+                color="yellow"
+                variant="outline"
+                size="lg"
+                @click="loadMoreItems"
+                :loading="backendLoading"
+              >
+                Load More Items ({{ pagination.items.total - pagination.items.page * 50 }} remaining)
+              </UButton>
+            </div>
           </div>
         </div>
 
@@ -502,7 +516,8 @@
           <p class="text-gray-600 dark:text-gray-300 mb-6">
             Try adjusting your search or filters to find what you're looking
             for.
-          </p>          <UButton color="yellow" variant="outline" @click="clearAllFilters">
+          </p>
+          <UButton color="yellow" variant="outline" @click="clearAllFilters">
             Clear All Filters
           </UButton>
         </div>
@@ -521,7 +536,8 @@
                 selectedItem.images.length > 1
               "
             >
-              <div class="relative w-full h-64 lg:h-80">                <NuxtImg
+              <div class="relative w-full h-64 lg:h-80">
+                <NuxtImg
                   v-for="(img, idx) in selectedItem.images"
                   :key="img"
                   v-show="carouselIndex === idx"
@@ -566,7 +582,8 @@
                 </div>
               </div>
             </template>
-            <template v-else>              <NuxtImg
+            <template v-else>
+              <NuxtImg
                 v-if="selectedItem?.image"
                 :src="selectedItem?.image"
                 class="w-full h-64 lg:h-80 object-cover"
@@ -591,7 +608,8 @@
           <div
             class="flex flex-col lg:flex-row justify-between lg:items-start gap-4"
           >
-            <div class="flex-1">              <div class="flex items-start justify-between mb-4">
+            <div class="flex-1">
+              <div class="flex items-start justify-between mb-4">
                 <h2
                   class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white"
                 >
@@ -700,7 +718,8 @@
             <h3 class="font-semibold text-gray-900 dark:text-white text-lg">
               Dietary Information
             </h3>
-            <div class="flex flex-wrap gap-2">              <UBadge
+            <div class="flex flex-wrap gap-2">
+              <UBadge
                 v-if="selectedItem.dietaryInfo.isVegetarian"
                 color="green"
                 variant="subtle"
@@ -794,12 +813,50 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
-import { useMenu } from "~/composables/useMenu";
+import { useBackendData } from "~/composables/useBackendData";
+import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
+import { use3DAnimations } from "~/composables/use3DAnimations";
+import { usePerformance } from "~/composables/usePerformance";
+import Background3D from "~/components/Background3D.vue";
+import LoadingScreen3D from "~/components/loading/LoadingScreen3D.vue";
+import SkeletonCard from "~/components/loading/SkeletonCard.vue";
 import type { MenuItem, MenuCategory } from "~/types/menu";
 
-// Composable
-const { menuCategories, getPrimaryCategories, getSecondaryCategories } =
-  useMenu();
+// Composables
+const {
+  menuCategories,
+  isLoading: backendLoading,
+  error: backendError,
+  fetchItems,
+  fetchItemById,
+  loadMoreItems,
+  pagination
+} = useBackendData();
+
+// 3D Animations
+const {
+  addFloatingElement,
+  addParallaxElement,
+  createMorphingEffect,
+  createLoadingAnimation,
+  createGSAPAnimation
+} = use3DAnimations({
+  enableParallax: true,
+  enableFloating: true,
+  enableRotation: true,
+  intensity: 1.2,
+  speed: 1
+});
+
+// Performance monitoring
+const {
+  preloadImage,
+  isVisible,
+  metrics
+} = usePerformance();
+
+// Loading state
+const { loadingState } = useAdvancedLoading();
 
 // Reactive data
 const activeCategory = ref("");
@@ -825,8 +882,16 @@ let carouselInterval: NodeJS.Timeout | null = null;
 const categories = computed<MenuCategory[]>(() =>
   Array.isArray(menuCategories.value) ? menuCategories.value : []
 );
-const primaryCategories = computed(() => getPrimaryCategories.value);
-const secondaryCategories = computed(() => getSecondaryCategories.value);
+
+const primaryCategories = computed(() => {
+  // Show first 4 categories as primary
+  return categories.value.slice(0, 4);
+});
+
+const secondaryCategories = computed(() => {
+  // Show remaining categories as secondary
+  return categories.value.slice(4);
+});
 
 const activeDietaryFilters = computed(() => {
   const filters: Record<string, boolean> = {};
@@ -920,20 +985,29 @@ const getImageUrl = (item: MenuItem) => {
   if (item.image) {
     return item.image;
   }
-  
+
   // Category-based fallback images
   const fallbackImages = {
-    'daily-specials': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=600&q=80',
-    'all-day-menu': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80',
-    'appetizers': 'https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=600&q=80',
-    'salads': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80',
-    'burgers': 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80',
-    'mains': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80',
-    'desserts': 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=80',
-    'beverages': 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=600&q=80',
-    'default': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80'
+    "daily-specials":
+      "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=600&q=80",
+    "all-day-menu":
+      "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80",
+    appetizers:
+      "https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=600&q=80",
+    salads:
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80",
+    burgers:
+      "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80",
+    mains:
+      "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80",
+    desserts:
+      "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=80",
+    beverages:
+      "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=600&q=80",
+    default:
+      "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80",
   };
-  
+
   return fallbackImages[item.category as keyof typeof fallbackImages] || fallbackImages.default;
 };
 
@@ -1044,7 +1118,16 @@ watch(isModalOpen, (isOpen) => {
   }
 });
 
-onMounted(() => {
+onMounted(async () => {
+  // Initialize backend data
+  try {
+    await Promise.all([
+      fetchItems(1, { visibility: true }),
+    ]);
+  } catch (error) {
+    console.error('Failed to load menu data:', error);
+  }
+
   // Set default category
   const allDayMenu = categories.value.find((c: any) => c.id === "all-day-menu");
   if (allDayMenu) {
@@ -1052,27 +1135,80 @@ onMounted(() => {
   } else if (categories.value.length > 0) {
     activeCategory.value = categories.value[0].id;
   }
+
   // Add click outside listener
   document.addEventListener("click", handleClickOutside);
 
-  // GSAP animations (if available)
+  // Initialize 3D animations and enhanced interactions
   if (process.client) {
-    nextTick(() => {
+    nextTick(async () => {
+      // Enhanced GSAP animations with 3D effects
       const nuxtApp = useNuxtApp();
       const $gsap = (nuxtApp as any)?.$gsap;
+
       if ($gsap && $gsap.utils && typeof $gsap.from === "function") {
+        // Animate menu cards with staggered 3D effects
         $gsap.utils.toArray(".menu-card").forEach((el: any, i: number) => {
-          $gsap.from(el, {
-            opacity: 0,
-            y: 40,
-            duration: 0.7,
-            delay: i * 0.1,
-            scrollTrigger: {
-              trigger: el,
-              start: "top 80%",
+          // Add floating and morphing effects
+          addFloatingElement(el, 15, 0.002, i * 0.5);
+          createMorphingEffect(el);
+
+          // Enhanced GSAP animation
+          createGSAPAnimation(el, {
+            from: {
+              opacity: 0,
+              y: 60,
+              rotationX: -15,
+              scale: 0.8,
+              transformPerspective: 1000
             },
+            to: {
+              opacity: 1,
+              y: 0,
+              rotationX: 0,
+              scale: 1,
+              duration: 1.2,
+              delay: i * 0.1,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: el,
+                start: "top 85%",
+                end: "bottom 15%",
+                toggleActions: "play none none reverse"
+              }
+            }
           });
         });
+
+        // Animate filter section
+        $gsap.from(".filter-section", {
+          opacity: 0,
+          y: -30,
+          duration: 0.8,
+          ease: "power2.out",
+          delay: 0.3
+        });
+
+        // Animate hero content
+        $gsap.timeline()
+          .from(".hero-content h1", {
+            opacity: 0,
+            y: 50,
+            duration: 1,
+            ease: "power3.out"
+          })
+          .from(".hero-content p", {
+            opacity: 0,
+            y: 30,
+            duration: 0.8,
+            ease: "power2.out"
+          }, "-=0.5");
+      }
+
+      // Add parallax effect to hero section
+      const heroSection = document.querySelector('.hero-section');
+      if (heroSection) {
+        addParallaxElement(heroSection as HTMLElement);
       }
     });
   }
@@ -1131,5 +1267,121 @@ watch(showDropdown, (val) => {
   line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Enhanced 3D Card Effects */
+.menu-card-3d {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-card-3d:hover {
+  transform: translateY(-10px) rotateX(5deg) rotateY(5deg) scale(1.02);
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.menu-card-3d::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.1) 0%,
+    transparent 50%,
+    rgba(255, 215, 0, 0.05) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.menu-card-3d:hover::before {
+  opacity: 1;
+}
+
+/* Floating animation for cards */
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.menu-card-3d.floating {
+  animation: cardFloat 3s ease-in-out infinite;
+}
+
+/* Loading state animation */
+.menu-card-3d.loading {
+  opacity: 0;
+  transform: translateY(30px) scale(0.9);
+  animation: cardAppear 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes cardAppear {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Shimmer effect for loading */
+.card-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Enhanced modal animations */
+.modal-enter-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-enter-from {
+  opacity: 0;
+  transform: scale(0.9) translateY(20px);
+}
+
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(1.1) translateY(-20px);
 }
 </style>

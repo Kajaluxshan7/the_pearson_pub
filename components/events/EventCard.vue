@@ -1,18 +1,17 @@
-<template>
-  <UCard
+<template>  <UCard
     class="overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 bg-white dark:bg-gray-800 border-0"
+    :class="{ 'lg:max-w-none': isDetailView }"
   >
     <!-- Event Image Carousel -->
     <template #header>
-      <div class="relative overflow-hidden">
-        <template v-if="event.images && event.images.length > 1">
-          <div class="relative w-full h-64 lg:h-80">
+      <div class="relative overflow-hidden">        <template v-if="event.images && event.images.length > 1">
+          <div class="relative w-full" :class="isDetailView ? 'h-80 lg:h-96' : 'h-64 lg:h-80'">
             <NuxtImg
               v-for="(img, idx) in event.images"
               :key="img"
               v-show="carouselIndex === idx"
               :src="img"
-              class="w-full h-64 lg:h-80 object-cover absolute top-0 left-0 transition-opacity duration-500"
+              :class="['w-full object-cover absolute top-0 left-0 transition-opacity duration-500', isDetailView ? 'h-80 lg:h-96' : 'h-64 lg:h-80']"
               :alt="event.title + ' image ' + (idx + 1)"
               format="webp"
               quality="80"
@@ -49,12 +48,11 @@
               />
             </div>
           </div>
-        </template>
-        <template v-else>
+        </template>        <template v-else>
           <NuxtImg
             :src="event.image || '/images/entertainment/music.jpg'"
             :alt="event.title"
-            class="w-full h-64 lg:h-80 object-cover"
+            :class="['w-full object-cover', isDetailView ? 'h-80 lg:h-96' : 'h-64 lg:h-80']"
             format="webp"
             quality="80"
           />
@@ -108,7 +106,7 @@
       </div>
     </template>
 
-    <div class="p-6 space-y-6">
+    <div class="p-6 space-y-6" :class="{ 'lg:p-8': isDetailView }">
       <!-- Event Header -->
       <div class="space-y-4">
         <h1
@@ -529,7 +527,10 @@ import type { Event } from "~/types/events";
 
 const props = defineProps<{
   event: Event;
+  isDetailView?: boolean;
 }>();
+
+const isDetailView = computed(() => props.isDetailView || false);
 
 // Carousel functionality
 const carouselIndex = ref(0);
