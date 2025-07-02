@@ -1,6 +1,6 @@
 <template>
   <div>
-    <LoadingScreen3D
+    <!-- <LoadingScreen3D
   v-if="loadingState.isLoading"
   :progress="loadingState.progress"
   :texts="loadingTexts"
@@ -9,13 +9,13 @@
   icon-name="i-heroicons-building-storefront"
   :error="loadingState.error"
   @retry="startLoading"
-/>
+/> -->
 
-    <USkeleton v-if="loadingState.isLoading" class="h-16 w-16 rounded-full">
+    <!-- <USkeleton v-if="loadingState.isLoading" class="h-16 w-16 rounded-full">
       <div class="w-16 h-16 border-4 border-yellow-500 rounded-full animate-spin border-t-transparent"></div>
-    </USkeleton>
+    </USkeleton> -->
 
-    <div v-else class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <!-- Header -->
       <LayoutsHeader />
 
@@ -47,7 +47,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useColorMode } from '#imports'
 
 const colorMode = useColorMode()
-colorMode.preference = 'light'
+if (colorMode) colorMode.preference = 'light'
 
 // Loading state
 const loadingState = ref({
