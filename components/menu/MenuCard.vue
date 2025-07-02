@@ -35,12 +35,11 @@
 
     <!-- Menu Grid -->
     <div v-else-if="items" class="space-y-8">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <UCard
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">        <UCard
           v-for="menuItem in paginatedItems"
           :key="menuItem.id"
           class="group cursor-pointer hover:shadow-xl transition-all duration-300"
-          @click="() => showItemDetails(menuItem)"
+          @click="() => navigateToItem(menuItem)"
         >
           <template #header>
             <div class="relative overflow-hidden rounded-t-lg">
@@ -50,18 +49,31 @@
                 :alt="menuItem.name"
               />
             </div>
-          </template>
-
-          <div class="text-center p-4">
+          </template>          <div class="text-center p-4">
             <h3 class="text-lg font-semibold text-gray-800 mb-2">
               {{ menuItem.name }}
             </h3>
-            <UBadge color="yellow" variant="solid" class="text-lg">
-              ${{ menuItem.price }}
-            </UBadge>
-            <UBadge :color="menuItem.isAvailable ? 'green' : 'red'" variant="subtle" class="ml-2">
-              {{ menuItem.isAvailable ? 'Available' : 'Not Available' }}
-            </UBadge>
+            <div class="flex items-center justify-center gap-2 mb-2">
+              <UBadge color="yellow" variant="solid" class="text-lg">
+                ${{ menuItem.price }}
+              </UBadge>
+              <UBadge :color="menuItem.isAvailable ? 'green' : 'red'" variant="subtle">
+                {{ menuItem.isAvailable ? 'Available' : 'Not Available' }}
+              </UBadge>
+            </div>
+            <!-- Vegetarian/Dietary badges -->
+            <div v-if="menuItem.dietaryInfo" class="flex justify-center gap-1 mt-2">
+              <UBadge v-if="menuItem.dietaryInfo.isVegetarian" color="green" variant="subtle" class="text-xs">
+                <UIcon name="i-heroicons-leaf" class="w-3 h-3 mr-1" />
+                Vegetarian
+              </UBadge>
+              <UBadge v-if="menuItem.dietaryInfo.isVegan" color="emerald" variant="subtle" class="text-xs">
+                Vegan
+              </UBadge>
+              <UBadge v-if="menuItem.dietaryInfo.isGlutenFree" color="blue" variant="subtle" class="text-xs">
+                GF
+              </UBadge>
+            </div>
           </div>
         </UCard>
       </div>
@@ -204,6 +216,12 @@ import type { MenuItem } from "~/types/menu";
 
 const isModalOpen = ref(false);
 const selectedItem = ref<MenuItem | null>(null);
+
+const navigateToItem = (item: MenuItem) => {
+  // Navigate to detailed item page instead of opening modal
+  const router = useRouter();
+  router.push(`/menu/${item.id}`);
+};
 
 const showItemDetails = (item: MenuItem) => {
   selectedItem.value = item;

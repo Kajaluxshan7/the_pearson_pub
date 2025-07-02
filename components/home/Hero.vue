@@ -1,16 +1,13 @@
 <template>
   <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
-    <!-- Background Image with Overlay -->
     <div class="absolute inset-0 z-0">
       <img
-        src="../../public/images/pub/hero-background.jpg"
+        src="../../public/images/pub/hero-background.jpg "
         alt="The Pearson Pub Interior"
         class="w-full h-full object-cover"
       />
       <div class="absolute inset-0 bg-black/60"></div>
     </div>
-
-    <!-- Content -->
     <div 
       class="container mx-auto px-4 relative z-10 text-center"
       :class="{ 'opacity-100 translate-y-0': isVisible, 'opacity-0 translate-y-8': !isVisible }"

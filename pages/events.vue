@@ -1,22 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">    <!-- Advanced 3D Loading Screen -->
-    <LoadingScreen3D
-      v-if="loadingState.isLoading"
-      :progress="loadingState.progress"
-      :texts="[
-        'Loading exciting events...',
-        'Preparing entertainment lineup...',
-        'Setting up the party...',
-        'Almost time to rock...',
-        'Let the fun begin!'
-      ]"
-      title="The Pearson Pub"
-      subtitle="Entertainment & Events"
-      icon-name="i-heroicons-musical-note"
-      :error="loadingState.error"
-      @retry="startLoading"
-    />
-
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Hero Section -->
     <section
       class="hero-section relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
@@ -115,34 +98,6 @@
               {{ category.name }}
             </button>
           </div>
-
-          <!-- View Toggle -->
-          <div
-            class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-full p-1"
-          >
-            <button
-              :class="[
-                'px-3 py-2 rounded-full text-sm font-medium transition-all',
-                viewMode === 'grid'
-                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
-              ]"
-              @click="viewMode = 'grid'"
-            >
-              <UIcon name="i-heroicons-squares-2x2" class="w-4 h-4" />
-            </button>
-            <button
-              :class="[
-                'px-3 py-2 rounded-full text-sm font-medium transition-all',
-                viewMode === 'list'
-                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
-              ]"
-              @click="viewMode = 'list'"
-            >
-              <UIcon name="i-heroicons-list-bullet" class="w-4 h-4" />
-            </button>
-          </div>
         </div>
 
         <!-- Active Filters Display -->
@@ -220,10 +175,8 @@
               List
             </UBadge>
           </div>
-        </div>
-
-        <!-- Error State -->
-        <div v-if="error" class="text-center py-16">
+        </div>        <!-- Error State -->
+        <div v-if="error || backendError" class="text-center py-16">
           <UIcon
             name="i-heroicons-exclamation-triangle"
             class="w-16 h-16 text-red-400 mx-auto mb-4"
@@ -232,17 +185,17 @@
             Something went wrong
           </h3>
           <p class="text-gray-600 dark:text-gray-300 mb-6">
-            {{ error }}
+            {{ error || backendError }}
           </p>
           <UButton
             color="red"
             variant="outline"
-            @click="error = null"
+            @click="error = null; fetchEvents()"
           >
             Try Again
           </UButton>
         </div>        <!-- Loading State with Skeleton Cards -->
-        <div v-else-if="isLoading || loadingState.showSkeletons">
+        <div v-else-if="isLoading || loadingState.isLoading || backendLoading">
           <!-- Skeleton Results Summary -->
           <div class="flex justify-between items-center mb-8">
             <div>
@@ -614,9 +567,7 @@
                 </div>
               </UCard>
             </div>
-          </div>
-
-          <!-- Pagination -->
+          </div>          <!-- Pagination -->
           <div v-if="totalPages > 1" class="flex justify-center mt-12">
             <UPagination
               v-model="currentPage"
@@ -631,6 +582,19 @@
                 },
               }"
             />
+          </div>
+
+          <!-- Load More Button for Backend Events -->
+          <div v-if="eventPagination.events.page < eventPagination.events.totalPages" class="flex justify-center mt-8">
+            <UButton
+              color="yellow"
+              variant="outline"
+              size="lg"
+              @click="loadMoreEvents"
+              :loading="backendLoading"
+            >
+              Load More Events ({{ eventPagination.events.total - eventPagination.events.page * 50 }} remaining)
+            </UButton>
           </div>
         </div>
 
@@ -704,6 +668,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { useEvents } from "~/composables/useEvents";
+import { useBackendData } from "~/composables/useBackendData";
 import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
 import { use3DAnimations } from "~/composables/use3DAnimations";
 import { usePerformance } from "~/composables/usePerformance";
@@ -718,7 +683,16 @@ import type { Category } from "~/types/events-ui";
 import type { FABAction } from "~/components/ui/FloatingActionButton.vue";
 
 // Composables
-const { events } = useEvents();
+const { events: staticEvents } = useEvents(); // Keep for weekly schedule
+const { 
+  events: backendEvents, 
+  isLoading: backendLoading, 
+  error: backendError,
+  fetchEvents,
+  fetchEventById,
+  loadMoreEvents,
+  pagination: eventPagination
+} = useBackendData();
 
 // Advanced loading with custom events texts
 const { loadingState, startLoading, finishLoading } = useAdvancedLoading({
@@ -750,7 +724,6 @@ const {
 
 // Performance monitoring
 const { 
-  optimizeResource,
   preloadImage,
   isVisible,
   metrics
@@ -822,10 +795,58 @@ const categories = ref<Category[]>([
 const error = ref<string | null>(null);
 const isLoading = ref(false);
 
+// Combine static events with backend events for display
+const allEvents = computed(() => {
+  const backend = backendEvents.value || [];
+  const static_ = staticEvents.value || [];
+  
+  // Transform backend events to match frontend interface
+  const transformedBackend = backend.map((event: any) => {
+    const getEventStatus = () => {
+      if (!event.start_date) return 'upcoming';
+      const now = new Date();
+      const start = new Date(event.start_date);
+      const end = new Date(event.end_date || event.start_date);
+      if (start > now) return 'upcoming';
+      if (end > now) return 'ongoing';
+      return 'completed';
+    };
+
+    return {
+      id: event.id,
+      title: event.name,
+      description: event.description || '',
+      date: event.start_date ? new Date(event.start_date).toLocaleDateString() : '',
+      time: event.start_date && event.end_date ? 
+        `${new Date(event.start_date).toLocaleTimeString()} - ${new Date(event.end_date).toLocaleTimeString()}` : '',
+      image: (event.images && event.images.length > 0) ? event.images[0] : '/images/entertainment/music.jpg',
+      images: event.images || [],
+      location: 'The Pearson Pub', // Default location
+      tags: ['Event'], // Default tag
+      performers: [], // Default empty
+      featured: false, // Default featured state
+      category: 'special' as 'music' | 'quiz' | 'food' | 'special' | 'entertainment', // Default category
+      status: getEventStatus() as 'upcoming' | 'ongoing' | 'completed' | 'cancelled',
+      price: undefined,
+      averageRating: null,
+      totalReviews: 0,
+      ctaText: "View Details",
+      ctaLink: "#"
+    };
+  });
+  
+  // Combine and sort by date (upcoming first)
+  return [...transformedBackend, ...static_].sort((a, b) => {
+    const dateA = new Date(a.date || '1970-01-01');
+    const dateB = new Date(b.date || '1970-01-01');
+    return dateB.getTime() - dateA.getTime();
+  });
+});
+
 // Computed properties with error handling
 const filteredEvents = computed(() => {
   try {
-    let filtered = events.value || [];
+    let filtered = allEvents.value || [];
 
     // Filter by category
     if (selectedCategory.value !== "all") {
@@ -909,8 +930,8 @@ const clearFilters = () => {
 };
 
 // Event modal functions with proper typing
-const showEventDetails = (event: Event, layout: 'portrait' | 'landscape' = 'portrait') => {
-  selectedEvent.value = event;
+const showEventDetails = (event: any, layout: 'portrait' | 'landscape' = 'portrait') => {
+  selectedEvent.value = event as Event;
   modalLayout.value = layout;
   isEventModalOpen.value = true;
 };
@@ -981,6 +1002,9 @@ const handleKeyNavigation = (event: KeyboardEvent) => {
 onMounted(async () => {
   // Start loading animation
   startLoading();
+  
+  // Fetch backend data
+  await fetchEvents();
   
   // Simulate loading time for better UX
   await new Promise(resolve => setTimeout(resolve, 1200));

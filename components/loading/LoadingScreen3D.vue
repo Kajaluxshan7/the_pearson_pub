@@ -320,7 +320,7 @@ const cleanup3D = () => {
 };
 
 // Debounced resize handler
-let resizeTimeout: number | null = null;
+let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
 const handleResize = () => {
   if (resizeTimeout) clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {

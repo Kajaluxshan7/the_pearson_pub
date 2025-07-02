@@ -1,31 +1,41 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Contact Hero Section -->
-    <section class="relative py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
+    <section class="hero-section relative py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
+      <!-- 3D Background -->
+      <Background3D 
+        :intensity="1.2" 
+        :enable-particles="true" 
+        :enable-rays="true" 
+        :enable-morphing="true"
+        :particle-count="60"
+        color-scheme="golden"
+      />
+      
       <div class="absolute inset-0">
         <NuxtImg
           src="/images/pub/interior-main.jpg"
           alt="Contact Us"
-          class="w-full h-full object-cover opacity-40"
+          class="w-full h-full object-cover opacity-30"
           format="webp"
           quality="80"
         />
-        <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-black/60"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/85 to-black/65"></div>
       </div>
       
       <!-- Decorative Elements -->
-      <div class="absolute top-10 left-10 w-24 h-24 rounded-full border border-yellow-500/30 animate-pulse"></div>
-      <div class="absolute bottom-20 right-10 w-32 h-32 rounded-full bg-yellow-500/20"></div>
+      <div class="absolute top-10 left-10 w-16 h-16 lg:w-24 lg:h-24 rounded-full border border-yellow-500/30 animate-pulse"></div>
+      <div class="absolute bottom-20 right-10 w-20 h-20 lg:w-32 lg:h-32 rounded-full bg-yellow-500/20"></div>
       
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
+      <div class="hero-content relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
         <div class="inline-block mb-4">
-          <span class="text-yellow-400 font-semibold text-lg tracking-wide uppercase">Get In Touch</span>
+          <span class="text-yellow-400 font-semibold text-sm lg:text-lg tracking-wide uppercase">Get In Touch</span>
           <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2"></div>
         </div>
-        <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight" style="font-family: 'Cinzel', 'Georgia', serif;">
+        <h1 class="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 leading-tight" style="font-family: 'Cinzel', 'Georgia', serif;">
           Contact <span class="text-yellow-400">Us</span>
         </h1>
-        <p class="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
+        <p class="text-lg md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed">
           Get in touch with us for <span class="text-yellow-300">reservations</span>, <span class="text-yellow-300">inquiries</span>, or <span class="text-yellow-300">feedback</span>
         </p>
       </div>
@@ -36,7 +46,7 @@
       <div class="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">          <!-- Contact Information -->
           <div
-            class="transition-all duration-700 space-y-8"
+            class="contact-info transition-all duration-700 space-y-8"
             :class="{
               'opacity-0 translate-x-8': !isVisible.info,
               'opacity-100 translate-x-0': isVisible.info,
@@ -229,7 +239,9 @@
     <UNotifications />
   </div>
 </template><script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue"
+import { ref, onMounted, nextTick } from "vue"
+import { useBackendData } from "~/composables/useBackendData";
+import Background3D from "~/components/Background3D.vue";
 
 interface ContactInfo {
   icon: string
@@ -245,6 +257,9 @@ interface FormData {
   message: string
 }
 
+// Backend integration
+const { operationHours, fetchOperationHours } = useBackendData();
+
 const form = ref<FormData>({
   name: "",
   email: "",
@@ -254,49 +269,67 @@ const form = ref<FormData>({
 
 const formErrors = ref<Record<string, string>>({})
 const isSubmitting = ref(false)
+const formRef = ref<HTMLElement>()
 
 const isVisible = ref({
   info: false,
   form: false,
 })
 
-const contactInfo: ContactInfo[] = [
-  {
-    icon: "i-heroicons-map-pin",
-    title: "Address",
-    value: "101 MARY ST WHITBY, ON",
-    extra: "L1N 2R4, Canada",
-  },
-  {
-    icon: "i-heroicons-phone",
-    title: "Phone",
-    value: "905-430-5699",
-    extra: "Call us anytime",
-  },
-  {
-    icon: "i-heroicons-envelope",
-    title: "Email",
-    value: "thepearsonpub@rogers.com",
-    extra: "We'll respond within 24 hours",
-  },
-  {
-    icon: "i-heroicons-clock",
-    title: "Opening Hours",
-    value: "Mon-Thu: 11:00 AM - 12:00 AM",
-    extra: "Fri-Sun: 11:00 AM - 2:00 AM",
-  },
-]
-
-// Simple animation triggers
-onMounted(() => {
-  setTimeout(() => {
-    isVisible.value.info = true
-  }, 300)
+// Generate dynamic operation hours from backend only
+const formatOperationHours = (hours: any[]) => {
+  if (!hours || hours.length === 0) return "";
   
-  setTimeout(() => {
-    isVisible.value.form = true
-  }, 600)
-})
+  // Group by similar times
+  const grouped = hours.reduce((acc: any, hour: any) => {
+    const timeKey = `${hour.opening_time}-${hour.closing_time}`;
+    if (!acc[timeKey]) acc[timeKey] = [];
+    acc[timeKey].push(hour.day_of_week);
+    return acc;
+  }, {});
+  
+  return Object.entries(grouped)
+    .map(([time, days]: [string, any]) => {
+      const [open, close] = time.split('-');
+      const daysList = days.join(', ');
+      return `${daysList}: ${open} - ${close}`;
+    })
+    .join('\n');
+}
+
+const contactInfo = ref<ContactInfo[]>([]);
+
+onMounted(async () => {
+  await fetchOperationHours();
+  contactInfo.value = [
+    {
+      icon: "i-heroicons-map-pin",
+      title: "Address",
+      value: "101 MARY ST WHITBY, ON",
+      extra: "L1N 2R4, Canada",
+    },
+    {
+      icon: "i-heroicons-phone",
+      title: "Phone",
+      value: "905-430-5699",
+      extra: "Call us anytime",
+    },
+    {
+      icon: "i-heroicons-envelope",
+      title: "Email",
+      value: "thepearsonpub@rogers.com",
+      extra: "We'll respond within 24 hours",
+    },
+    {
+      icon: "i-heroicons-clock",
+      title: "Opening Hours",
+      value: formatOperationHours(operationHours.value),
+      extra: "Extended hours on weekends",
+    },
+  ];
+  setTimeout(() => { isVisible.value.info = true }, 300)
+  setTimeout(() => { isVisible.value.form = true }, 600)
+});
 
 const validateForm = (data: FormData) => {
   const errors: Record<string, string> = {}
@@ -328,41 +361,26 @@ const validateForm = (data: FormData) => {
 const toast = useToast()
 
 const submitForm = async () => {
-  try {
-    const { isValid, errors } = validateForm(form.value)
-    if (!isValid) {
-      formErrors.value = errors
-      return
-    }
-
-    isSubmitting.value = true
-
-    // Simulate API call delay (replace with actual send logic)
-    await new Promise((r) => setTimeout(r, 1500))
-
-    // Reset form
-    form.value = {
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    }
-    formErrors.value = {}
-
-    toast.add({
-      title: "Success!",
-      description: "Your message has been sent successfully.",
-      color: "green",
-    })
-  } catch (error) {    toast.add({
-      title: "Error",
-      description: "Failed to send message. Please try again.",
-      color: "red",
-    })
-    console.error("Failed to send message:", error)
-  } finally {
-    isSubmitting.value = false
+  const { isValid, errors } = validateForm(form.value)
+  if (!isValid) {
+    formErrors.value = errors
+    return
   }
+  isSubmitting.value = true
+  await new Promise((r) => setTimeout(r, 1500))
+  form.value = {
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  }
+  formErrors.value = {}
+  toast.add({
+    title: "Success!",
+    description: "Your message has been sent successfully.",
+    color: "green",
+  })
+  isSubmitting.value = false
 }
 
 // Page meta

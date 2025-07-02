@@ -1,19 +1,20 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">    <!-- Advanced 3D Loading Screen -->    
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Advanced 3D Loading Screen -->
     <!-- Menu Hero Section -->
     <section
       class="hero-section relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
     >
       <!-- 3D Background -->
-      <Background3D 
-        :intensity="1.2" 
-        :enable-particles="true" 
-        :enable-rays="true" 
+      <Background3D
+        :intensity="1.2"
+        :enable-particles="true"
+        :enable-rays="true"
         :enable-morphing="true"
         :particle-count="60"
         color-scheme="golden"
       />
-      
+
       <div class="absolute inset-0">
         <NuxtImg
           src="/images/food/foods.jpg"
@@ -51,7 +52,8 @@
           <span class="text-yellow-300">craft beverages</span>
         </p>
       </div>
-    </section>    <!-- Enhanced Filters and Search Section -->
+    </section>
+    <!-- Enhanced Filters and Search Section -->
     <section
       class="filter-section py-6 lg:py-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50"
     >
@@ -84,52 +86,21 @@
               </div>
             </div>
 
-            <!-- View Toggle and Sort -->
-            <div class="flex items-center gap-4">
-              <!-- View Toggle -->
-              <div
-                class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-full p-1"
+            <!-- Sort Options -->
+            <div class="flex items-center gap-2">
+              <span
+                class="text-sm text-gray-600 dark:text-gray-300 hidden lg:block"
+                >Sort by:</span
               >
-                <button
-                  :class="[
-                    'px-3 py-2 rounded-full text-sm font-medium transition-all',
-                    viewMode === 'grid'
-                      ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
-                  ]"
-                  @click="viewMode = 'grid'"
-                >
-                  <UIcon name="i-heroicons-squares-2x2" class="w-4 h-4" />
-                </button>
-                <button
-                  :class="[
-                    'px-3 py-2 rounded-full text-sm font-medium transition-all',
-                    viewMode === 'list'
-                      ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white',
-                  ]"
-                  @click="viewMode = 'list'"
-                >
-                  <UIcon name="i-heroicons-list-bullet" class="w-4 h-4" />
-                </button>
-              </div>
-
-              <!-- Sort Options -->
-              <div class="flex items-center gap-2">
-                <span
-                  class="text-sm text-gray-600 dark:text-gray-300 hidden lg:block"
-                  >Sort by:</span
-                >
-                <select
-                  v-model="sortBy"
-                  class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                >
-                  <option value="name">Name</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="featured">Featured First</option>
-                </select>
-              </div>
+              <select
+                v-model="sortBy"
+                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              >
+                <option value="name">Name</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="featured">Featured First</option>
+              </select>
             </div>
           </div>
 
@@ -225,11 +196,12 @@
           </div>
         </div>
       </div>
-    </section>    <!-- Menu Items Section -->
+    </section>
+    <!-- Menu Items Section -->
     <section class="py-10 lg:py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Loading State with Skeleton Cards -->
-        <div v-if="loadingState.isLoading">
+        <div v-if="backendLoading">
           <div v-for="category in ['Starters', 'Mains', 'Desserts']" :key="`skeleton-category-${category}`" class="mb-16">
             <!-- Skeleton Category Header -->
             <div class="text-center mb-12">
@@ -238,11 +210,11 @@
               <div class="h-4 w-96 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto mb-2"></div>
               <div class="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto"></div>
             </div>
-            
+
             <!-- Skeleton Cards Grid -->
             <div :class="gridClasses">
-              <SkeletonCard 
-                v-for="i in 6" 
+              <SkeletonCard
+                v-for="i in 6"
                 :key="`skeleton-${category}-${i}`"
                 type="menu"
                 :delay="i * 0.1"
@@ -250,7 +222,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Actual Content -->
         <div v-else-if="filteredCategories.length > 0">
           <div
@@ -294,9 +266,10 @@
                   class="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0 h-full flex flex-col"
                 >
                   <template #header>
-                    <div class="relative overflow-hidden aspect-square">                      <NuxtImg
+                    <div class="relative overflow-hidden aspect-square">
+                      <NuxtImg
                         :src="getImageUrl(item)"
-                        class="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-110"
+                        class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-110"
                         :alt="item.name"
                         format="webp"
                         quality="75"
@@ -330,14 +303,16 @@
                         >
                           Sold Out
                         </UBadge>
-                      </div>                      <!-- Dietary Icons -->
+                      </div>
+                      <!-- Dietary Icons -->
                       <div class="absolute bottom-3 left-3 flex gap-1">
                         <UBadge
                           :color="item.dietaryInfo?.isVegetarian ? 'green' : 'gray'"
                           variant="subtle"
                           class="text-xs flex items-center"
                         >
-                          <UIcon name="i-heroicons-heart" class="w-3 h-3 mr-1" />
+                          <UIcon name="i-heroicons-sparkles" class="w-3 h-3 mr-1" />
+                          <!-- You can replace 'i-heroicons-sparkles' with a leaf icon if available in your icon set -->
                           {{ item.dietaryInfo?.isVegetarian ? 'V' : 'Not V' }}
                         </UBadge>
                         <UBadge
@@ -375,7 +350,7 @@
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 flex-grow">
                       {{ item.name }}
                     </h3>
-                    
+
                     <UButton
                       color="yellow"
                       variant="outline"
@@ -404,9 +379,10 @@
                 >
                   <div class="flex flex-col sm:flex-row">
                     <!-- Image -->
-                    <div class="sm:w-48 relative overflow-hidden">                      <NuxtImg
+                    <div class="sm:w-48 relative overflow-hidden">
+                      <NuxtImg
                         :src="getImageUrl(item)"
-                        class="w-full h-48 sm:h-full object-cover transform transition-transform duration-300 group-hover:scale-110"
+                        class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-110"
                         :alt="item.name"
                         format="webp"
                         quality="75"
@@ -445,7 +421,7 @@
                           <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
                             {{ item.description }}
                           </p>
-                          
+
                           <!-- Dietary Info -->
                           <div class="flex flex-wrap gap-2 mb-4">
                             <UBadge
@@ -453,7 +429,8 @@
                               variant="subtle"
                               class="text-xs flex items-center"
                             >
-                              <UIcon name="i-heroicons-heart" class="w-3 h-3 mr-1" />
+                              <UIcon name="i-heroicons-sparkles" class="w-3 h-3 mr-1" />
+                              <!-- You can replace 'i-heroicons-sparkles' with a leaf icon if available in your icon set -->
                               {{ item.dietaryInfo?.isVegetarian ? 'Vegetarian' : 'Not Vegetarian' }}
                             </UBadge>
                             <UBadge
@@ -495,7 +472,6 @@
                 </UCard>
               </div>
             </div>
-
             <!-- Pagination -->
             <div v-if="paginatedItems(category).totalPages > 1" class="flex justify-center mt-8">
               <UPagination
@@ -512,6 +488,19 @@
                 }"
               />
             </div>
+
+            <!-- Load More Button for Backend Pagination -->
+            <div v-if="pagination.items.page < pagination.items.totalPages" class="flex justify-center mt-8">
+              <UButton
+                color="yellow"
+                variant="outline"
+                size="lg"
+                @click="loadMoreItems"
+                :loading="backendLoading"
+              >
+                Load More Items ({{ pagination.items.total - pagination.items.page * 50 }} remaining)
+              </UButton>
+            </div>
           </div>
         </div>
 
@@ -527,7 +516,8 @@
           <p class="text-gray-600 dark:text-gray-300 mb-6">
             Try adjusting your search or filters to find what you're looking
             for.
-          </p>          <UButton color="yellow" variant="outline" @click="clearAllFilters">
+          </p>
+          <UButton color="yellow" variant="outline" @click="clearAllFilters">
             Clear All Filters
           </UButton>
         </div>
@@ -546,7 +536,8 @@
                 selectedItem.images.length > 1
               "
             >
-              <div class="relative w-full h-64 lg:h-80">                <NuxtImg
+              <div class="relative w-full h-64 lg:h-80">
+                <NuxtImg
                   v-for="(img, idx) in selectedItem.images"
                   :key="img"
                   v-show="carouselIndex === idx"
@@ -591,7 +582,8 @@
                 </div>
               </div>
             </template>
-            <template v-else>              <NuxtImg
+            <template v-else>
+              <NuxtImg
                 v-if="selectedItem?.image"
                 :src="selectedItem?.image"
                 class="w-full h-64 lg:h-80 object-cover"
@@ -616,7 +608,8 @@
           <div
             class="flex flex-col lg:flex-row justify-between lg:items-start gap-4"
           >
-            <div class="flex-1">              <div class="flex items-start justify-between mb-4">
+            <div class="flex-1">
+              <div class="flex items-start justify-between mb-4">
                 <h2
                   class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white"
                 >
@@ -725,7 +718,8 @@
             <h3 class="font-semibold text-gray-900 dark:text-white text-lg">
               Dietary Information
             </h3>
-            <div class="flex flex-wrap gap-2">              <UBadge
+            <div class="flex flex-wrap gap-2">
+              <UBadge
                 v-if="selectedItem.dietaryInfo.isVegetarian"
                 color="green"
                 variant="subtle"
@@ -810,38 +804,39 @@
               class="text-sm lg:text-base font-medium text-gray-800 dark:text-gray-200 text-center"
               >{{ info.label }}</span
             >
-          </div>        </div>
+          </div>
+        </div>
       </div>
-    </section>    <!-- Floating Action Button -->
-    <FloatingActionButton
-      :actions="fabActions"
-      main-icon="i-heroicons-bars-3"
-      @action="handleFABAction"
-    />
-
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
-import { useMenu } from "~/composables/useMenu";
+import { useBackendData } from "~/composables/useBackendData";
 import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
 import { use3DAnimations } from "~/composables/use3DAnimations";
 import { usePerformance } from "~/composables/usePerformance";
 import Background3D from "~/components/Background3D.vue";
 import LoadingScreen3D from "~/components/loading/LoadingScreen3D.vue";
 import SkeletonCard from "~/components/loading/SkeletonCard.vue";
-import FloatingActionButton from "~/components/ui/FloatingActionButton.vue";
 import type { MenuItem, MenuCategory } from "~/types/menu";
-import type { FABAction } from "~/components/ui/FloatingActionButton.vue";
 
 // Composables
-const { menuCategories, getPrimaryCategories, getSecondaryCategories } = useMenu();
+const {
+  menuCategories,
+  isLoading: backendLoading,
+  error: backendError,
+  fetchItems,
+  fetchItemById,
+  loadMoreItems,
+  pagination
+} = useBackendData();
 
 // 3D Animations
-const { 
-  addFloatingElement, 
-  addParallaxElement, 
+const {
+  addFloatingElement,
+  addParallaxElement,
   createMorphingEffect,
   createLoadingAnimation,
   createGSAPAnimation
@@ -854,8 +849,7 @@ const {
 });
 
 // Performance monitoring
-const { 
-  optimizeResource,
+const {
   preloadImage,
   isVisible,
   metrics
@@ -884,53 +878,20 @@ const selectedItem = ref<MenuItem | null>(null);
 const carouselIndex = ref(0);
 let carouselInterval: NodeJS.Timeout | null = null;
 
-// FAB Actions
-const fabActions = ref<FABAction[]>([
-  {
-    id: 'scroll-top',
-    label: 'Scroll to Top',
-    icon: 'i-heroicons-arrow-up',
-    action: () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  },
-  {
-    id: 'view-mode',
-    label: `Switch to ${viewMode.value === 'grid' ? 'List' : 'Grid'} View`,
-    icon: viewMode.value === 'grid' ? 'i-heroicons-list-bullet' : 'i-heroicons-squares-2x2',
-    action: () => {
-      viewMode.value = viewMode.value === 'grid' ? 'list' : 'grid';
-    }
-  },
-  {
-    id: 'filter',
-    label: 'Quick Filters',
-    icon: 'i-heroicons-funnel',
-    action: () => {
-      // Toggle vegetarian filter as quick action
-      dietaryFilters.value.vegetarian = !dietaryFilters.value.vegetarian;
-    }
-  },
-  {
-    id: 'search',
-    label: 'Focus Search',
-    icon: 'i-heroicons-magnifying-glass',
-    action: () => {
-      const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
-      if (searchInput) {
-        searchInput.focus();
-        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
-  }
-]);
-
 // Computed properties
 const categories = computed<MenuCategory[]>(() =>
   Array.isArray(menuCategories.value) ? menuCategories.value : []
 );
-const primaryCategories = computed(() => getPrimaryCategories.value);
-const secondaryCategories = computed(() => getSecondaryCategories.value);
+
+const primaryCategories = computed(() => {
+  // Show first 4 categories as primary
+  return categories.value.slice(0, 4);
+});
+
+const secondaryCategories = computed(() => {
+  // Show remaining categories as secondary
+  return categories.value.slice(4);
+});
 
 const activeDietaryFilters = computed(() => {
   const filters: Record<string, boolean> = {};
@@ -1024,20 +985,29 @@ const getImageUrl = (item: MenuItem) => {
   if (item.image) {
     return item.image;
   }
-  
+
   // Category-based fallback images
   const fallbackImages = {
-    'daily-specials': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=600&q=80',
-    'all-day-menu': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80',
-    'appetizers': 'https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=600&q=80',
-    'salads': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80',
-    'burgers': 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80',
-    'mains': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80',
-    'desserts': 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=80',
-    'beverages': 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=600&q=80',
-    'default': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80'
+    "daily-specials":
+      "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=600&q=80",
+    "all-day-menu":
+      "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80",
+    appetizers:
+      "https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=600&q=80",
+    salads:
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80",
+    burgers:
+      "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80",
+    mains:
+      "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80",
+    desserts:
+      "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=80",
+    beverages:
+      "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=600&q=80",
+    default:
+      "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80",
   };
-  
+
   return fallbackImages[item.category as keyof typeof fallbackImages] || fallbackImages.default;
 };
 
@@ -1045,17 +1015,6 @@ const showItemDetails = (item: MenuItem) => {
   selectedItem.value = item;
   isModalOpen.value = true;
   carouselIndex.value = 0;
-};
-
-const handleFABAction = (actionId: string) => {
-  console.log(`FAB action triggered: ${actionId}`);
-  
-  // Update view mode label dynamically
-  const viewModeAction = fabActions.value.find(action => action.id === 'view-mode');
-  if (viewModeAction) {
-    viewModeAction.label = `Switch to ${viewMode.value === 'grid' ? 'List' : 'Grid'} View`;
-    viewModeAction.icon = viewMode.value === 'grid' ? 'i-heroicons-list-bullet' : 'i-heroicons-squares-2x2';
-  }
 };
 
 const closeModal = () => {
@@ -1160,9 +1119,15 @@ watch(isModalOpen, (isOpen) => {
 });
 
 onMounted(async () => {
-  // Simulate loading time for better UX
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
+  // Initialize backend data
+  try {
+    await Promise.all([
+      fetchItems(1, { visibility: true }),
+    ]);
+  } catch (error) {
+    console.error('Failed to load menu data:', error);
+  }
+
   // Set default category
   const allDayMenu = categories.value.find((c: any) => c.id === "all-day-menu");
   if (allDayMenu) {
@@ -1170,24 +1135,24 @@ onMounted(async () => {
   } else if (categories.value.length > 0) {
     activeCategory.value = categories.value[0].id;
   }
-  
+
   // Add click outside listener
   document.addEventListener("click", handleClickOutside);
 
   // Initialize 3D animations and enhanced interactions
   if (process.client) {
-    nextTick(async () => {      
+    nextTick(async () => {
       // Enhanced GSAP animations with 3D effects
       const nuxtApp = useNuxtApp();
       const $gsap = (nuxtApp as any)?.$gsap;
-      
+
       if ($gsap && $gsap.utils && typeof $gsap.from === "function") {
         // Animate menu cards with staggered 3D effects
         $gsap.utils.toArray(".menu-card").forEach((el: any, i: number) => {
           // Add floating and morphing effects
           addFloatingElement(el, 15, 0.002, i * 0.5);
           createMorphingEffect(el);
-          
+
           // Enhanced GSAP animation
           createGSAPAnimation(el, {
             from: {
@@ -1214,7 +1179,7 @@ onMounted(async () => {
             }
           });
         });
-        
+
         // Animate filter section
         $gsap.from(".filter-section", {
           opacity: 0,
@@ -1223,7 +1188,7 @@ onMounted(async () => {
           ease: "power2.out",
           delay: 0.3
         });
-        
+
         // Animate hero content
         $gsap.timeline()
           .from(".hero-content h1", {
@@ -1239,7 +1204,7 @@ onMounted(async () => {
             ease: "power2.out"
           }, "-=0.5");
       }
-      
+
       // Add parallax effect to hero section
       const heroSection = document.querySelector('.hero-section');
       if (heroSection) {
@@ -1313,7 +1278,7 @@ watch(showDropdown, (val) => {
 
 .menu-card-3d:hover {
   transform: translateY(-10px) rotateX(5deg) rotateY(5deg) scale(1.02);
-  box-shadow: 
+  box-shadow:
     0 25px 50px rgba(0, 0, 0, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);

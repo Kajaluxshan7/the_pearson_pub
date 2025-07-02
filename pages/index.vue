@@ -1,6 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">    
-    <Hero />
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Lazy loaded Hero -->
+    <component :is="Hero" v-if="Hero" />
 
     <!-- Specials Section (moved from menu.vue) -->
     <section id="specials" class="specials section py-20 bg-gray-50 dark:bg-gray-900">
@@ -8,7 +9,7 @@
         <!-- Specials Title -->
         <div class="mb-12 text-center" data-aos="fade-up">
           <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white" style="font-family: 'Cinzel', 'Georgia', serif;">
-            Today's <span class="text-yellow-600 dark:text-yellow-400">Specials</span>
+            Daily <span class="text-yellow-600 dark:text-yellow-400">Specials</span>
           </h2>
           <div class="w-16 h-1 bg-yellow-500 mx-auto mb-4"></div>
           <p class="text-xl text-gray-600 dark:text-gray-300">Check Our Chef's Recommendations</p>
@@ -56,13 +57,60 @@
                         height="256"
                         format="webp"
                         quality="80"
+                        loading="lazy"
                       />
                     </div>
                   </div>
                 </div>
-              </div>
-            </transition>
+              </div>            </transition>
           </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Features Section -->
+    <section class="py-20 bg-white dark:bg-gray-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <div class="inline-block mb-4">
+            <span class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase">What We Offer</span>
+            <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2"></div>
+          </div>
+          <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6" style="font-family: 'Cinzel', 'Georgia', serif;">
+            Experience <span class="text-yellow-600 dark:text-yellow-400">Excellence</span>
+          </h2>
+          <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            Discover what makes The Pearson Pub a beloved destination in Whitby
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <template v-for="(feature, index) in features" :key="feature.id">
+            <NuxtLink
+              v-if="feature.link"
+              :to="feature.link"
+              class="feature-card group bg-gray-50 dark:bg-gray-700 rounded-2xl p-8 text-center hover:bg-gradient-to-br hover:from-yellow-50 hover:to-orange-50 dark:hover:from-gray-600 dark:hover:to-gray-700 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-gray-200 dark:border-gray-600"
+            >
+              <div :class="[feature.bgColor, 'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300']">
+                <UIcon :name="feature.icon" :class="[feature.color, 'w-10 h-10']" />
+              </div>
+              <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">
+                {{ feature.title }}
+              </h3>
+              <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
+                {{ feature.description }}
+              </p>
+              <UButton
+                color="yellow"
+                variant="outline"
+                class="group-hover:bg-yellow-500 group-hover:text-white transition-all duration-300"
+              >
+                Learn More
+                <UIcon name="i-heroicons-arrow-right" class="w-4 h-4 ml-2" />
+              </UButton>
+            </NuxtLink>
+          </template>
         </div>
       </div>
     </section>
@@ -125,10 +173,14 @@
             style="animation-delay: 400ms"
           >
             <div class="relative h-96 lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl group">
+              <!-- About Section image: optimize for LCP -->
               <img
                 src="/images/pub/interior-main.jpg"
                 alt="Pub Interior"
                 class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                decoding="async"
+                fetchpriority="high"
+                loading="eager"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
             </div>
@@ -148,8 +200,145 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, computed } from 'vue'
-import Hero from '../components/home/Hero.vue'  
+import { onMounted, onUnmounted, ref, computed, shallowRef, nextTick } from 'vue'
+import { useBackendData } from "~/composables/useBackendData";
+import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
+import { use3DAnimations } from "~/composables/use3DAnimations";
+// Lazy load Hero for better LCP
+const Hero = shallowRef<any>(null)
+if (process.client) {
+  import('../components/home/Hero.vue').then(mod => Hero.value = mod.default)
+}
+
+definePageMeta({
+  title: 'The Pearson Pub | Whitby',
+  description: 'Live menu, events, and more. Experience The Pearson Pub in Whitby.',
+  layout: 'default',
+  // Nuxt 3 SSG/SSR hint
+  prerender: true
+})
+
+// SSR/SSG: useAsyncData for backend data
+const { data: categoriesData } = await useAsyncData('categories', () => useBackendData().fetchCategories())
+const { data: itemsData } = await useAsyncData('items', () => useBackendData().fetchItems())
+const { data: eventsData } = await useAsyncData('events', () => useBackendData().fetchEvents())
+const { data: hoursData } = await useAsyncData('operationHours', () => useBackendData().fetchOperationHours())
+
+
+
+// Simple in-memory cache for backend data
+const backendCache: Record<string, any> = {}
+
+// Backend integration
+const {
+  menuCategories,
+  events: backendEvents,
+  operationHours,
+  isLoading: backendLoading,
+  error: backendError,
+  fetchCategories,
+  fetchItems,
+  fetchEvents,
+  fetchOperationHours,
+  pagination
+} = useBackendData();
+
+// Advanced loading
+const { loadingState, startLoading, finishLoading } = useAdvancedLoading({
+  duration: 100,
+  showProgress: true,
+  customTexts: [
+    'Loading restaurant data...',
+    'Preparing menu categories...',
+    'Setting up events...',
+    'Almost ready...',
+    'Welcome to The Pearson Pub!'
+  ]
+});
+
+// 3D Animations
+const {
+  addFloatingElement,
+  addParallaxElement,
+  createMorphingEffect,
+  createLoadingAnimation,
+  createGSAPAnimation
+} = use3DAnimations({
+  enableParallax: true,
+  enableFloating: true,
+  enableRotation: true,
+  intensity: 1.1,
+  speed: 0.9
+});
+
+// Statistics computed from backend data (memoized)
+const statistics = computed(() => [
+  {
+    id: 'categories',
+    label: 'Menu Categories',
+    value: menuCategories.value.length || 0,
+    icon: 'i-heroicons-squares-2x2',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100',
+  },
+  {
+    id: 'items',
+    label: 'Menu Items',
+    value: pagination.value.items?.total || 0,
+    icon: 'i-heroicons-fire',
+    color: 'text-green-600',
+    bgColor: 'bg-green-100',
+  },
+  {
+    id: 'events',
+    label: 'Upcoming Events',
+    value: backendEvents.value.length || 0,
+    icon: 'i-heroicons-calendar-days',
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-100',
+  },
+  {
+    id: 'hours',
+    label: 'Operating Days',
+    value: operationHours.value.length || 7,
+    icon: 'i-heroicons-clock',
+    color: 'text-yellow-600',
+    bgColor: 'bg-yellow-100',
+  },
+]);
+
+// Features showcase
+const features = ref([
+  {
+    id: 'menu',
+    title: 'Diverse Menu',
+    description: 'Explore our extensive menu with categories ranging from traditional pub fare to modern cuisine.',
+    icon: 'i-heroicons-book-open',
+    link: '/menu',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-100',
+  },
+  {
+    id: 'events',
+    title: 'Live Events',
+    description: 'Join us for live music, quiz nights, and special events throughout the week.',
+    icon: 'i-heroicons-musical-note',
+    link: '/events',
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-100',
+  },
+
+  //Contact us easily for reservations, inquiries, or special requests.
+  {
+    id: 'contact',
+    title: 'Easy Booking',
+    description: '',
+    icon: 'i-heroicons-phone',
+    link: '/contact',
+    color: 'text-green-600',
+    bgColor: 'bg-green-100',
+  },
+]);
 
 // Specials Section State (moved from menu.vue)
 const specialsTabs = ref([
@@ -218,22 +407,64 @@ const handleIntersection = (entries: IntersectionObserverEntry[], observer: Inte
 
 let observer: IntersectionObserver
 
-onMounted(() => {
+onMounted(async () => {
+  // Fetch only categories and items for above-the-fold content
+  if (!backendCache.categories) backendCache.categories = await fetchCategories();
+  if (!backendCache.items) backendCache.items = await fetchItems();
+
+  // Defer fetching events and operation hours
+  setTimeout(async () => {
+    if (!backendCache.events) backendCache.events = await fetchEvents();
+    if (!backendCache.operationHours) backendCache.operationHours = await fetchOperationHours();
+  }, 0);
+
   // Initialize intersection observer
   observer = new IntersectionObserver(handleIntersection, {
     threshold: 0.1,
     rootMargin: '0px'
   })
-
-  // Start observing sections
   if (aboutRef.value) observer.observe(aboutRef.value)
+
+  // Defer heavy animation setup to idle
+  if (process.client) {
+    const runAnimations = async () => {
+      await finishLoading();
+      const nuxtApp = useNuxtApp();
+      const $gsap = (nuxtApp as any)?.$gsap;
+      if ($gsap && $gsap.utils && typeof $gsap.from === "function") {
+        $gsap.utils.toArray(".stat-card").forEach((el: any, i: number) => {
+          addFloatingElement(el, 6, 0.0008, i * 0.2);
+          createMorphingEffect(el);
+          createGSAPAnimation(el, {
+            from: { opacity: 0, y: 40, scale: 0.8, rotationY: -15 },
+            to: {
+              opacity: 1, y: 0, scale: 1, rotationY: 0, duration: 1, delay: i * 0.1, ease: "back.out(1.3)",
+              scrollTrigger: { trigger: el, start: "top 85%", end: "bottom 15%", toggleActions: "play none none reverse" }
+            }
+          });
+        });
+        $gsap.utils.toArray(".feature-card").forEach((el: any, i: number) => {
+          addFloatingElement(el, 8, 0.001, i * 0.3);
+          createGSAPAnimation(el, {
+            from: { opacity: 0, y: 60, rotationX: -10 },
+            to: {
+              opacity: 1, y: 0, rotationX: 0, duration: 1.2, delay: i * 0.15, ease: "power3.out",
+              scrollTrigger: { trigger: el, start: "top 85%", end: "bottom 15%", toggleActions: "play none none reverse" }
+            }
+          });
+        });
+      }
+    }
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(runAnimations);
+    } else {
+      setTimeout(runAnimations, 200);
+    }
+  }
 })
 
 onUnmounted(() => {
-  // Clean up observer
-  if (observer) {
-    observer.disconnect()
-  }
+  if (observer) observer.disconnect()
 })
 </script>
 
