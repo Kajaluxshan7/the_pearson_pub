@@ -143,6 +143,14 @@ export const operationHoursApi = {
     api(`/operation-hours/${id}`),
 };
 
+// Public API for landing page content
+export const publicApi = {
+  getLandingContent: () => api("/api/public/landing-content"),
+  getMenuData: () => api("/api/public/menu"),
+  getEventsData: () => api("/api/public/events"),
+  getContactInfo: () => api("/api/public/contact"),
+};
+
 export default api;
 
 // Main composable function
@@ -170,5 +178,6 @@ export const useApi = () => {
     itemsApi,
     eventsApi,
     operationHoursApi,
+    publicApi,
   };
 };

@@ -668,7 +668,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { useEvents } from "~/composables/useEvents";
-import { useBackendData } from "~/composables/useBackendData";
+import { useLandingPageData } from "~/composables/useLandingPageData";
 import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
 import { use3DAnimations } from "~/composables/use3DAnimations";
 import { usePerformance } from "~/composables/usePerformance";
@@ -677,22 +677,30 @@ import LoadingScreen3D from "~/components/loading/LoadingScreen3D.vue";
 import SkeletonCard from "~/components/loading/SkeletonCard.vue";
 import FloatingActionButton from "~/components/ui/FloatingActionButton.vue";
 import EventDetailsModal from "~/components/events/EventDetailsModal.vue";
-import EventDetailsModalLandscape from "~/components/events/EventDetailsModalLandscape.vue";
+import EventDetailsModalLandscape from "~/components/events/EventDetailsModalLandscape.vue";  // SSR/SSG: useAsyncData for events data
+const { data: eventsData } = await useAsyncData('events-data', async () => {
+  const { fetchEventsData } = useLandingPageData();
+  await fetchEventsData();
+  return true;
+});
+
+// Backend events data
+const {
+  eventsData: backendEventsData,
+  allEvents: dynamicEvents,
+  isLoading: backendLoading,
+  error: backendError,
+  fetchEventsData,
+} = useLandingPageData();
+
+// Alias for compatibility
+const fetchEvents = fetchEventsData;
 import type { Event } from "~/types/events";
 import type { Category } from "~/types/events-ui";
 import type { FABAction } from "~/components/ui/FloatingActionButton.vue";
 
 // Composables
 const { events: staticEvents } = useEvents(); // Keep for weekly schedule
-const { 
-  events: backendEvents, 
-  isLoading: backendLoading, 
-  error: backendError,
-  fetchEvents,
-  fetchEventById,
-  loadMoreEvents,
-  pagination: eventPagination
-} = useBackendData();
 
 // Advanced loading with custom events texts
 const { loadingState, startLoading, finishLoading } = useAdvancedLoading({
@@ -735,6 +743,15 @@ const selectedCategory = ref("all");
 const viewMode = ref<"grid" | "list">("grid");
 const currentPage = ref(1);
 const itemsPerPage = 8; // Changed to 8 as requested
+
+// Pagination for backend events
+const eventPagination = ref({
+  events: {
+    page: 1,
+    totalPages: 1,
+    total: 0
+  }
+});
 
 // Modal state
 const selectedEvent = ref<Event | null>(null);
@@ -797,11 +814,11 @@ const isLoading = ref(false);
 
 // Combine static events with backend events for display
 const allEvents = computed(() => {
-  const backend = backendEvents.value || [];
+  const dynamic = dynamicEvents.value || [];
   const static_ = staticEvents.value || [];
   
   // Transform backend events to match frontend interface
-  const transformedBackend = backend.map((event: any) => {
+  const transformedDynamic = dynamic.map((event: any) => {
     const getEventStatus = () => {
       if (!event.start_date) return 'upcoming';
       const now = new Date();
@@ -836,7 +853,7 @@ const allEvents = computed(() => {
   });
   
   // Combine and sort by date (upcoming first)
-  return [...transformedBackend, ...static_].sort((a, b) => {
+  return [...transformedDynamic, ...static_].sort((a, b) => {
     const dateA = new Date(a.date || '1970-01-01');
     const dateB = new Date(b.date || '1970-01-01');
     return dateB.getTime() - dateA.getTime();
@@ -999,12 +1016,29 @@ const handleKeyNavigation = (event: KeyboardEvent) => {
   }
 };
 
+// Load more events function for pagination
+const loadMoreEvents = async () => {
+  try {
+    eventPagination.value.events.page += 1;
+    // Since we're using static pagination, just update the counter
+    // In a real implementation, this would fetch more data from the backend
+  } catch (error) {
+    console.error('Error loading more events:', error);
+  }
+};
+
 onMounted(async () => {
   // Start loading animation
   startLoading();
   
   // Fetch backend data
   await fetchEvents();
+  
+  // Update pagination based on events data
+  if (dynamicEvents.value) {
+    eventPagination.value.events.total = dynamicEvents.value.length;
+    eventPagination.value.events.totalPages = Math.ceil(dynamicEvents.value.length / 50);
+  }
   
   // Simulate loading time for better UX
   await new Promise(resolve => setTimeout(resolve, 1200));
