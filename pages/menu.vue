@@ -813,7 +813,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
-import { useBackendData } from "~/composables/useBackendData";
+import { useLandingPageData } from "~/composables/useLandingPageData";
 import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
 import { use3DAnimations } from "~/composables/use3DAnimations";
 import { usePerformance } from "~/composables/usePerformance";
@@ -822,16 +822,21 @@ import LoadingScreen3D from "~/components/loading/LoadingScreen3D.vue";
 import SkeletonCard from "~/components/loading/SkeletonCard.vue";
 import type { MenuItem, MenuCategory } from "~/types/menu";
 
+// SSR/SSG: useAsyncData for menu data
+const { data: menuData } = await useAsyncData('menu-data', async () => {
+  const { fetchMenuData } = useLandingPageData();
+  await fetchMenuData();
+  return true;
+});
+
 // Composables
 const {
+  menuData: backendMenuData,
   menuCategories,
   isLoading: backendLoading,
   error: backendError,
-  fetchItems,
-  fetchItemById,
-  loadMoreItems,
-  pagination
-} = useBackendData();
+  fetchMenuData,
+} = useLandingPageData();
 
 // 3D Animations
 const {
@@ -870,6 +875,15 @@ const dietaryFilters = ref({
   vegetarian: false,
   vegan: false,
   glutenFree: false,
+});
+
+// Pagination for backend items
+const pagination = ref({
+  items: {
+    page: 1,
+    totalPages: 1,
+    total: 0
+  }
 });
 
 // Modal
@@ -1085,6 +1099,17 @@ const clearAllFilters = () => {
   };
 };
 
+// Load more items function for pagination
+const loadMoreItems = async () => {
+  try {
+    pagination.value.items.page += 1;
+    // Since we're using static pagination, just update the counter
+    // In a real implementation, this would fetch more data from the backend
+  } catch (error) {
+    console.error('Error loading more items:', error);
+  }
+};
+
 // Dietary info
 const dietaryInfo = [
   { icon: "i-heroicons-leaf", label: "Vegetarian Options" },
@@ -1119,21 +1144,26 @@ watch(isModalOpen, (isOpen) => {
 });
 
 onMounted(async () => {
-  // Initialize backend data
+  // Initialize menu data
   try {
-    await Promise.all([
-      fetchItems(1, { visibility: true }),
-    ]);
+    if (!backendMenuData.value) {
+      await fetchMenuData();
+    }
   } catch (error) {
     console.error('Failed to load menu data:', error);
   }
 
   // Set default category
-  const allDayMenu = categories.value.find((c: any) => c.id === "all-day-menu");
-  if (allDayMenu) {
-    activeCategory.value = "all-day-menu";
-  } else if (categories.value.length > 0) {
-    activeCategory.value = categories.value[0].id;
+  const firstCategory = categories.value[0];
+  if (firstCategory) {
+    activeCategory.value = firstCategory.id;
+  }
+
+  // Initialize pagination based on menu data
+  const allItems = categories.value.flatMap(cat => cat.items || []);
+  if (allItems.length > 0) {
+    pagination.value.items.total = allItems.length;
+    pagination.value.items.totalPages = Math.ceil(allItems.length / 50);
   }
 
   // Add click outside listener

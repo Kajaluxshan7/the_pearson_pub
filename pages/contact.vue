@@ -238,9 +238,11 @@
     <!-- Success/Error Messages -->
     <UNotifications />
   </div>
-</template><script setup lang="ts">
-import { ref, onMounted, nextTick } from "vue"
-import { useBackendData } from "~/composables/useBackendData";
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from "vue"
+import { useLandingPageData } from "~/composables/useLandingPageData";
 import Background3D from "~/components/Background3D.vue";
 
 interface ContactInfo {
@@ -257,8 +259,19 @@ interface FormData {
   message: string
 }
 
+// SSR/SSG: useAsyncData for contact data
+const { data: contactData } = await useAsyncData('contact-data', async () => {
+  const { fetchContactInfo } = useLandingPageData();
+  await fetchContactInfo();
+  return true;
+});
+
 // Backend integration
-const { operationHours, fetchOperationHours } = useBackendData();
+const { 
+  contactInfo: backendContactInfo, 
+  operationHours, 
+  fetchContactInfo 
+} = useLandingPageData();
 
 const form = ref<FormData>({
   name: "",
@@ -276,15 +289,15 @@ const isVisible = ref({
   form: false,
 })
 
-// Generate dynamic operation hours from backend only
+// Generate dynamic operation hours from backend
 const formatOperationHours = (hours: any[]) => {
   if (!hours || hours.length === 0) return "";
   
   // Group by similar times
   const grouped = hours.reduce((acc: any, hour: any) => {
-    const timeKey = `${hour.opening_time}-${hour.closing_time}`;
+    const timeKey = `${hour.open_time}-${hour.close_time}`;
     if (!acc[timeKey]) acc[timeKey] = [];
-    acc[timeKey].push(hour.day_of_week);
+    acc[timeKey].push(hour.day);
     return acc;
   }, {});
   
@@ -297,38 +310,57 @@ const formatOperationHours = (hours: any[]) => {
     .join('\n');
 }
 
-const contactInfo = ref<ContactInfo[]>([]);
+const contactInfo = computed(() => {
+  const info = backendContactInfo.value;
+  if (!info) {
+    return [
+      {
+        icon: "i-heroicons-map-pin",
+        title: "Address",
+        value: "5179 Dundas Street W",
+        extra: "Etobicoke, ON M9A 1C2",
+      },
+      {
+        icon: "i-heroicons-phone",
+        title: "Phone",
+        value: "905-430-5699",
+        extra: "Call us anytime",
+      },
+      {
+        icon: "i-heroicons-envelope",
+        title: "Email",
+        value: "info@thepearsonpub.com",
+        extra: "We'll get back to you soon",
+      },
+    ];
+  }
 
-onMounted(async () => {
-  await fetchOperationHours();
-  contactInfo.value = [
+  return [
     {
       icon: "i-heroicons-map-pin",
       title: "Address",
-      value: "101 MARY ST WHITBY, ON",
-      extra: "L1N 2R4, Canada",
+      value: info.address.split(',')[0],
+      extra: info.address.split(',').slice(1).join(','),
     },
     {
       icon: "i-heroicons-phone",
       title: "Phone",
-      value: "905-430-5699",
+      value: info.phone,
       extra: "Call us anytime",
     },
     {
       icon: "i-heroicons-envelope",
       title: "Email",
-      value: "thepearsonpub@rogers.com",
-      extra: "We'll respond within 24 hours",
+      value: info.email,
+      extra: "We'll get back to you soon",
     },
     {
       icon: "i-heroicons-clock",
-      title: "Opening Hours",
-      value: formatOperationHours(operationHours.value),
-      extra: "Extended hours on weekends",
+      title: "Hours",
+      value: formatOperationHours(info.operationHours),
+      extra: "Check our current hours",
     },
   ];
-  setTimeout(() => { isVisible.value.info = true }, 300)
-  setTimeout(() => { isVisible.value.form = true }, 600)
 });
 
 const validateForm = (data: FormData) => {
@@ -382,6 +414,16 @@ const submitForm = async () => {
   })
   isSubmitting.value = false
 }
+
+onMounted(async () => {
+  // Initialize contact data if not already loaded
+  if (!backendContactInfo.value) {
+    await fetchContactInfo();
+  }
+  
+  setTimeout(() => { isVisible.value.info = true }, 300)
+  setTimeout(() => { isVisible.value.form = true }, 600)
+});
 
 // Page meta
 useHead({
