@@ -2,8 +2,6 @@
 # Development Docker Compose Override
 # ===============================================
 
-version: "3.8"
-
 services:
   # Development override for landing page
   landing-page:
@@ -11,21 +9,19 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: pearson_landing
-    ports:
-      - "3000:3000"
     environment:
       - NODE_ENV=development
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=3000
+    ports:
+      - "3000:3000"
     volumes:
-      # Mount source code for hot reload
       - .:/app
       - /app/node_modules
       - /app/.nuxt
       - /app/.output
     command: ["npm", "run", "dev"]
-    
-    # Remove resource limits in development
-    deploy: {}
-    
-    # Remove health check in development (optional)
+    user: "1001:1001"    # Run container process as UID 1001 (nuxtjs user)
     healthcheck:
       disable: true
+    deploy: {}  # removes resource limits (optional for dev)
