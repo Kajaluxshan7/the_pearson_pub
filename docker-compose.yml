@@ -11,6 +11,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: pearson_landing
+    ports:
+      - "3000:3000"
     environment:
       - NODE_ENV=development
     volumes:
