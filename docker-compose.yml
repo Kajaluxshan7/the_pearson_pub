@@ -16,8 +16,6 @@ services:
       - /app/.nuxt
       - /app/.output
     user: root
-    command: >
-      sh -c "chown -R nuxtjs:nodejs /app/.output /app/.nuxt && su-exec nuxtjs npm run dev"
     healthcheck:
       disable: true
     deploy: {}
