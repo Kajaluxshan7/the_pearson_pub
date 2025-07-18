@@ -11,7 +11,7 @@ const getApiBaseUrl = () => {
   }
 };
 
-// Create fetch instance with base configuration
+// Create fetch instance with base configuration and error handling
 const createApiClient = () => {
   const API_BASE_URL = getApiBaseUrl();
 
@@ -21,11 +21,29 @@ const createApiClient = () => {
     headers: {
       "Content-Type": "application/json",
     },
+    onRequestError({ error }) {
+      console.warn("API Request Error:", error);
+      // Don't throw error, let components handle gracefully
+    },
+    onResponseError({ response }) {
+      console.warn("API Response Error:", response.status, response.statusText);
+      // Don't throw error, let components handle gracefully
+    },
   });
 };
 
 // Create the API client
 const api = createApiClient();
+
+// Helper function to handle API calls with fallback
+const safeApiCall = async <T>(apiCall: () => Promise<T>, fallback: T): Promise<T> => {
+  try {
+    return await apiCall();
+  } catch (error) {
+    console.warn("API call failed, using fallback data:", error);
+    return fallback;
+  }
+};
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -88,21 +106,26 @@ export interface ApiOperationHour {
   updated_at: string;
 }
 
-// Categories API
+// Categories API with fallbacks
 export const categoriesApi = {
   getAll: (
     page = 1,
     limit = 50,
     search?: string
   ): Promise<PaginatedResponse<ApiCategory>> =>
-    api("/categories", {
-      query: { page, limit, search },
-    }),
+    safeApiCall(
+      () => api("/categories", { query: { page, limit, search } }),
+      { data: [], total: 0, page: 1, totalPages: 0 }
+    ),
 
-  getById: (id: string): Promise<ApiCategory> => api(`/categories/${id}`),
+  getById: (id: string): Promise<ApiCategory | null> =>
+    safeApiCall(
+      () => api(`/categories/${id}`),
+      null
+    ),
 };
 
-// Items API
+// Items API with fallbacks
 export const itemsApi = {
   getAll: (
     page = 1,
@@ -113,22 +136,29 @@ export const itemsApi = {
     visibility?: boolean,
     is_favourite?: boolean
   ): Promise<PaginatedResponse<ApiItem>> =>
-    api("/items", {
-      query: {
-        page,
-        limit,
-        search,
-        categoryId,
-        availability,
-        visibility,
-        is_favourite,
-      },
-    }),
+    safeApiCall(
+      () => api("/items", {
+        query: {
+          page,
+          limit,
+          search,
+          categoryId,
+          availability,
+          visibility,
+          is_favourite,
+        },
+      }),
+      { data: [], total: 0, page: 1, totalPages: 0 }
+    ),
 
-  getById: (id: string): Promise<ApiItem> => api(`/items/${id}`),
+  getById: (id: string): Promise<ApiItem | null> =>
+    safeApiCall(
+      () => api(`/items/${id}`),
+      null
+    ),
 };
 
-// Events API
+// Events API with fallbacks
 export const eventsApi = {
   getAll: (
     page = 1,
@@ -137,37 +167,66 @@ export const eventsApi = {
     startDate?: string,
     endDate?: string
   ): Promise<PaginatedResponse<ApiEvent>> =>
-    api("/events", {
-      query: { page, limit, search, startDate, endDate },
-    }),
+    safeApiCall(
+      () => api("/events", {
+        query: { page, limit, search, startDate, endDate },
+      }),
+      { data: [], total: 0, page: 1, totalPages: 0 }
+    ),
 
-  getById: (id: string): Promise<ApiEvent> => api(`/events/${id}`),
+  getById: (id: string): Promise<ApiEvent | null> =>
+    safeApiCall(
+      () => api(`/events/${id}`),
+      null
+    ),
 };
 
-// Operation Hours API
+// Operation Hours API with fallbacks
 export const operationHoursApi = {
   getAll: (
     page = 1,
     limit = 20,
     day?: string
   ): Promise<PaginatedResponse<ApiOperationHour>> =>
-    api("/operation-hours", {
-      query: { page, limit, day },
-    }),
+    safeApiCall(
+      () => api("/operation-hours", {
+        query: { page, limit, day },
+      }),
+      { data: [], total: 0, page: 1, totalPages: 0 }
+    ),
 
-  getById: (id: string): Promise<ApiOperationHour> =>
-    api(`/operation-hours/${id}`),
+  getById: (id: string): Promise<ApiOperationHour | null> =>
+    safeApiCall(
+      () => api(`/operation-hours/${id}`),
+      null
+    ),
 };
 
-// Public API for landing page content
+// Public API for landing page content - these endpoints are optional
 export const publicApi = {
-  getLandingContent: () => api("/api/public/landing-content"),
-  getMenuData: () => api("/api/public/menu"),
-  getEventsData: () => api("/api/public/events"),
-  getContactInfo: () => api("/api/public/contact"),
+  getLandingContent: () => 
+    safeApiCall(
+      () => api("/api/public/landing-content"),
+      null
+    ),
+  getMenuData: () => 
+    safeApiCall(
+      () => api("/api/public/menu"),
+      null
+    ),
+  getEventsData: () => 
+    safeApiCall(
+      () => api("/api/public/events"),
+      null
+    ),
+  getContactInfo: () => 
+    safeApiCall(
+      () => api("/api/public/contact"),
+      null
+    ),
 };
 
-// Specials API for public use
+// Specials API for public use with fallbacks
 export const specialsApi = {
   getAll: (
     page = 1,
@@ -175,35 +234,50 @@ export const specialsApi = {
     search?: string,
     specialType?: string
   ): Promise<PaginatedResponse<any>> =>
-    api("/specials", {
-      query: { page, limit, search, specialType },
-    }),
+    safeApiCall(
+      () => api("/specials", {
+        query: { page, limit, search, specialType },
+      }),
+      { data: [], total: 0, page: 1, totalPages: 0 }
+    ),
 
   getByType: (
     specialType: "daily" | "seasonal" | "latenight"
   ): Promise<any[]> =>
-    api("/specials", {
-      query: { specialType, limit: 50 },
-    }).then((response) => response.data),
+    safeApiCall(
+      () => api("/specials", {
+        query: { specialType, limit: 50 },
+      }).then((response) => response.data),
+      []
+    ),
 
   getCurrentDaySpecials: (): Promise<any[]> => {
     const currentDay = new Date().toLocaleDateString("en-US", {
       weekday: "long",
     });
-    return api("/specials", {
-      query: { specialType: "daily", limit: 50 },
-    }).then((response) => response.data);
+    return safeApiCall(
+      () => api("/specials", {
+        query: { specialType: "daily", limit: 50 },
+      }).then((response) => response.data),
+      []
+    );
   },
 
   getSeasonalSpecials: (): Promise<any[]> =>
-    api("/specials", {
-      query: { specialType: "seasonal", limit: 50 },
-    }).then((response) => response.data),
+    safeApiCall(
+      () => api("/specials", {
+        query: { specialType: "seasonal", limit: 50 },
+      }).then((response) => response.data),
+      []
+    ),
 
   getLastNightSpecials: (): Promise<any[]> =>
-    api("/specials", {
-      query: { specialType: "latenight", limit: 50 },
-    }).then((response) => response.data),
+    safeApiCall(
+      () => api("/specials", {
+        query: { specialType: "latenight", limit: 50 },
+      }).then((response) => response.data),
+      []
+    ),
 };
 
 export default api;

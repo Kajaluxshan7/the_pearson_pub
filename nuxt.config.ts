@@ -50,16 +50,9 @@ export default defineNuxtConfig({
   modules: [
     "@nuxt/ui",
     "@nuxt/image",
-    "nuxt-icon",
     "@vite-pwa/nuxt",
     "@nuxtjs/color-mode", // Added color mode module
   ],
-  icon: {
-    // To prevent multiple Icon component registration warnings
-    addComponent: {
-      priority: 10,
-    },
-  },
   ui: {
     global: true,
   },
@@ -97,8 +90,10 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: "vercel",
-    compatibilityDate: "2025-06-16",
+    compatibilityDate: "2025-07-19",
   },
+
+  compatibilityDate: "2025-07-19",
 
   build: {
     transpile: ["@heroicons/vue"],

@@ -398,21 +398,48 @@ const submitForm = async () => {
     formErrors.value = errors
     return
   }
+  
   isSubmitting.value = true
-  await new Promise((r) => setTimeout(r, 1500))
-  form.value = {
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
+  
+  try {
+    // Map form fields to match the API expected format
+    const contactData = {
+      firstName: form.value.name.split(' ')[0] || form.value.name,
+      lastName: form.value.name.split(' ').slice(1).join(' ') || '',
+      email: form.value.email,
+      message: `Subject: ${form.value.subject}\n\nMessage: ${form.value.message}`
+    }
+
+    const response = await $fetch('/api/contact', {
+      method: 'POST',
+      body: contactData
+    })
+
+    // Success
+    form.value = {
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+    }
+    formErrors.value = {}
+    
+    toast.add({
+      title: "Success!",
+      description: "Your message has been sent successfully. We'll get back to you soon!",
+      color: "green",
+    })
+  } catch (error: any) {
+    console.error('Contact form error:', error)
+    
+    toast.add({
+      title: "Error",
+      description: error.data?.message || "Failed to send message. Please try again or contact us directly.",
+      color: "red",
+    })
+  } finally {
+    isSubmitting.value = false
   }
-  formErrors.value = {}
-  toast.add({
-    title: "Success!",
-    description: "Your message has been sent successfully.",
-    color: "green",
-  })
-  isSubmitting.value = false
 }
 
 onMounted(async () => {
