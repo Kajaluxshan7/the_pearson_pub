@@ -1,9 +1,4 @@
-# ===============================================
-# Development Docker Compose Override
-# ===============================================
-
 services:
-  # Development override for landing page
   landing-page:
     build:
       context: .
@@ -20,8 +15,9 @@ services:
       - /app/node_modules
       - /app/.nuxt
       - /app/.output
-    command: ["npm", "run", "dev"]
-    user: "1001:1001"    # Run container process as UID 1001 (nuxtjs user)
+    user: root
+    command: >
+      sh -c "chown -R nuxtjs:nodejs /app/.output /app/.nuxt && su-exec nuxtjs npm run dev"
     healthcheck:
       disable: true
-    deploy: {}  # removes resource limits (optional for dev)
+    deploy: {}
