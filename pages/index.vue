@@ -1,7 +1,8 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Loading State -->
-    <div v-if="backendLoading && !landingContent" class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900">
+    <div v-if="backendLoading && !landingContent"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900">
       <div class="text-center">
         <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-500 mx-auto mb-4"></div>
         <p class="text-xl text-gray-600 dark:text-gray-300">Loading restaurant content...</p>
@@ -24,13 +25,35 @@
       <!-- Lazy loaded Hero -->
       <component :is="Hero" v-if="Hero" />
 
+      <!-- Operation Hours Banner -->
+      <section class="bg-yellow-600 dark:bg-yellow-700 py-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex flex-col md:flex-row items-center justify-center text-center md:text-left gap-4">
+            <div class="flex items-center gap-2">
+              <UIcon name="i-heroicons-clock" class="w-5 h-5 text-white" />
+              <span class="font-semibold text-white">Hours of Operation:</span>
+            </div>
+            <div class="text-white text-sm md:text-base" v-if="operationHours?.length">
+              <span v-for="(hourGroup, index) in formattedOperationHours" :key="index" class="block md:inline">
+                {{ hourGroup }}
+                <span v-if="index < formattedOperationHours.length - 1" class="hidden md:inline mx-2">•</span>
+              </span>
+            </div>
+            <div v-else class="text-white text-sm md:text-base">
+              Mon-Sun: 11:00 AM - 11:00 PM
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Specials Section -->
       <section id="specials" class="specials section py-20 bg-gray-50 dark:bg-gray-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <!-- Specials Title -->
           <div class="mb-12 text-center" data-aos="fade-up">
-            <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white" style="font-family: 'Cinzel', 'Georgia', serif;">
-              Daily <span class="text-yellow-600 dark:text-yellow-400">Specials</span>
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white"
+              style="font-family: 'Cinzel', 'Georgia', serif;">
+              <span class="text-yellow-600 dark:text-yellow-400">Specials</span>
             </h2>
             <div class="w-16 h-1 bg-yellow-500 mx-auto mb-4"></div>
             <p class="text-xl text-gray-600 dark:text-gray-300">Check Our Chef's Recommendations</p>
@@ -38,18 +61,14 @@
           <div class="flex flex-col lg:flex-row gap-12">
             <!-- Tabs List -->
             <nav class="lg:w-1/4">
-              <div class="flex lg:flex-col space-x-4 lg:space-x-0 lg:space-y-4 overflow-x-auto lg:overflow-visible border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 pb-4 lg:pb-0 lg:pr-8">
-                <button
-                  v-for="(tab, index) in specialsTabs"
-                  :key="tab.id"
-                  @click="activeSpecialTab = tab.id"
-                  :class="[
-                    'py-3 px-6 font-medium text-left whitespace-nowrap transition-all duration-300 rounded-lg lg:rounded-none lg:rounded-l-lg transform hover:scale-105',
-                    activeSpecialTab === tab.id
-                      ? 'bg-yellow-500 text-white shadow-lg lg:bg-transparent lg:text-yellow-600 dark:lg:text-yellow-400 lg:font-bold lg:border-l-4 lg:border-yellow-500 lg:shadow-none'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
-                  ]"
-                >
+              <div
+                class="flex lg:flex-col space-x-4 lg:space-x-0 lg:space-y-4 overflow-x-auto lg:overflow-visible border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 pb-4 lg:pb-0 lg:pr-8">
+                <button v-for="(tab, index) in specialsTabs" :key="tab.id" @click="activeSpecialTab = tab.id" :class="[
+                  'py-3 px-6 font-medium text-left whitespace-nowrap transition-all duration-300 rounded-lg lg:rounded-none lg:rounded-l-lg transform hover:scale-105',
+                  activeSpecialTab === tab.id
+                    ? 'bg-yellow-500 text-white shadow-lg lg:bg-transparent lg:text-yellow-600 dark:lg:text-yellow-400 lg:font-bold lg:border-l-4 lg:border-yellow-500 lg:shadow-none'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+                ]">
                   {{ tab.title }}
                 </button>
               </div>
@@ -57,37 +76,43 @@
             <!-- Tabs Content -->
             <div class="lg:flex-1">
               <transition name="fade" mode="out-in" appear>
-                <div
-                  v-if="selectedTab"
-                  :key="selectedTab.id"
-                  class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8"
-                >
+                <div v-if="selectedTab" :key="selectedTab.id"
+                  class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8">
                   <div class="flex flex-col lg:flex-row items-center lg:items-start gap-8">
                     <div class="lg:flex-1 order-2 lg:order-1">
-                      <h3 class="text-3xl font-bold mb-3 text-gray-900 dark:text-white">{{ selectedTab.title }}</h3>
+                      <h3 class="text-3xl font-bold mb-3 text-gray-900 dark:text-white">
+                        {{ (selectedTab as any).name || selectedTab.title }}
+                      </h3>
                       <p class="italic text-yellow-600 dark:text-yellow-400 mb-4 text-lg">{{ selectedTab.subtitle }}</p>
                       <p class="text-gray-700 dark:text-gray-300 leading-relaxed">{{ selectedTab.description }}</p>
                       <div v-if="selectedTab && 'price' in selectedTab && selectedTab.price" class="mt-4">
-                        <span class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${{ selectedTab.price }}</span>
+                        <span class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${{ selectedTab.price
+                          }}</span>
                       </div>
                     </div>
                     <div class="lg:w-80 order-1 lg:order-2 text-center">
                       <div class="relative overflow-hidden rounded-xl shadow-lg">
-                        <NuxtImg
-                          :src="selectedTab.img"
-                          :alt="selectedTab.title"
+                        <NuxtImg :src="selectedTab.img" :alt="selectedTab.title"
                           class="w-full h-64 object-cover transform hover:scale-110 transition-transform duration-500"
-                          width="320"
-                          height="256"
-                          format="webp"
-                          quality="80"
-                          loading="lazy"
-                        />
+                          width="320" height="256" format="webp" quality="80" loading="lazy" />
                       </div>
                     </div>
                   </div>
                 </div>
               </transition>
+            </div>
+
+            <!-- Three Dots Navigation -->
+            <div class="flex justify-center mt-8">
+              <div class="flex space-x-2">
+                <button v-for="(tab, index) in specialsTabs" :key="`dot-${tab.id}`" @click="activeSpecialTab = tab.id"
+                  :class="[
+                    'w-3 h-3 rounded-full transition-all duration-300',
+                    activeSpecialTab === tab.id
+                      ? 'bg-yellow-500 scale-125'
+                      : 'bg-gray-300 dark:bg-gray-600 hover:bg-yellow-400'
+                  ]" :aria-label="`Go to ${tab.title}`"></button>
+              </div>
             </div>
           </div>
         </div>
@@ -98,38 +123,36 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="text-center mb-16">
             <div class="inline-block mb-4">
-              <span class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase">What We Offer</span>
+              <span class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase">What We
+                Offer</span>
               <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2"></div>
             </div>
-            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6" style="font-family: 'Cinzel', 'Georgia', serif;">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6"
+              style="font-family: 'Cinzel', 'Georgia', serif;">
               Experience <span class="text-yellow-600 dark:text-yellow-400">Excellence</span>
             </h2>
             <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               Discover what makes {{ siteInfo.name }} a beloved destination
             </p>
           </div>
-          
+
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <template v-for="(feature, index) in features" :key="feature.id">
-              <NuxtLink
-                v-if="feature.link"
-                :to="feature.link"
-                class="feature-card group bg-gray-50 dark:bg-gray-700 rounded-2xl p-8 text-center hover:bg-gradient-to-br hover:from-yellow-50 hover:to-orange-50 dark:hover:from-gray-600 dark:hover:to-gray-700 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-gray-200 dark:border-gray-600"
-              >
-                <div :class="[feature.bgColor, 'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300']">
+              <NuxtLink v-if="feature.link" :to="feature.link"
+                class="feature-card group bg-gray-50 dark:bg-gray-700 rounded-2xl p-8 text-center hover:bg-gradient-to-br hover:from-yellow-50 hover:to-orange-50 dark:hover:from-gray-600 dark:hover:to-gray-700 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-gray-200 dark:border-gray-600">
+                <div
+                  :class="[feature.bgColor, 'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300']">
                   <UIcon :name="feature.icon" :class="[feature.color, 'w-10 h-10']" />
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">
+                <h3
+                  class="text-2xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">
                   {{ feature.title }}
                 </h3>
                 <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
                   {{ feature.description }}
                 </p>
-                <UButton
-                  color="yellow"
-                  variant="outline"
-                  class="group-hover:bg-yellow-500 group-hover:text-white transition-all duration-300"
-                >
+                <UButton color="yellow" variant="outline"
+                  class="group-hover:bg-yellow-500 group-hover:text-white transition-all duration-300">
                   Learn More
                   <UIcon name="i-heroicons-arrow-right" class="w-4 h-4 ml-2" />
                 </UButton>
@@ -140,37 +163,34 @@
       </section>
 
       <!-- About Section -->
-      <section 
-        class="py-20 bg-white dark:bg-gray-800 relative overflow-hidden"
+      <section class="py-20 bg-white dark:bg-gray-800 relative overflow-hidden"
         :class="{ 'opacity-0 transform translate-y-8': !isVisible.about, 'animate-fade-in-up': isVisible.about }"
-        ref="aboutRef"
-      >
+        ref="aboutRef">
         <!-- Decorative Background -->
         <div class="absolute inset-0 opacity-5">
           <div class="absolute top-10 left-10 w-32 h-32 rounded-full border-2 border-yellow-500"></div>
           <div class="absolute bottom-10 right-10 w-48 h-48 rounded-full border border-yellow-300"></div>
         </div>
-        
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div 
-              class="space-y-8"
+            <div class="space-y-8"
               :class="{ 'opacity-0 transform translate-x-8': !isVisible.about, 'animate-fade-in-left': isVisible.about }"
-              style="animation-delay: 200ms"
-            >
+              style="animation-delay: 200ms">
               <div class="inline-block">
-                <span class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase">Our Story</span>
+                <span class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase">Our
+                  Story</span>
                 <div class="w-16 h-1 bg-yellow-500 mt-2"></div>
               </div>
-              
+
               <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
                 A Local Landmark <span class="text-yellow-600 dark:text-yellow-400">Since Day One</span>
               </h2>
-              
+
               <p class="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
                 {{ siteInfo?.description || 'A cozy neighborhood pub offering great food, drinks, and entertainment.' }}
               </p>
-              
+
               <div class="grid grid-cols-2 gap-8">
                 <div v-for="(stat, index) in statistics" :key="stat.id" class="text-center">
                   <div :class="[stat.bgColor, 'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4']">
@@ -182,77 +202,37 @@
               </div>
 
               <div class="flex flex-col sm:flex-row gap-4">
-                <UButton 
-                  to="/about" 
-                  color="yellow" 
-                  size="lg"
-                  class="flex-1 sm:flex-none"
-                >
+                <UButton to="/about" color="yellow" size="lg" class="flex-1 sm:flex-none">
                   Learn More
                   <UIcon name="i-heroicons-arrow-right" class="w-5 h-5 ml-2" />
                 </UButton>
-                <UButton 
-                  :to="`tel:${siteInfo.phone}`"
-                  variant="outline" 
-                  color="gray" 
-                  size="lg"
-                  class="flex-1 sm:flex-none"
-                >
+                <UButton :to="`tel:${siteInfo.phone}`" variant="outline" color="gray" size="lg"
+                  class="flex-1 sm:flex-none">
                   <UIcon name="i-heroicons-phone" class="w-5 h-5 mr-2" />
                   {{ siteInfo.phone }}
                 </UButton>
               </div>
             </div>
 
-            <div 
-              class="relative"
+            <div class="relative"
               :class="{ 'opacity-0 transform translate-x-8': !isVisible.about, 'animate-fade-in-right': isVisible.about }"
-              style="animation-delay: 400ms"
-            >
+              style="animation-delay: 400ms">
               <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-4">
-                  <NuxtImg
-                    src="/images/about/interior-1.jpg"
-                    alt="Restaurant Interior"
-                    class="w-full h-48 object-cover rounded-2xl shadow-lg"
-                    width="200"
-                    height="192"
-                    format="webp"
-                    quality="80"
-                    loading="lazy"
-                  />
-                  <NuxtImg
-                    src="/images/about/food-1.jpg"
-                    alt="Delicious Food"
-                    class="w-full h-32 object-cover rounded-2xl shadow-lg"
-                    width="200"
-                    height="128"
-                    format="webp"
-                    quality="80"
-                    loading="lazy"
-                  />
+                  <NuxtImg src="/images/about/interior-1.jpg" alt="Restaurant Interior"
+                    class="w-full h-48 object-cover rounded-2xl shadow-lg" width="200" height="192" format="webp"
+                    quality="80" loading="lazy" />
+                  <NuxtImg src="/images/about/food-1.jpg" alt="Delicious Food"
+                    class="w-full h-32 object-cover rounded-2xl shadow-lg" width="200" height="128" format="webp"
+                    quality="80" loading="lazy" />
                 </div>
                 <div class="space-y-4 pt-8">
-                  <NuxtImg
-                    src="/images/about/bar-1.jpg"
-                    alt="Bar Area"
-                    class="w-full h-32 object-cover rounded-2xl shadow-lg"
-                    width="200"
-                    height="128"
-                    format="webp"
-                    quality="80"
-                    loading="lazy"
-                  />
-                  <NuxtImg
-                    src="/images/about/exterior-1.jpg"
-                    alt="Restaurant Exterior"
-                    class="w-full h-48 object-cover rounded-2xl shadow-lg"
-                    width="200"
-                    height="192"
-                    format="webp"
-                    quality="80"
-                    loading="lazy"
-                  />
+                  <NuxtImg src="/images/about/bar-1.jpg" alt="Bar Area"
+                    class="w-full h-32 object-cover rounded-2xl shadow-lg" width="200" height="128" format="webp"
+                    quality="80" loading="lazy" />
+                  <NuxtImg src="/images/about/exterior-1.jpg" alt="Restaurant Exterior"
+                    class="w-full h-48 object-cover rounded-2xl shadow-lg" width="200" height="192" format="webp"
+                    quality="80" loading="lazy" />
                 </div>
               </div>
             </div>
@@ -264,7 +244,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, computed, shallowRef } from 'vue'
+import { onMounted, onUnmounted, ref, computed, shallowRef, watch, nextTick } from 'vue'
 import { useLandingPageData } from "~/composables/useLandingPageData";
 import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
 import { use3DAnimations } from "~/composables/use3DAnimations";
@@ -404,47 +384,171 @@ const features = computed(() => [
 // Specials Section State (dynamic from backend)
 const specialsTabs = computed(() => {
   if (!landingContent.value?.todaysSpecials?.length) {
-    // Fallback static content
+    // Fallback static content with new category names
     return [
       {
-        id: 'specials-tab-1',
-        title: 'Classic Fish & Chips',
+        id: 'seasonal-special',
+        title: 'Seasonal Special',
         subtitle: 'Crispy battered fish served with golden fries and house tartar sauce.',
         description: 'A British pub staple! Fresh cod fillets, hand-battered and fried to perfection, served with thick-cut fries, mushy peas, and our signature tartar sauce.',
         img: '/images/food/fish_and_chips.jpg',
       },
       {
-        id: 'specials-tab-2',
-        title: 'Shepherd\'s Pie',
+        id: 'daily-special',
+        title: 'Daily Special',
         subtitle: 'Traditional comfort food with seasoned lamb and vegetables.',
         description: 'A hearty helping of seasoned ground lamb and vegetables, topped with creamy mashed potatoes and baked until golden brown.',
         img: '/images/food/shepherds_pie.jpg',
       },
       {
-        id: 'specials-tab-3',
-        title: 'Bangers & Mash',
+        id: 'last-night',
+        title: 'Last Night',
         subtitle: 'Traditional British sausages with creamy mashed potatoes.',
         description: 'Premium pork sausages served with fluffy mashed potatoes, caramelized onions, and rich gravy.',
         img: '/images/food/bangers_mash.jpg',
       },
     ];
   }
-  
-  // Dynamic content from backend
-  return landingContent.value.todaysSpecials.map((special: any, index: number) => ({
-    id: `special-${special.id}`,
-    title: special.name || special.title,
-    subtitle: special.description?.substring(0, 80) + '...' || 'Today\'s special offering',
-    description: special.description || 'A delicious special prepared by our chef.',
-    img: special.images?.[0] || `/images/food/special_${index + 1}.jpg`,
-    price: special.price,
-  }));
+
+  // Dynamic content from backend - map to new categories
+  const specials = landingContent.value.todaysSpecials;
+  const seasonalSpecials = specials.filter((s: any) => s.special_type === 'seasonal');
+  const dailySpecials = specials.filter((s: any) => s.special_type === 'daily');
+  const lastNightSpecials = specials.filter((s: any) => s.special_type === 'latenight');
+
+  const tabs = [];
+
+  // Add Seasonal Special tab
+  if (seasonalSpecials.length > 0) {
+    tabs.push({
+      id: 'seasonal-special',
+      title: 'Seasonal Special',
+      specials: seasonalSpecials, // Store all seasonal specials for auto-swapping
+      subtitle: seasonalSpecials[0].description?.substring(0, 80) + '...' || 'Fresh seasonal offering',
+      description: seasonalSpecials[0].description || 'A delicious seasonal special prepared by our chef.',
+      img: seasonalSpecials[0].menuItem?.images?.[0] || '/images/food/fish_and_chips.jpg',
+      price: seasonalSpecials[0].price,
+      name: seasonalSpecials[0].name,
+    });
+  }
+
+  // Add Daily Special tab
+  if (dailySpecials.length > 0) {
+    const daily = dailySpecials[0];
+    tabs.push({
+      id: 'daily-special',
+      title: 'Daily Special',
+      subtitle: daily.description?.substring(0, 80) + '...' || 'Today\'s featured dish',
+      description: daily.description || 'A delicious daily special prepared by our chef.',
+      img: daily.menuItem?.images?.[0] || '/images/food/shepherds_pie.jpg',
+      price: daily.price,
+      name: daily.name,
+    });
+  }
+
+  // Add Last Night tab
+  if (lastNightSpecials.length > 0) {
+    const lastNight = lastNightSpecials[0];
+    tabs.push({
+      id: 'last-night',
+      title: 'Last Night',
+      subtitle: lastNight.description?.substring(0, 80) + '...' || 'Late night favorite',
+      description: lastNight.description || 'A delicious late night special.',
+      img: lastNight.menuItem?.images?.[0] || '/images/food/bangers_mash.jpg',
+      price: lastNight.price,
+      name: lastNight.name,
+    });
+  }
+
+  return tabs.length > 0 ? tabs : [
+    // Fallback if no specials found
+    {
+      id: 'seasonal-special',
+      title: 'Seasonal Special',
+      subtitle: 'Check back soon for our seasonal offerings',
+      description: 'Our chef is preparing something special for this season. Stay tuned!',
+      img: '/images/food/fish_and_chips.jpg',
+    }
+  ];
 });
 
-const activeSpecialTab = ref('specials-tab-1')
-const selectedTab = computed(() =>
-  specialsTabs.value.find((tab) => tab.id === activeSpecialTab.value)
-)
+const activeSpecialTab = ref('seasonal-special')
+const seasonalSpecialIndex = ref(0) // For auto-swapping seasonal specials
+let seasonalSwapInterval: NodeJS.Timeout | null = null
+
+const selectedTab = computed(() => {
+  const tab = specialsTabs.value.find((tab) => tab.id === activeSpecialTab.value)
+
+  // If this is the seasonal special tab and it has multiple specials, swap through them
+  if (tab?.id === 'seasonal-special' && (tab as any).specials?.length > 1) {
+    const currentSpecial = (tab as any).specials[seasonalSpecialIndex.value]
+    return {
+      ...tab,
+      subtitle: currentSpecial.description?.substring(0, 80) + '...' || 'Fresh seasonal offering',
+      description: currentSpecial.description || 'A delicious seasonal special prepared by our chef.',
+      img: currentSpecial.menuItem?.images?.[0] || '/images/food/fish_and_chips.jpg',
+      price: currentSpecial.price,
+      name: currentSpecial.name,
+    }
+  }
+
+  return tab
+})
+
+// Auto-swap seasonal specials function
+const startSeasonalSpecialRotation = () => {
+  const seasonalTab = specialsTabs.value.find(tab => tab.id === 'seasonal-special')
+  if (seasonalTab && (seasonalTab as any).specials?.length > 1) {
+    seasonalSwapInterval = setInterval(() => {
+      seasonalSpecialIndex.value = (seasonalSpecialIndex.value + 1) % (seasonalTab as any).specials.length
+    }, 4000) // Swap every 4 seconds
+  }
+}
+
+const stopSeasonalSpecialRotation = () => {
+  if (seasonalSwapInterval) {
+    clearInterval(seasonalSwapInterval)
+    seasonalSwapInterval = null
+  }
+}
+
+// Watch for changes in active tab to manage rotation
+watch(activeSpecialTab, (newTab) => {
+  if (newTab === 'seasonal-special') {
+    startSeasonalSpecialRotation()
+  } else {
+    stopSeasonalSpecialRotation()
+  }
+})
+
+// Watch for changes in specials data to restart rotation
+watch(specialsTabs, () => {
+  if (activeSpecialTab.value === 'seasonal-special') {
+    stopSeasonalSpecialRotation()
+    seasonalSpecialIndex.value = 0
+    nextTick(() => {
+      startSeasonalSpecialRotation()
+    })
+  }
+}, { deep: true })
+const formattedOperationHours = computed(() => {
+  if (!operationHours.value?.length) return [];
+
+  // Group by similar times
+  const grouped = operationHours.value.reduce((acc: any, hour: any) => {
+    const timeKey = `${hour.open_time}-${hour.close_time}`;
+    if (!acc[timeKey]) acc[timeKey] = [];
+    acc[timeKey].push(hour.day);
+    return acc;
+  }, {});
+
+  return Object.entries(grouped)
+    .map(([time, days]: [string, any]) => {
+      const [open, close] = time.split('-');
+      const daysList = days.join(', ');
+      return `${daysList}: ${open} - ${close}`;
+    });
+});
 
 // Visibility states
 const isVisible = ref({
@@ -494,6 +598,11 @@ onMounted(async () => {
   await nextTick()
   finishLoading()
 
+  // Start seasonal special rotation if on seasonal special tab
+  if (activeSpecialTab.value === 'seasonal-special') {
+    startSeasonalSpecialRotation()
+  }
+
   // Initialize 3D animations with more performance checks
   if (process.client && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
     const runAnimations = () => {
@@ -523,6 +632,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (observer) observer.disconnect()
+  stopSeasonalSpecialRotation() // Clean up interval
 })
 </script>
 
@@ -544,6 +654,7 @@ onUnmounted(() => {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -555,6 +666,7 @@ onUnmounted(() => {
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -566,16 +678,20 @@ onUnmounted(() => {
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
   }
 }
 
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s ease;
 }
-.fade-enter-from, .fade-leave-to {
+
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>

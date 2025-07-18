@@ -1,5 +1,25 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
+
+  // Runtime configuration for environment variables
+  runtimeConfig: {
+    // Private keys (only available on server-side)
+    smtpHost: process.env.SMTP_HOST,
+    smtpPort: process.env.SMTP_PORT,
+    smtpUser: process.env.SMTP_USER,
+    smtpPass: process.env.SMTP_PASS,
+    contactEmail: process.env.CONTACT_EMAIL,
+
+    // Public keys (exposed to client-side)
+    public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
+      appName: process.env.NUXT_PUBLIC_APP_NAME || "The Pearson Pub",
+      appDescription:
+        process.env.NUXT_PUBLIC_APP_DESCRIPTION ||
+        "A traditional pub atmosphere with modern amenities in Whitby",
+    },
+  },
+
   app: {
     head: {
       title: "The Pearson Pub",

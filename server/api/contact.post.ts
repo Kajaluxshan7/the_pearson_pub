@@ -1,11 +1,14 @@
-// server/api/contact.post.ts
-import { H3Event } from "h3";
+import { readBody, createError } from "h3";
+import type { H3Event } from "h3";
 import nodemailer from "nodemailer";
 
 export default defineEventHandler(async (event: H3Event) => {
   try {
     const body = await readBody(event);
     const { firstName, lastName, email, message } = body;
+
+    // Get runtime config
+    const config = useRuntimeConfig();
 
     // Validate required fields
     if (!firstName || !lastName || !email || !message) {
@@ -24,20 +27,20 @@ export default defineEventHandler(async (event: H3Event) => {
       });
     }
 
-    // Create mail transporter (using ethereal for development)
+    // Create mail transporter using environment variables
     const transport = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
+      host: config.smtpHost || "smtp.ethereal.email",
+      port: Number(config.smtpPort) || 587,
       auth: {
-        user: "ethereal.user@ethereal.email",
-        pass: "ethereal.pass",
+        user: config.smtpUser || "ethereal.user@ethereal.email",
+        pass: config.smtpPass || "ethereal.pass",
       },
     });
 
     // Prepare email content
     const mailOptions = {
       from: `"${firstName} ${lastName}" <${email}>`,
-      to: "contact@pearsonpub.com",
+      to: config.contactEmail || "contact@pearsonpub.com",
       subject: "New Contact Form Submission - The Pearson Pub",
       text: `
         Name: ${firstName} ${lastName}
@@ -45,11 +48,11 @@ export default defineEventHandler(async (event: H3Event) => {
         Message: ${message}
       `,
       html: `
-        &lt;h2&gt;New Contact Form Submission&lt;/h2&gt;
-        &lt;p&gt;&lt;strong&gt;Name:&lt;/strong&gt; ${firstName} ${lastName}&lt;/p&gt;
-        &lt;p&gt;&lt;strong&gt;Email:&lt;/strong&gt; ${email}&lt;/p&gt;
-        &lt;p&gt;&lt;strong&gt;Message:&lt;/strong&gt;&lt;/p&gt;
-        &lt;p&gt;${message.replace(/\n/g, "&lt;br&gt;")}&lt;/p&gt;
+        <h2>New Contact Form Submission</h2>
+        <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message.replace(/\n/g, "<br>")}</p>
       `,
     };
 
@@ -72,4 +75,3 @@ export default defineEventHandler(async (event: H3Event) => {
     });
   }
 });
-

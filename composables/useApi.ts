@@ -1,15 +1,31 @@
 import { $fetch } from "ofetch";
 
-const API_BASE_URL = "http://localhost:5000";
+// Function to get API base URL from runtime config
+const getApiBaseUrl = () => {
+  try {
+    const config = useRuntimeConfig();
+    return (config.public.apiBaseUrl as string) || "http://localhost:5000";
+  } catch {
+    // Fallback for SSR or when runtime config is not available
+    return "http://localhost:5000";
+  }
+};
 
 // Create fetch instance with base configuration
-const api = $fetch.create({
-  baseURL: API_BASE_URL,
-  credentials: "include", // Include cookies
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+const createApiClient = () => {
+  const API_BASE_URL = getApiBaseUrl();
+
+  return $fetch.create({
+    baseURL: API_BASE_URL,
+    credentials: "include", // Include cookies
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Create the API client
+const api = createApiClient();
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -151,6 +167,45 @@ export const publicApi = {
   getContactInfo: () => api("/api/public/contact"),
 };
 
+// Specials API for public use
+export const specialsApi = {
+  getAll: (
+    page = 1,
+    limit = 50,
+    search?: string,
+    specialType?: string
+  ): Promise<PaginatedResponse<any>> =>
+    api("/specials", {
+      query: { page, limit, search, specialType },
+    }),
+
+  getByType: (
+    specialType: "daily" | "seasonal" | "latenight"
+  ): Promise<any[]> =>
+    api("/specials", {
+      query: { specialType, limit: 50 },
+    }).then((response) => response.data),
+
+  getCurrentDaySpecials: (): Promise<any[]> => {
+    const currentDay = new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+    });
+    return api("/specials", {
+      query: { specialType: "daily", limit: 50 },
+    }).then((response) => response.data);
+  },
+
+  getSeasonalSpecials: (): Promise<any[]> =>
+    api("/specials", {
+      query: { specialType: "seasonal", limit: 50 },
+    }).then((response) => response.data),
+
+  getLastNightSpecials: (): Promise<any[]> =>
+    api("/specials", {
+      query: { specialType: "latenight", limit: 50 },
+    }).then((response) => response.data),
+};
+
 export default api;
 
 // Main composable function
@@ -172,12 +227,20 @@ export const useApi = () => {
     getOperationHours: operationHoursApi.getAll,
     getOperationHourById: operationHoursApi.getById,
 
+    // Specials
+    getSpecials: specialsApi.getAll,
+    getSpecialsByType: specialsApi.getByType,
+    getCurrentDaySpecials: specialsApi.getCurrentDaySpecials,
+    getSeasonalSpecials: specialsApi.getSeasonalSpecials,
+    getLastNightSpecials: specialsApi.getLastNightSpecials,
+
     // Direct API access
     api,
     categoriesApi,
     itemsApi,
     eventsApi,
     operationHoursApi,
+    specialsApi,
     publicApi,
   };
 };
