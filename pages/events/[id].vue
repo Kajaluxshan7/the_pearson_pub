@@ -1,14 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- 3D Background -->
-    <Background3D 
-      :intensity="0.6" 
-      :enable-particles="true" 
-      :enable-rays="false" 
-      :enable-morphing="true"
-      :particle-count="30"
-      color-scheme="blue"
-    />
     
     <!-- Loading State -->
     <div v-if="loading" class="flex items-center justify-center min-h-screen">
@@ -200,7 +191,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import EventCard from "~/components/events/EventCard.vue";
-import Background3D from "~/components/Background3D.vue";
 import { eventsApi } from "~/composables/useApi";
 
 const route = useRoute();

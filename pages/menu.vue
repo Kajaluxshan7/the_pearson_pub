@@ -4,9 +4,6 @@
     <!-- Menu Hero Section -->
     <section
       class="hero-section relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
-      <!-- 3D Background -->
-      <Background3D :intensity="1.2" :enable-particles="true" :enable-rays="true" :enable-morphing="true"
-        :particle-count="60" color-scheme="golden" />
 
       <div class="absolute inset-0">
         <NuxtImg src="/images/food/foods.jpg" alt="Our Menu" class="w-full h-full object-cover opacity-30" format="webp"
@@ -339,8 +336,8 @@
 
     <!-- Enhanced Item Details Modal -->
     <UModal v-model="isModalOpen" class="z-50">
-      <div class="h-[80vh] max-w-4xl mx-auto">
-        <UCard v-if="selectedItem" class="h-full">
+      <div class="max-w-4xl w-full mx-auto">
+        <UCard v-if="selectedItem">
           <template #header>
             <div class="relative overflow-hidden rounded-t-lg">
               <template v-if="
@@ -386,7 +383,7 @@
             </div>
           </template>
 
-          <div class="p-6 lg:p-8 space-y-6 flex-1 overflow-y-auto">
+          <div class="p-6 lg:p-8 space-y-6">
             <!-- Item Header -->
             <div class="flex flex-col lg:flex-row justify-between lg:items-start gap-4">
               <div class="flex-1">
@@ -476,11 +473,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { useLandingPageData } from "~/composables/useLandingPageData";
-import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
-import { use3DAnimations } from "~/composables/use3DAnimations";
 import { usePerformance } from "~/composables/usePerformance";
-import Background3D from "~/components/Background3D.vue";
-import LoadingScreen3D from "~/components/loading/LoadingScreen3D.vue";
 import SkeletonCard from "~/components/loading/SkeletonCard.vue";
 import type { MenuItem, MenuCategory } from "~/types/menu";
 
@@ -500,30 +493,12 @@ const {
   fetchMenuData,
 } = useLandingPageData();
 
-// 3D Animations
-const {
-  addFloatingElement,
-  addParallaxElement,
-  createMorphingEffect,
-  createLoadingAnimation,
-  createGSAPAnimation
-} = use3DAnimations({
-  enableParallax: true,
-  enableFloating: true,
-  enableRotation: true,
-  intensity: 1.2,
-  speed: 1
-});
-
 // Performance monitoring
 const {
   preloadImage,
   isVisible,
   metrics
 } = usePerformance();
-
-// Loading state
-const { loadingState } = useAdvancedLoading();
 
 // Reactive data
 const activeCategory = ref("");
@@ -825,80 +800,6 @@ onMounted(async () => {
 
   // Add click outside listener
   document.addEventListener("click", handleClickOutside);
-
-  // Initialize 3D animations and enhanced interactions
-  if (process.client) {
-    nextTick(async () => {
-      // Enhanced GSAP animations with 3D effects
-      const nuxtApp = useNuxtApp();
-      const $gsap = (nuxtApp as any)?.$gsap;
-
-      if ($gsap && $gsap.utils && typeof $gsap.from === "function") {
-        // Animate menu cards with staggered 3D effects
-        $gsap.utils.toArray(".menu-card").forEach((el: any, i: number) => {
-          // Add floating and morphing effects
-          addFloatingElement(el, 15, 0.002, i * 0.5);
-          createMorphingEffect(el);
-
-          // Enhanced GSAP animation
-          createGSAPAnimation(el, {
-            from: {
-              opacity: 0,
-              y: 60,
-              rotationX: -15,
-              scale: 0.8,
-              transformPerspective: 1000
-            },
-            to: {
-              opacity: 1,
-              y: 0,
-              rotationX: 0,
-              scale: 1,
-              duration: 1.2,
-              delay: i * 0.1,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 85%",
-                end: "bottom 15%",
-                toggleActions: "play none none reverse"
-              }
-            }
-          });
-        });
-
-        // Animate filter section
-        $gsap.from(".filter-section", {
-          opacity: 0,
-          y: -30,
-          duration: 0.8,
-          ease: "power2.out",
-          delay: 0.3
-        });
-
-        // Animate hero content
-        $gsap.timeline()
-          .from(".hero-content h1", {
-            opacity: 0,
-            y: 50,
-            duration: 1,
-            ease: "power3.out"
-          })
-          .from(".hero-content p", {
-            opacity: 0,
-            y: 30,
-            duration: 0.8,
-            ease: "power2.out"
-          }, "-=0.5");
-      }
-
-      // Add parallax effect to hero section
-      const heroSection = document.querySelector('.hero-section');
-      if (heroSection) {
-        addParallaxElement(heroSection as HTMLElement);
-      }
-    });
-  }
 });
 
 onUnmounted(() => {

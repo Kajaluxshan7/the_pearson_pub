@@ -2,15 +2,6 @@
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Contact Hero Section -->
     <section class="hero-section relative py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
-      <!-- 3D Background -->
-      <Background3D 
-        :intensity="1.2" 
-        :enable-particles="true" 
-        :enable-rays="true" 
-        :enable-morphing="true"
-        :particle-count="60"
-        color-scheme="golden"
-      />
       
       <div class="absolute inset-0">
         <NuxtImg
@@ -22,10 +13,6 @@
         />
         <div class="absolute inset-0 bg-gradient-to-r from-black/85 to-black/65"></div>
       </div>
-      
-      <!-- Decorative Elements -->
-      <div class="absolute top-10 left-10 w-16 h-16 lg:w-24 lg:h-24 rounded-full border border-yellow-500/30 animate-pulse"></div>
-      <div class="absolute bottom-20 right-10 w-20 h-20 lg:w-32 lg:h-32 rounded-full bg-yellow-500/20"></div>
       
       <div class="hero-content relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
         <div class="inline-block mb-4">
@@ -46,11 +33,7 @@
       <div class="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">          <!-- Contact Information -->
           <div
-            class="contact-info transition-all duration-700 space-y-8"
-            :class="{
-              'opacity-0 translate-x-8': !isVisible.info,
-              'opacity-100 translate-x-0': isVisible.info,
-            }"
+            class="contact-info space-y-8"
           >
             <div class="space-y-6">
               <div class="inline-block">
@@ -71,7 +54,7 @@
               <div
                 v-for="(item, index) in contactInfo"
                 :key="index"
-                class="group flex items-start space-x-4 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-700"
+                class="group flex items-start space-x-4 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700"
               >
                 <div class="flex-shrink-0">
                   <div class="w-12 h-12 bg-yellow-500/10 rounded-full flex items-center justify-center group-hover:bg-yellow-500/20 transition-colors duration-300">
@@ -90,12 +73,7 @@
           <!-- Contact Form -->
           <div
             ref="formRef"
-            class="transition-all duration-700"
-            :class="{
-              'opacity-0 -translate-x-8': !isVisible.form,
-              'opacity-100 translate-x-0': isVisible.form,
-            }"
-
+            class=""
           >
 
                       <!-- Quick Links -->
@@ -107,7 +85,6 @@
                   color="yellow"
                   variant="outline"
                   size="lg"
-                  class="transform transition hover:scale-105"
                 >
                   View Menu
                 </UButton>
@@ -116,7 +93,6 @@
                   color="yellow"
                   variant="outline"
                   size="lg"
-                  class="transform transition hover:scale-105"
                 >
                   See Events
                 </UButton>
@@ -137,7 +113,6 @@
                       :error="!!formErrors.name"
                       autocomplete="name"
                       size="lg"
-                      class="transform transition focus:scale-105"
                     />
                     <p v-if="formErrors.name" class="text-red-600 text-sm mt-1">{{ formErrors.name }}</p>
                   </UFormGroup>
@@ -150,7 +125,6 @@
                       :error="!!formErrors.email"
                       autocomplete="email"
                       size="lg"
-                      class="transform transition focus:scale-105"
                     />
                     <p v-if="formErrors.email" class="text-red-600 text-sm mt-1">{{ formErrors.email }}</p>
                   </UFormGroup>
@@ -162,7 +136,6 @@
                     placeholder="Subject"
                     :error="!!formErrors.subject"
                     size="lg"
-                    class="transform transition focus:scale-105"
                   />
                   <p v-if="formErrors.subject" class="text-red-600 text-sm mt-1">{{ formErrors.subject }}</p>
                 </UFormGroup>
@@ -174,7 +147,6 @@
                     :rows="6"
                     :error="!!formErrors.message"
                     size="lg"
-                    class="transform transition focus:scale-105"
                   />
                   <p v-if="formErrors.message" class="text-red-600 text-sm mt-1">{{ formErrors.message }}</p>
                 </UFormGroup>
@@ -185,7 +157,7 @@
                   variant="solid"
                   size="xl"
                   :loading="isSubmitting"
-                  class="w-auto mx-auto block transform transition hover:scale-105"
+                  class="w-auto mx-auto block"
                   :disabled="isSubmitting"
                 >
                   <UIcon name="i-heroicons-paper-airplane" class="w-5 h-5 mr-2" />
@@ -200,11 +172,6 @@
 
     <!-- Map Section -->
     <section class="py-14 bg-white dark:bg-gray-800 relative overflow-hidden">
-      <div class="absolute inset-0 opacity-5">
-        <div class="absolute top-10 left-10 w-40 h-40 rounded-full border-2 border-yellow-500"></div>
-        <div class="absolute bottom-10 right-10 w-32 h-32 rounded-full bg-yellow-300"></div>
-      </div>
-      
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center mb-6">
           <div class="inline-block mb-4">
@@ -243,7 +210,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
 import { useLandingPageData } from "~/composables/useLandingPageData";
-import Background3D from "~/components/Background3D.vue";
 
 interface ContactInfo {
   icon: string
@@ -283,11 +249,6 @@ const form = ref<FormData>({
 const formErrors = ref<Record<string, string>>({})
 const isSubmitting = ref(false)
 const formRef = ref<HTMLElement>()
-
-const isVisible = ref({
-  info: false,
-  form: false,
-})
 
 // Generate dynamic operation hours from backend
 const formatOperationHours = (hours: any[]) => {
@@ -447,9 +408,6 @@ onMounted(async () => {
   if (!backendContactInfo.value) {
     await fetchContactInfo();
   }
-  
-  setTimeout(() => { isVisible.value.info = true }, 300)
-  setTimeout(() => { isVisible.value.form = true }, 600)
 });
 
 // Page meta

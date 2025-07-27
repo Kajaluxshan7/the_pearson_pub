@@ -4,7 +4,7 @@
     <div v-if="backendLoading && !landingContent" class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900">
       <div class="text-center">
         <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-500 mx-auto mb-4"></div>
-        <p class="text-xl text-gray-600 dark:text-gray-300">Loading restaurant content...</p>
+        <p class="text-xl text-gray-600 dark:text-gray-300"></p>
       </div>
     </div>
 
@@ -266,8 +266,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, computed, shallowRef } from 'vue'
 import { useLandingPageData } from "~/composables/useLandingPageData";
-import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
-import { use3DAnimations } from "~/composables/use3DAnimations";
 
 // Lazy load Hero for better LCP
 const Hero = shallowRef<any>(null)
@@ -305,34 +303,6 @@ const {
   error: backendError,
   initializeAllData,
 } = useLandingPageData();
-
-// Advanced loading
-const { loadingState, startLoading, finishLoading } = useAdvancedLoading({
-  duration: 100,
-  showProgress: true,
-  customTexts: [
-    'Loading restaurant data...',
-    'Preparing menu categories...',
-    'Setting up events...',
-    'Almost ready...',
-    'Welcome to The Pearson Pub!'
-  ]
-});
-
-// 3D Animations
-const {
-  addFloatingElement,
-  addParallaxElement,
-  createMorphingEffect,
-  createLoadingAnimation,
-  createGSAPAnimation
-} = use3DAnimations({
-  enableParallax: true,
-  enableFloating: true,
-  enableRotation: true,
-  intensity: 1.1,
-  speed: 0.9
-});
 
 // Statistics computed from backend data
 const statistics = computed(() => [
@@ -497,18 +467,19 @@ onMounted(async () => {
   // Initialize 3D animations with more performance checks
   if (process.client && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
     const runAnimations = () => {
-      // Only run animations if user has not disabled them
+      // Simple fade-in animations without heavy dependencies
       if (typeof window !== 'undefined' && 'IntersectionObserver' in window) {
-        const animatedElements = document.querySelectorAll('[data-aos], .feature-card, .special-card')
+        const animatedElements = document.querySelectorAll('.feature-card, .special-card')
         animatedElements.forEach((el, i) => {
           if (el instanceof HTMLElement) {
-            createGSAPAnimation(el, {
-              from: { opacity: 0, y: 60, rotationX: -15 },
-              to: {
-                opacity: 1, y: 0, rotationX: 0, duration: 1.2, delay: i * 0.15, ease: "power3.out",
-                scrollTrigger: { trigger: el, start: "top 85%", end: "bottom 15%", toggleActions: "play none none reverse" }
-              }
-            });
+            // Simple CSS-based animation
+            el.style.opacity = '0'
+            el.style.transform = 'translateY(20px)'
+            setTimeout(() => {
+              el.style.transition = 'all 0.6s ease'
+              el.style.opacity = '1'
+              el.style.transform = 'translateY(0)'
+            }, i * 100)
           }
         });
       }

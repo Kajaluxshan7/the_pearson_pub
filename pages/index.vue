@@ -5,7 +5,7 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900">
       <div class="text-center">
         <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-500 mx-auto mb-4"></div>
-        <p class="text-xl text-gray-600 dark:text-gray-300">Loading restaurant content...</p>
+        <p class="text-xl text-gray-600 dark:text-gray-300"></p>
       </div>
     </div>
 
@@ -64,7 +64,7 @@
               <div
                 class="flex lg:flex-col space-x-4 lg:space-x-0 lg:space-y-4 overflow-x-auto lg:overflow-visible border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 pb-4 lg:pb-0 lg:pr-8">
                 <button v-for="(tab, index) in specialsTabs" :key="tab.id" @click="activeSpecialTab = tab.id" :class="[
-                  'py-3 px-6 font-medium text-left whitespace-nowrap transition-all duration-300 rounded-lg lg:rounded-none lg:rounded-l-lg transform hover:scale-105',
+                  'py-3 px-6 font-medium text-left whitespace-nowrap transition-all duration-300 rounded-lg lg:rounded-none lg:rounded-l-lg',
                   activeSpecialTab === tab.id
                     ? 'bg-yellow-500 text-white shadow-lg lg:bg-transparent lg:text-yellow-600 dark:lg:text-yellow-400 lg:font-bold lg:border-l-4 lg:border-yellow-500 lg:shadow-none'
                     : 'text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
@@ -101,18 +101,18 @@
                 </div>
               </transition>
             </div>
-
-            <!-- Three Dots Navigation -->
-            <div class="flex justify-center mt-8">
-              <div class="flex space-x-2">
-                <button v-for="(tab, index) in specialsTabs" :key="`dot-${tab.id}`" @click="activeSpecialTab = tab.id"
-                  :class="[
-                    'w-3 h-3 rounded-full transition-all duration-300',
-                    activeSpecialTab === tab.id
-                      ? 'bg-yellow-500 scale-125'
-                      : 'bg-gray-300 dark:bg-gray-600 hover:bg-yellow-400'
-                  ]" :aria-label="`Go to ${tab.title}`"></button>
-              </div>
+          </div>
+          
+          <!-- Three Dots Navigation -->
+          <div class="flex justify-center mt-8">
+            <div class="flex space-x-2">
+              <button v-for="(tab, index) in specialsTabs" :key="`dot-${tab.id}`" @click="activeSpecialTab = tab.id"
+                :class="[
+                  'w-3 h-3 rounded-full transition-all duration-300',
+                  activeSpecialTab === tab.id
+                    ? 'bg-yellow-500 scale-125'
+                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-yellow-400'
+                ]" :aria-label="`Go to ${tab.title}`"></button>
             </div>
           </div>
         </div>
@@ -139,7 +139,7 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <template v-for="(feature, index) in features" :key="feature.id">
               <NuxtLink v-if="feature.link" :to="feature.link"
-                class="feature-card group bg-gray-50 dark:bg-gray-700 rounded-2xl p-8 text-center hover:bg-gradient-to-br hover:from-yellow-50 hover:to-orange-50 dark:hover:from-gray-600 dark:hover:to-gray-700 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-gray-200 dark:border-gray-600">
+                class="feature-card group bg-gray-50 dark:bg-gray-700 rounded-2xl p-8 text-center hover:bg-gradient-to-br hover:from-yellow-50 hover:to-orange-50 dark:hover:from-gray-600 dark:hover:to-gray-700 transition-all duration-300 hover:shadow-xl border border-gray-200 dark:border-gray-600">
                 <div
                   :class="[feature.bgColor, 'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300']">
                   <UIcon :name="feature.icon" :class="[feature.color, 'w-10 h-10']" />
@@ -246,8 +246,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, computed, shallowRef, watch, nextTick } from 'vue'
 import { useLandingPageData } from "~/composables/useLandingPageData";
-import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
-import { use3DAnimations } from "~/composables/use3DAnimations";
 
 // Lazy load Hero for better LCP
 const Hero = shallowRef<any>(null)
@@ -285,34 +283,6 @@ const {
   error: backendError,
   initializeAllData,
 } = useLandingPageData();
-
-// Advanced loading
-const { loadingState, startLoading, finishLoading } = useAdvancedLoading({
-  duration: 100,
-  showProgress: true,
-  customTexts: [
-    'Loading restaurant data...',
-    'Preparing menu categories...',
-    'Setting up events...',
-    'Almost ready...',
-    'Welcome to The Pearson Pub!'
-  ]
-});
-
-// 3D Animations
-const {
-  addFloatingElement,
-  addParallaxElement,
-  createMorphingEffect,
-  createLoadingAnimation,
-  createGSAPAnimation
-} = use3DAnimations({
-  enableParallax: true,
-  enableFloating: true,
-  enableRotation: true,
-  intensity: 1.1,
-  speed: 0.9
-});
 
 // Statistics computed from backend data
 const statistics = computed(() => [
@@ -401,8 +371,8 @@ const specialsTabs = computed(() => {
         img: '/images/food/shepherds_pie.jpg',
       },
       {
-        id: 'last-night',
-        title: 'Last Night',
+        id: 'late-night',
+        title: 'Late Night Specials',
         subtitle: 'Traditional British sausages with creamy mashed potatoes.',
         description: 'Premium pork sausages served with fluffy mashed potatoes, caramelized onions, and rich gravy.',
         img: '/images/food/bangers_mash.jpg',
@@ -451,9 +421,9 @@ const specialsTabs = computed(() => {
     const lastNight = lastNightSpecials[0];
     tabs.push({
       id: 'last-night',
-      title: 'Last Night',
-      subtitle: lastNight.description?.substring(0, 80) + '...' || 'Late night favorite',
-      description: lastNight.description || 'A delicious late night special.',
+      title: 'Late Night Special',
+      subtitle: lastNight.description?.substring(0, 80) + '...' || 'Late Night Specials favorite',
+      description: lastNight.description || 'A delicious Late Night Specials special.',
       img: lastNight.menuItem?.images?.[0] || '/images/food/bangers_mash.jpg',
       price: lastNight.price,
       name: lastNight.name,
@@ -593,11 +563,6 @@ onMounted(async () => {
   // Observe sections
   if (aboutRef.value) observer.observe(aboutRef.value)
 
-  // Start advanced loading
-  startLoading()
-  await nextTick()
-  finishLoading()
-
   // Start seasonal special rotation if on seasonal special tab
   if (activeSpecialTab.value === 'seasonal-special') {
     startSeasonalSpecialRotation()
@@ -611,13 +576,14 @@ onMounted(async () => {
         const animatedElements = document.querySelectorAll('[data-aos], .feature-card, .special-card')
         animatedElements.forEach((el, i) => {
           if (el instanceof HTMLElement) {
-            createGSAPAnimation(el, {
-              from: { opacity: 0, y: 60, rotationX: -15 },
-              to: {
-                opacity: 1, y: 0, rotationX: 0, duration: 1.2, delay: i * 0.15, ease: "power3.out",
-                scrollTrigger: { trigger: el, start: "top 85%", end: "bottom 15%", toggleActions: "play none none reverse" }
-              }
-            });
+            // Simple fade in animation without heavy 3D effects
+            el.style.opacity = '0'
+            el.style.transform = 'translateY(20px)'
+            setTimeout(() => {
+              el.style.transition = 'all 0.6s ease'
+              el.style.opacity = '1'
+              el.style.transform = 'translateY(0)'
+            }, i * 100)
           }
         });
       }

@@ -1,15 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">    <!-- Hero Section -->
     <section class="relative py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
-      <!-- 3D Background -->
-      <Background3D 
-        :intensity="1.0" 
-        :enable-particles="true" 
-        :enable-rays="true" 
-        :enable-morphing="true"
-        :particle-count="40"
-        color-scheme="golden"
-      />
       
       <div class="absolute inset-0">
         <NuxtImg 
@@ -209,29 +200,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
-import { use3DAnimations } from '~/composables/use3DAnimations'
-import { useAdvancedLoading } from '~/composables/useAdvancedLoading'
-import Background3D from '~/components/Background3D.vue'
+import { ref, onMounted } from 'vue'
 
-// 3D Animations
-const { 
-  addFloatingElement, 
-  addParallaxElement, 
-  createMorphingEffect,
-  createGSAPAnimation
-} = use3DAnimations({
-  enableParallax: true,
-  enableFloating: true,
-  enableRotation: true,
-  intensity: 1.0,
-  speed: 0.8
-});
-
-// Loading state
-const { loadingState } = useAdvancedLoading();
-
-// Animation state
+// Simple animation state
 const animationState = ref({
   history: false,
   values: false,
@@ -239,173 +210,14 @@ const animationState = ref({
   stats: false
 })
 
-// Trigger animations on mount with enhanced 3D effects
+// Simple fade-in animations on mount
 onMounted(() => {
   if (process.client) {
-    nextTick(async () => {
-      // Enhanced GSAP animations with 3D effects
-      const nuxtApp = useNuxtApp();
-      const $gsap = (nuxtApp as any)?.$gsap;
-      
-      if ($gsap && $gsap.utils && typeof $gsap.from === "function") {
-        // Animate hero content
-        $gsap.timeline()
-          .from(".hero-content h1", {
-            opacity: 0,
-            y: 60,
-            rotationX: -20,
-            duration: 1.2,
-            ease: "power3.out"
-          })
-          .from(".hero-content p", {
-            opacity: 0,
-            y: 40,
-            duration: 0.8,
-            ease: "power2.out"
-          }, "-=0.6");
-
-        // Animate history section
-        $gsap.utils.toArray(".history-card").forEach((el: any, i: number) => {
-          addFloatingElement(el, 10, 0.001, i * 0.3);
-          createMorphingEffect(el);
-          
-          createGSAPAnimation(el, {
-            from: {
-              opacity: 0,
-              x: i % 2 === 0 ? -80 : 80,
-              rotationY: i % 2 === 0 ? -15 : 15,
-              scale: 0.8,
-              transformPerspective: 1000
-            },
-            to: {
-              opacity: 1,
-              x: 0,
-              rotationY: 0,
-              scale: 1,
-              duration: 1.4,
-              delay: i * 0.2,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 80%",
-                end: "bottom 20%",
-                toggleActions: "play none none reverse"
-              }
-            }
-          });
-        });
-
-        // Animate value cards
-        $gsap.utils.toArray(".value-card").forEach((el: any, i: number) => {
-          addFloatingElement(el, 12, 0.0015, i * 0.4);
-          
-          createGSAPAnimation(el, {
-            from: {
-              opacity: 0,
-              y: 50,
-              rotationX: -10,
-              scale: 0.9,
-              transformPerspective: 1000
-            },
-            to: {
-              opacity: 1,
-              y: 0,
-              rotationX: 0,
-              scale: 1,
-              duration: 1.0,
-              delay: i * 0.15,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 85%",
-                end: "bottom 15%",
-                toggleActions: "play none none reverse"
-              }
-            }
-          });
-        });
-
-        // Animate team cards
-        $gsap.utils.toArray(".team-card").forEach((el: any, i: number) => {
-          addFloatingElement(el, 8, 0.002, i * 0.5);
-          
-          createGSAPAnimation(el, {
-            from: {
-              opacity: 0,
-              y: 60,
-              rotationZ: i % 2 === 0 ? -5 : 5,
-              scale: 0.85,
-              transformPerspective: 1000
-            },
-            to: {
-              opacity: 1,
-              y: 0,
-              rotationZ: 0,
-              scale: 1,
-              duration: 1.1,
-              delay: i * 0.2,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 80%",
-                end: "bottom 20%",
-                toggleActions: "play none none reverse"
-              }
-            }
-          });
-        });
-
-        // Animate stats with counter effect
-        $gsap.utils.toArray(".stat-item").forEach((el: any, i: number) => {
-          const numberEl = el.querySelector('.stat-number');
-          if (numberEl) {
-            const targetValue = parseInt(numberEl.textContent);
-            
-            createGSAPAnimation(el, {
-              from: {
-                opacity: 0,
-                scale: 0.5,
-                rotation: -10
-              },
-              to: {
-                opacity: 1,
-                scale: 1,
-                rotation: 0,
-                duration: 0.8,
-                delay: i * 0.1,
-                ease: "back.out(1.7)",
-                scrollTrigger: {
-                  trigger: el,
-                  start: "top 80%",
-                  onEnter: () => {
-                    // Counter animation
-                    $gsap.to(numberEl, {
-                      textContent: targetValue,
-                      duration: 2,
-                      ease: "power2.out",
-                      snap: { textContent: 1 },
-                      stagger: 0.1
-                    });
-                  }
-                }
-              }
-            });
-          }
-        });
-      }
-      
-      // Add parallax effects
-      const heroSection = document.querySelector('.hero-section');
-      if (heroSection) {
-        addParallaxElement(heroSection as HTMLElement);
-      }
-
-      // Trigger state animations
-      setTimeout(() => animationState.value.history = true, 300);
-      setTimeout(() => animationState.value.values = true, 600);
-      setTimeout(() => animationState.value.team = true, 900);
-      setTimeout(() => animationState.value.stats = true, 1200);
-    });
+    // Trigger section animations with simple transitions
+    setTimeout(() => animationState.value.history = true, 300);
+    setTimeout(() => animationState.value.values = true, 600);
+    setTimeout(() => animationState.value.team = true, 900);
+    setTimeout(() => animationState.value.stats = true, 1200);
   }
 });
 
@@ -458,76 +270,25 @@ useHead({
 </script>
 
 <style scoped>
-/* Enhanced 3D animations */
-.history-card {
-  perspective: 1000px;
-  transform-style: preserve-3d;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+/* Simple hover effects */
+.history-card, .value-card, .team-card, .stat-item {
+  transition: all 0.3s ease;
 }
 
-.history-card:hover {
-  transform: translateY(-10px) rotateX(5deg) rotateY(5deg) scale(1.02);
-  box-shadow: 
-    0 25px 50px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.value-card {
-  perspective: 1000px;
-  transform-style: preserve-3d;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.value-card:hover {
-  transform: translateY(-8px) rotateX(8deg) scale(1.05);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 215, 0, 0.1);
-}
-
-.team-card {
-  perspective: 1000px;
-  transform-style: preserve-3d;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.team-card:hover {
-  transform: translateY(-12px) rotateZ(2deg) scale(1.03);
-  box-shadow: 
-    0 30px 60px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 215, 0, 0.2);
-}
-
-.stat-item {
-  perspective: 1000px;
-  transform-style: preserve-3d;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+.history-card:hover, .value-card:hover, .team-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 .stat-item:hover {
-  transform: translateY(-5px) rotateX(10deg) scale(1.1);
+  transform: translateY(-3px) scale(1.05);
 }
 
-/* Floating animation for cards */
-@keyframes cardFloat {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-.floating {
-  animation: cardFloat 3s ease-in-out infinite;
-}
-
-/* Enhanced fade animations */
+/* Simple fade animations */
 @keyframes fade-in-up {
   0% {
     opacity: 0;
-    transform: translateY(2rem);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;
@@ -535,94 +296,7 @@ useHead({
   }
 }
 
-@keyframes fade-in-left {
-  0% {
-    opacity: 0;
-    transform: translateX(-2rem);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fade-in-right {
-  0% {
-    opacity: 0;
-    transform: translateX(2rem);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes bounce-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  70% {
-    transform: scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 .animate-fade-in-up {
-  animation: fade-in-up 0.7s ease forwards;
-}
-
-.animate-fade-in-left {
-  animation: fade-in-left 0.7s ease forwards;
-}
-
-.animate-fade-in-right {
-  animation: fade-in-right 0.7s ease forwards;
-}
-
-.animate-bounce-in {
-  animation: bounce-in 0.8s ease forwards;
-}
-
-/* Parallax effect enhancement */
-.parallax-element {
-  will-change: transform;
-}
-
-/* Loading state animation */
-.loading-shimmer {
-  position: relative;
-  overflow: hidden;
-}
-
-.loading-shimmer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 100%;
-  }
+  animation: fade-in-up 0.6s ease forwards;
 }
 </style>

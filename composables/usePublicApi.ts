@@ -1,0 +1,136 @@
+import { $fetch } from "ofetch";
+
+const API_BASE_URL = "http://15.223.253.194:5000";
+
+// Create fetch instance with base configuration
+const api = $fetch.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+export interface PublicMenuData {
+  categories: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    items: Array<{
+      id: string;
+      name: string;
+      description?: string;
+      original_price: number;
+      price: number;
+      ingredients: string[];
+      sizes: string[];
+      images: string[];
+      availability: boolean;
+      visibility: boolean;
+      is_favourite: boolean;
+      categoryId: string;
+      created_at: string;
+      updated_at: string;
+      dietaryInfo?: {
+        isVegetarian?: boolean;
+        isVegan?: boolean;
+        isGlutenFree?: boolean;
+      };
+    }>;
+    created_at: string;
+    updated_at: string;
+  }>;
+  totalItems: number;
+}
+
+export interface PublicEventsData {
+  events: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    images: string[];
+    start_date: string;
+    end_date: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+  total: number;
+}
+
+export interface PublicContactData {
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  operationHours: Array<{
+    id: string;
+    day: string;
+    open_time: string;
+    close_time: string;
+    status: boolean;
+    created_at: string;
+    updated_at: string;
+  }>;
+  socialMedia: {
+    facebook: string;
+    instagram: string;
+    twitter: string;
+  };
+  mapCoordinates: {
+    lat: number;
+    lng: number;
+  };
+}
+
+export interface LandingPageContent {
+  categories: any[];
+  featuredItems: any[];
+  allItems: any[];
+  upcomingEvents: any[];
+  todaysSpecials: any[];
+  operationHours: any[];
+  siteInfo: {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+    description: string;
+    socialMedia: {
+      facebook: string;
+      instagram: string;
+      twitter: string;
+    };
+  };
+}
+
+// Public API endpoints
+export const publicApi = {
+  // Landing page content with all data
+  getLandingContent: (): Promise<LandingPageContent> =>
+    api("/api/public/landing-content"),
+
+  // Menu data (categories with items)
+  getMenuData: (): Promise<PublicMenuData> => api("/api/public/menu"),
+
+  // Events data
+  getEventsData: (): Promise<PublicEventsData> => api("/api/public/events"),
+
+  // Contact info with operation hours
+  getContactInfo: (): Promise<PublicContactData> => api("/api/public/contact"),
+};
+
+export default publicApi;
+
+// Main composable function for public API
+export const usePublicApi = () => {
+  return {
+    // Public endpoints
+    getLandingContent: publicApi.getLandingContent,
+    getMenuData: publicApi.getMenuData,
+    getEventsData: publicApi.getEventsData,
+    getContactInfo: publicApi.getContactInfo,
+
+    // Direct API access
+    api,
+    publicApi,
+  };
+};

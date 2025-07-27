@@ -1,14 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- 3D Background -->
-    <Background3D
-      :intensity="0.5"
-      :enable-particles="true"
-      :enable-rays="false"
-      :enable-morphing="true"
-      :particle-count="25"
-      color-scheme="golden"
-    />
 
     <!-- Loading State -->
     <div v-if="loading" class="flex items-center justify-center min-h-screen">
@@ -585,7 +576,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import Background3D from "~/components/Background3D.vue";
 import { itemsApi } from "~/composables/useApi";
 
 const route = useRoute();

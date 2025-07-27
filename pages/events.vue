@@ -4,15 +4,6 @@
     <section
       class="hero-section relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
     >
-      <!-- 3D Background -->
-      <Background3D 
-        :intensity="1.5" 
-        :enable-particles="true" 
-        :enable-rays="true" 
-        :enable-morphing="true"
-        :particle-count="80"
-        color-scheme="blue"
-      />
       
       <div class="absolute inset-0">
         <NuxtImg
@@ -25,7 +16,9 @@
         <div
           class="absolute inset-0 bg-gradient-to-r from-black/85 to-black/65"
         ></div>
-      </div>      <div
+      </div>
+      
+      <div
         class="hero-content relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10"
       >
         <div class="inline-block mb-4">
@@ -194,29 +187,15 @@
           >
             Try Again
           </UButton>
-        </div>        <!-- Loading State with Skeleton Cards -->
-        <div v-else-if="isLoading || loadingState.isLoading || backendLoading">
-          <!-- Skeleton Results Summary -->
-          <div class="flex justify-between items-center mb-8">
-            <div>
-              <div class="h-8 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
-              <div class="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+        </div>
+
+        <!-- Simple Loading State -->
+        <div v-else-if="isLoading || backendLoading">
+          <div class="flex justify-center items-center py-20">
+            <div class="text-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+              <p class="text-gray-600 dark:text-gray-400">Loading events...</p>
             </div>
-            <div class="hidden sm:flex items-center gap-2">
-              <div class="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-              <div class="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-              <div class="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-            </div>
-          </div>
-          
-          <!-- Skeleton Events Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
-            <SkeletonCard 
-              v-for="i in 9" 
-              :key="`skeleton-event-${i}`"
-              type="event"
-              :delay="i * 0.1"
-            />
           </div>
         </div>
 
@@ -669,12 +648,7 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { useEvents } from "~/composables/useEvents";
 import { useLandingPageData } from "~/composables/useLandingPageData";
-import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
-import { use3DAnimations } from "~/composables/use3DAnimations";
 import { usePerformance } from "~/composables/usePerformance";
-import Background3D from "~/components/Background3D.vue";
-import LoadingScreen3D from "~/components/loading/LoadingScreen3D.vue";
-import SkeletonCard from "~/components/loading/SkeletonCard.vue";
 import FloatingActionButton from "~/components/ui/FloatingActionButton.vue";
 import EventDetailsModal from "~/components/events/EventDetailsModal.vue";
 import EventDetailsModalLandscape from "~/components/events/EventDetailsModalLandscape.vue";  // SSR/SSG: useAsyncData for events data
@@ -701,34 +675,6 @@ import type { FABAction } from "~/components/ui/FloatingActionButton.vue";
 
 // Composables
 const { events: staticEvents } = useEvents(); // Keep for weekly schedule
-
-// Advanced loading with custom events texts
-const { loadingState, startLoading, finishLoading } = useAdvancedLoading({
-  duration: 2200,
-  showProgress: true,
-  customTexts: [
-    'Loading exciting events...',
-    'Preparing entertainment lineup...',
-    'Setting up the party...',
-    'Almost time to rock...',
-    'Let the fun begin!'
-  ]
-});
-
-// 3D Animations for events
-const { 
-  addFloatingElement, 
-  addParallaxElement, 
-  createMorphingEffect,
-  createLoadingAnimation,
-  createGSAPAnimation
-} = use3DAnimations({
-  enableParallax: true,
-  enableFloating: true,
-  enableRotation: true,
-  intensity: 1.5,
-  speed: 1.2
-});
 
 // Performance monitoring
 const { 
@@ -1028,9 +974,6 @@ const loadMoreEvents = async () => {
 };
 
 onMounted(async () => {
-  // Start loading animation
-  startLoading();
-  
   // Fetch backend data
   await fetchEvents();
   
@@ -1040,99 +983,57 @@ onMounted(async () => {
     eventPagination.value.events.totalPages = Math.ceil(dynamicEvents.value.length / 50);
   }
   
-  // Simulate loading time for better UX
-  await new Promise(resolve => setTimeout(resolve, 1200));
-  
   checkViewMode();
   window.addEventListener("resize", checkViewMode);
   document.addEventListener("keydown", handleKeyNavigation);
   
-  // Initialize 3D animations and enhanced interactions
+  // Initialize enhanced interactions without heavy 3D animations
   if (process.client) {
     nextTick(async () => {
-      // Finish loading
-      await finishLoading();
-      
       // Enhanced GSAP animations with 3D effects
       const nuxtApp = useNuxtApp();
       const $gsap = (nuxtApp as any)?.$gsap;
       
       if ($gsap && $gsap.utils && typeof $gsap.from === "function") {
-        // Animate event cards with staggered 3D effects
+        // Simple event card animations
         $gsap.utils.toArray(".event-card").forEach((el: any, i: number) => {
-          // Add floating and morphing effects
-          addFloatingElement(el, 12, 0.0015, i * 0.3);
-          createMorphingEffect(el);
-          
-          // Enhanced GSAP animation with music-themed effects
-          createGSAPAnimation(el, {
-            from: {
-              opacity: 0,
-              y: 80,
-              rotationY: -25,
-              scale: 0.7,
-              transformPerspective: 1200
-            },
-            to: {
-              opacity: 1,
-              y: 0,
-              rotationY: 0,
-              scale: 1,
-              duration: 1.4,
-              delay: i * 0.15,
-              ease: "back.out(1.7)",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 85%",
-                end: "bottom 15%",
-                toggleActions: "play none none reverse"
-              }
+          $gsap.from(el, {
+            opacity: 0,
+            y: 30,
+            duration: 0.6,
+            delay: i * 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 90%",
+              toggleActions: "play none none reverse"
             }
           });
         });
         
-        // Animate filter section with music pulse effect
+        // Simple filter section animation
         $gsap.from(".filter-section", {
           opacity: 0,
-          y: -40,
-          duration: 1,
-          ease: "power3.out",
-          delay: 0.4
+          y: -20,
+          duration: 0.8,
+          ease: "power2.out",
+          delay: 0.2
         });
         
-        // Animate hero content with rhythmic timing
+        // Simple hero content animation
         $gsap.timeline()
           .from(".hero-content h1", {
             opacity: 0,
-            y: 60,
-            rotationX: 15,
-            duration: 1.2,
-            ease: "power3.out"
+            y: 30,
+            duration: 0.8,
+            ease: "power2.out"
           })
           .from(".hero-content p", {
             opacity: 0,
-            y: 40,
-            duration: 1,
+            y: 20,
+            duration: 0.6,
             ease: "power2.out"
-          }, "-=0.6");
-        
-        // Add pulsing animation to category buttons
-        $gsap.utils.toArray(".category-btn").forEach((el: any, i: number) => {
-          $gsap.to(el, {
-            scale: 1.05,
-            duration: 0.3,
-            ease: "power2.out",
-            paused: true,
-            repeat: -1,
-            yoyo: true
-          });
-        });
-      }
-      
-      // Add parallax effect to hero section
-      const heroSection = document.querySelector('.hero-section');
-      if (heroSection) {
-        addParallaxElement(heroSection as HTMLElement);
+          }, "-=0.4");
       }
     });
   }
