@@ -63,7 +63,17 @@
                 </div>
                 <div class="flex-1">
                   <h3 class="font-bold text-lg text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">{{ item.title }}</h3>
-                  <p class="text-gray-600 dark:text-gray-300 mt-1">{{ item.value }}</p>
+                  <!-- Special handling for hours to display multiple lines -->
+                  <div v-if="item.title === 'Hours'" class="text-gray-600 dark:text-gray-300 mt-1">
+                    <div 
+                      v-for="(line, lineIndex) in item.value.split('\n')" 
+                      :key="lineIndex"
+                      class="py-1 font-medium"
+                    >
+                      {{ line }}
+                    </div>
+                  </div>
+                  <p v-else class="text-gray-600 dark:text-gray-300 mt-1">{{ item.value }}</p>
                   <p v-if="item.extra" class="text-gray-500 dark:text-gray-400 text-sm mt-1">{{ item.extra }}</p>
                 </div>
               </div>
@@ -250,23 +260,40 @@ const formErrors = ref<Record<string, string>>({})
 const isSubmitting = ref(false)
 const formRef = ref<HTMLElement>()
 
-// Generate dynamic operation hours from backend
+// Enhanced operation hours formatting with categories
 const formatOperationHours = (hours: any[]) => {
   if (!hours || hours.length === 0) return "";
   
+  // Helper function to format time to "11:00 AM" format
+  const formatTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  // Helper function to capitalize day names
+  const capitalizeDay = (day: string) => {
+    return day.charAt(0).toUpperCase() + day.slice(1);
+  };
+
   // Group by similar times
   const grouped = hours.reduce((acc: any, hour: any) => {
     const timeKey = `${hour.open_time}-${hour.close_time}`;
     if (!acc[timeKey]) acc[timeKey] = [];
-    acc[timeKey].push(hour.day);
+    acc[timeKey].push(capitalizeDay(hour.day));
     return acc;
   }, {});
   
+  // Format each group and join with line breaks
   return Object.entries(grouped)
     .map(([time, days]: [string, any]) => {
       const [open, close] = time.split('-');
-      const daysList = days.join(', ');
-      return `${daysList}: ${open} - ${close}`;
+      const formattedDays = days.join(', ');
+      const formattedOpen = formatTime(open);
+      const formattedClose = formatTime(close);
+      return `${formattedDays}: ${formattedOpen} - ${formattedClose}`;
     })
     .join('\n');
 }

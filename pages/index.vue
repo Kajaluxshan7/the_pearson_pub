@@ -31,16 +31,24 @@
           <div class="flex flex-col md:flex-row items-center justify-center text-center md:text-left gap-4">
             <div class="flex items-center gap-2">
               <UIcon name="i-heroicons-clock" class="w-5 h-5 text-white" />
-              <span class="font-semibold text-white">Hours of Operation:</span>
+              <span class="font-semibold text-white">Today's Hours:</span>
             </div>
-            <div class="text-white text-sm md:text-base" v-if="operationHours?.length">
-              <span v-for="(hourGroup, index) in formattedOperationHours" :key="index" class="block md:inline">
-                {{ hourGroup }}
-                <span v-if="index < formattedOperationHours.length - 1" class="hidden md:inline mx-2">•</span>
-              </span>
+            <div class="text-white text-sm md:text-base" v-if="currentDayHours">
+              <div class="flex items-center gap-3">
+                <!-- <span class="font-medium">{{ currentDayHours.day }}</span> -->
+                <span>{{ currentDayHours.openTime }} - {{ currentDayHours.closeTime }}</span>
+                <span 
+                  class="px-2 py-1 rounded-full text-xs font-semibold"
+                  :class="currentDayHours.isOpen ? 'bg-green-500 text-white' : 'bg-red-500 text-white'"
+                >
+                  {{ currentDayHours.isOpen ? 'OPEN NOW' : 'CLOSED' }}
+                </span>
+              </div>
             </div>
             <div v-else class="text-white text-sm md:text-base">
-              Mon-Sun: 11:00 AM - 11:00 PM
+              <span class="px-2 py-1 rounded-full text-xs font-semibold bg-gray-500 text-white">
+                Hours not available
+              </span>
             </div>
           </div>
         </div>
@@ -501,23 +509,46 @@ watch(specialsTabs, () => {
     })
   }
 }, { deep: true })
-const formattedOperationHours = computed(() => {
-  if (!operationHours.value?.length) return [];
+// Get current day's operation hours with open/close status
+const currentDayHours = computed(() => {
+  if (!operationHours.value?.length) return null;
 
-  // Group by similar times
-  const grouped = operationHours.value.reduce((acc: any, hour: any) => {
-    const timeKey = `${hour.open_time}-${hour.close_time}`;
-    if (!acc[timeKey]) acc[timeKey] = [];
-    acc[timeKey].push(hour.day);
-    return acc;
-  }, {});
+  const currentDay = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const todayHours = operationHours.value.find((hour: any) => hour.day === currentDay);
+  
+  if (!todayHours) return null;
 
-  return Object.entries(grouped)
-    .map(([time, days]: [string, any]) => {
-      const [open, close] = time.split('-');
-      const daysList = days.join(', ');
-      return `${daysList}: ${open} - ${close}`;
-    });
+  // Format time from HH:MM:SS to HH:MM AM/PM
+  const formatTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  // Check if currently open
+  const now = new Date();
+  const currentTime = now.getHours() * 100 + now.getMinutes();
+  const openTime = parseInt(todayHours.open_time.replace(':', ''));
+  const closeTime = parseInt(todayHours.close_time.replace(':', ''));
+  
+  let isOpen = false;
+  if (closeTime < openTime) {
+    // Spans midnight (e.g., 11 PM to 2 AM)
+    isOpen = currentTime >= openTime || currentTime <= closeTime;
+  } else {
+    // Same day (e.g., 11 AM to 11 PM)
+    isOpen = currentTime >= openTime && currentTime <= closeTime;
+  }
+
+  return {
+    day: currentDay.charAt(0).toUpperCase() + currentDay.slice(1),
+    openTime: formatTime(todayHours.open_time),
+    closeTime: formatTime(todayHours.close_time),
+    isOpen: isOpen && todayHours.status,
+    status: todayHours.status
+  };
 });
 
 // Visibility states

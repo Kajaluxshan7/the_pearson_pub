@@ -1,10 +1,19 @@
 import { $fetch } from "ofetch";
 
-const API_BASE_URL = "http://15.223.253.194:5000";
+// Function to get API base URL from runtime config
+const getApiBaseUrl = () => {
+  try {
+    const config = useRuntimeConfig();
+    return (config.public.apiBaseUrl as string) || "http://15.223.253.194:5000";
+  } catch {
+    // Fallback for SSR or when runtime config is not available
+    return "http://15.223.253.194:5000";
+  }
+};
 
 // Create fetch instance with base configuration
 const api = $fetch.create({
-  baseURL: API_BASE_URL,
+  baseURL: getApiBaseUrl(),
   headers: {
     "Content-Type": "application/json",
   },

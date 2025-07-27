@@ -4,10 +4,10 @@ import { $fetch } from "ofetch";
 const getApiBaseUrl = () => {
   try {
     const config = useRuntimeConfig();
-    return (config.public.apiBaseUrl as string) || "http://localhost:5000";
+    return (config.public.apiBaseUrl as string) || "http://15.223.253.194:5000";
   } catch {
     // Fallback for SSR or when runtime config is not available
-    return "http://localhost:5000";
+    return "http://15.223.253.194:5000";
   }
 };
 

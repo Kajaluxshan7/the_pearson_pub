@@ -110,7 +110,72 @@
           </div>
         </div>
       </div>
-    </section>    <!-- Values Section -->
+    </section>
+
+    <!-- Our Stories Section -->
+    <section class="py-20 bg-gray-50 dark:bg-gray-800 relative overflow-hidden">
+      <!-- Background decorations -->
+      <div class="absolute inset-0 opacity-5">
+        <div class="absolute top-20 right-10 w-48 h-48 rounded-full border-2 border-yellow-500"></div>
+        <div class="absolute bottom-20 left-10 w-32 h-32 rounded-full bg-yellow-300"></div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center mb-16">
+          <div class="inline-block mb-4">
+            <span class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase">Memorable Moments</span>
+            <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2"></div>
+          </div>
+          <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6" style="font-family: 'Cinzel', 'Georgia', serif;">
+            Our <span class="text-yellow-600 dark:text-yellow-400">Stories</span>
+          </h2>
+          <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            Capturing the moments, celebrations, and memories that make The Pearson Pub special
+          </p>
+        </div>
+
+        <!-- Stories Gallery -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div 
+            v-for="(story, index) in stories" 
+            :key="index"
+            class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-500 hover:scale-105"
+          >
+            <div class="relative h-80 overflow-hidden">
+              <img 
+                :src="story.image" 
+                :alt="story.title"
+                class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
+            </div>
+            
+            <!-- Story Content Overlay -->
+            <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+              <div class="flex items-center mb-3">
+                <UIcon :name="story.icon" class="w-5 h-5 text-yellow-400 mr-2" />
+                <span class="text-yellow-400 text-sm font-semibold uppercase tracking-wide">{{ story.category }}</span>
+              </div>
+              <h3 class="text-xl font-bold mb-2 group-hover:text-yellow-300 transition-colors">{{ story.title }}</h3>
+              <p class="text-gray-200 text-sm leading-relaxed">{{ story.description }}</p>
+              <div class="flex items-center mt-3 text-xs text-gray-300">
+                <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-1" />
+                <span>{{ story.date }}</span>
+              </div>
+            </div>
+
+            <!-- Hover Effect Badge -->
+            <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                <UIcon name="i-heroicons-eye" class="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Values Section -->
     <section 
       class="py-20 bg-white dark:bg-gray-800 relative overflow-hidden"
       :class="{
@@ -236,6 +301,57 @@ const values = [
     icon: 'i-heroicons-users',
     title: 'Community',
     description: 'Building connections that last and being a cornerstone of the local community'
+  }
+]
+
+const stories = [
+  {
+    title: 'Grand Opening Night',
+    description: 'The unforgettable evening that marked the beginning of our journey. Local residents, families, and friends gathered to celebrate.',
+    image: 'https://images.unsplash.com/photo-1574391884720-bbc8681fda8d?w=500&h=400&fit=crop',
+    category: 'Milestone',
+    icon: 'i-heroicons-star',
+    date: 'March 2010'
+  },
+  {
+    title: 'Community Fundraiser',
+    description: 'When our neighbor needed support, we rallied together. This charity evening raised over $15,000 for local families.',
+    image: 'https://images.unsplash.com/photo-1530126483408-aa533e55bdb2?w=500&h=400&fit=crop',
+    category: 'Community',
+    icon: 'i-heroicons-heart',
+    date: 'September 2019'
+  },
+  {
+    title: 'Live Music Nights',
+    description: 'Every Friday brings incredible local talent to our stage. These musicians have become part of our extended family.',
+    image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&h=400&fit=crop',
+    category: 'Entertainment',
+    icon: 'i-heroicons-musical-note',
+    date: 'Every Friday'
+  },
+  {
+    title: 'Wedding Celebrations',
+    description: 'Sarah and Mike\'s reception in our private dining room was magical. We love being part of life\'s special moments.',
+    image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=500&h=400&fit=crop',
+    category: 'Celebration',
+    icon: 'i-heroicons-gift',
+    date: 'June 2022'
+  },
+  {
+    title: 'Sports Victory Party',
+    description: 'When the local team won the championship, the whole neighborhood celebrated here. The energy was electric!',
+    image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=400&fit=crop',
+    category: 'Sports',
+    icon: 'i-heroicons-trophy',
+    date: 'October 2023'
+  },
+  {
+    title: 'Anniversary Dinner',
+    description: 'John and Mary\'s 50th anniversary celebration touched everyone\'s hearts. They chose us for their golden milestone.',
+    image: 'https://images.unsplash.com/photo-1529543444438-832b8d3bbce3?w=500&h=400&fit=crop',
+    category: 'Romance',
+    icon: 'i-heroicons-heart',
+    date: 'February 2024'
   }
 ]
 

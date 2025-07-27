@@ -106,7 +106,7 @@
         <div class="space-y-6">
           <h3 class="text-lg font-semibold">Hours of Operation</h3>
           <ul class="space-y-2 text-sm text-gray-400">
-            <li v-for="schedule in businessHours" :key="schedule.days">
+            <li v-for="schedule in formattedBusinessHours" :key="schedule.days">
               <p class="font-medium text-gray-300">{{ schedule.days }}</p>
               <p>{{ schedule.hours }}</p>
             </li>
@@ -123,18 +123,18 @@
                 href="https://maps.google.com/?q=101+MARY+ST+WHITBY,+ON,+L1N+2R4"
                 target="_blank"
                 rel="noopener"
-                class="hover:text-yellow-500 underline"
+                class="hover:text-yellow-500 transition-colors duration-200 no-underline"
               >
                 101 MARY ST WHITBY, ON, L1N 2R4
               </a>
             </div>
             <div class="flex items-center justify-center md:justify-start space-x-3">
               <UIcon name="i-heroicons-phone" class="w-5 h-5 text-yellow-500 flex-shrink-0" />
-              <a href="tel:9054305699" class="hover:text-yellow-500 underline">905-430-5699</a>
+              <a href="tel:9054305699" class="hover:text-yellow-500 transition-colors duration-200 no-underline">905-430-5699</a>
             </div>
             <div class="flex items-center justify-center md:justify-start space-x-3">
               <UIcon name="i-heroicons-envelope" class="w-5 h-5 text-yellow-500 flex-shrink-0" />
-              <a href="mailto:thepearsonpub@rogers.com" class="hover:text-yellow-500 underline">
+              <a href="mailto:thepearsonpub@rogers.com" class="hover:text-yellow-500 transition-colors duration-200 no-underline">
                 thepearsonpub@rogers.com
               </a>
             </div>
@@ -171,7 +171,60 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useLandingPageData } from "~/composables/useLandingPageData"
+
 const currentYear = new Date().getFullYear();
+
+// Get operation hours from backend
+const { operationHours } = useLandingPageData();
+
+// Format operation hours with proper time format and capitalization
+const formattedBusinessHours = computed(() => {
+  if (!operationHours.value?.length) {
+    // Fallback to static hours if backend data not available
+    return [
+      { days: "Monday - Tuesday", hours: "11:00 AM - 12:00 AM" },
+      { days: "Wednesday - Saturday", hours: "11:00 AM - 2:00 AM" },
+      { days: "Sunday", hours: "11:00 AM - 12:00 AM" },
+    ];
+  }
+
+  // Helper function to format time from HH:MM:SS to HH:MM AM/PM
+  const formatTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  // Helper function to capitalize day names
+  const capitalizeDay = (day: string) => {
+    return day.charAt(0).toUpperCase() + day.slice(1);
+  };
+
+  // Group by similar times
+  const grouped = operationHours.value.reduce((acc: any, hour: any) => {
+    const timeKey = `${hour.open_time}-${hour.close_time}`;
+    if (!acc[timeKey]) acc[timeKey] = [];
+    acc[timeKey].push(capitalizeDay(hour.day));
+    return acc;
+  }, {});
+  
+  // Format each group
+  return Object.entries(grouped)
+    .map(([time, days]: [string, any]) => {
+      const [open, close] = time.split('-');
+      const formattedDays = days.join(' - ');
+      const formattedOpen = formatTime(open);
+      const formattedClose = formatTime(close);
+      return {
+        days: formattedDays,
+        hours: `${formattedOpen} - ${formattedClose}`
+      };
+    });
+});
 
 const socialLinks = [
   { name: "Facebook", icon: "i-simple-icons-facebook", url: "https://facebook.com" },
@@ -186,12 +239,6 @@ const quickLinks = [
   { name: "Contact", path: "/contact" },
 ];
 
-const businessHours = [
-  { days: "Monday - Tuesday", hours: "11:00 AM - 12:00 AM" },
-  { days: "Wednesday - Saturday", hours: "11:00 AM - 2:00 AM" },
-  { days: "Sunday", hours: "11:00 AM - 12:00 AM" },
-];
-
 const entertainmentSchedule = [
   { day: "Friday", event: "Live Bands", time: "9:30 PM - 1:30 AM" },
   { day: "Saturday", event: "Live Bands", time: "9:30 PM - 1:30 AM" },
@@ -203,6 +250,14 @@ const particleCount = 30;
 </script>
 
 <style scoped>
+.no-underline {
+  text-decoration: none !important;
+}
+
+.no-underline:hover {
+  text-decoration: none !important;
+}
+
 .floating-orb {
   animation: floatOrb 12s infinite ease-in-out alternate;
 }
