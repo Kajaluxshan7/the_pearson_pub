@@ -135,32 +135,71 @@
         </div>
 
         <!-- Stories Gallery -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div v-if="storiesLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Loading skeletons -->
+          <div 
+            v-for="i in 6" 
+            :key="i"
+            class="relative overflow-hidden rounded-2xl shadow-lg h-80 bg-gray-200 dark:bg-gray-700 animate-pulse"
+          >
+            <div class="w-full h-full bg-gradient-to-t from-gray-300 to-gray-200 dark:from-gray-600 dark:to-gray-700"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-6">
+              <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
+              <div class="h-6 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
+              <div class="h-12 bg-gray-300 dark:bg-gray-600 rounded"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div v-else-if="stories.length === 0" class="text-center py-16">
+          <UIcon name="i-heroicons-photo" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <p class="text-gray-500 dark:text-gray-400 text-lg">No stories available at the moment.</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div 
             v-for="(story, index) in stories" 
-            :key="index"
+            :key="story.id || index"
             class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-500 hover:scale-105"
           >
             <div class="relative h-80 overflow-hidden">
               <img 
-                :src="story.image" 
+                :src="getCurrentImage(story)" 
                 :alt="story.title"
-                class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                class="w-full h-full object-cover transform group-hover:scale-110 transition-all duration-700"
+                :key="getCurrentImage(story)"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
+              
+              <!-- Image indicator dots for multiple images -->
+              <div v-if="story.images && story.images.length > 1" class="absolute top-4 right-4 flex space-x-1">
+                <div 
+                  v-for="(_, index) in story.images" 
+                  :key="index"
+                  class="w-2 h-2 rounded-full transition-all duration-300"
+                  :class="index === (currentImageIndexes[story.id] || 0) ? 'bg-yellow-400' : 'bg-white/50'"
+                ></div>
+              </div>
+              
+              <!-- Image count badge for multiple images -->
+              <div v-if="story.images && story.images.length > 1" class="absolute bottom-4 left-4">
+                <span class="bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                  {{ (currentImageIndexes[story.id] || 0) + 1 }} / {{ story.images.length }}
+                </span>
+              </div>
             </div>
             
             <!-- Story Content Overlay -->
             <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
               <div class="flex items-center mb-3">
-                <UIcon :name="story.icon" class="w-5 h-5 text-yellow-400 mr-2" />
-                <span class="text-yellow-400 text-sm font-semibold uppercase tracking-wide">{{ story.category }}</span>
+                <UIcon :name="story.icon || 'i-heroicons-heart'" class="w-5 h-5 text-yellow-400 mr-2" />
+                <span class="text-yellow-400 text-sm font-semibold uppercase tracking-wide">{{ story.category || 'Story' }}</span>
               </div>
               <h3 class="text-xl font-bold mb-2 group-hover:text-yellow-300 transition-colors">{{ story.title }}</h3>
               <p class="text-gray-200 text-sm leading-relaxed">{{ story.description }}</p>
               <div class="flex items-center mt-3 text-xs text-gray-300">
                 <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-1" />
-                <span>{{ story.date }}</span>
+                <span>{{ story.date || 'Recently' }}</span>
               </div>
             </div>
 
@@ -266,6 +305,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { publicApi } from '~/composables/usePublicApi'
+import type { ApiStory } from '~/composables/usePublicApi'
 
 // Simple animation state
 const animationState = ref({
@@ -275,9 +316,80 @@ const animationState = ref({
   stats: false
 })
 
+// Stories data from API
+const stories = ref<ApiStory[]>([])
+const storiesLoading = ref(true)
+
+// Image rotation for stories with multiple images
+const currentImageIndexes = ref<{ [key: string]: number }>({})
+
+// Load stories from API
+const loadStories = async () => {
+  try {
+    storiesLoading.value = true
+    const data = await publicApi.getStoriesData()
+    if (data && Array.isArray(data)) {
+      stories.value = data.map(story => ({
+        ...story,
+        // Map API fields to template expectations
+        image: story.image || (story.images && story.images.length > 0 ? story.images[0] : '/images/placeholder.jpg'),
+        category: 'Story', // Default category since backend doesn't have this field
+        icon: 'i-heroicons-heart', // Default icon
+        date: story.createdAt ? new Date(story.createdAt).toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long' 
+        }) : 'Recently'
+      }))
+    }
+  } catch (error) {
+    console.error('Failed to load stories:', error)
+    // Keep stories as empty array on error
+    stories.value = []
+  } finally {
+    storiesLoading.value = false
+  }
+}
+
+// Get current image for a story
+const getCurrentImage = (story: ApiStory) => {
+  if (!story.images || story.images.length === 0) {
+    return story.image || '/images/placeholder.jpg'
+  }
+  
+  if (story.images.length === 1) {
+    return story.images[0]
+  }
+  
+  const currentIndex = currentImageIndexes.value[story.id] || 0
+  return story.images[currentIndex] || story.images[0]
+}
+
+// Initialize image rotation for stories with multiple images
+const initializeImageRotation = () => {
+  stories.value.forEach(story => {
+    if (story.images && story.images.length > 1) {
+      // Initialize index for this story
+      currentImageIndexes.value[story.id] = 0
+      
+      // Set up rotation interval for this story
+      setInterval(() => {
+        const currentIndex = currentImageIndexes.value[story.id] || 0
+        const nextIndex = (currentIndex + 1) % story.images.length
+        currentImageIndexes.value[story.id] = nextIndex
+      }, 3000) // Change image every 3 seconds
+    }
+  })
+}
+
 // Simple fade-in animations on mount
 onMounted(() => {
   if (process.client) {
+    // Load stories from API
+    loadStories().then(() => {
+      // Initialize image rotation after stories are loaded
+      initializeImageRotation()
+    })
+    
     // Trigger section animations with simple transitions
     setTimeout(() => animationState.value.history = true, 300);
     setTimeout(() => animationState.value.values = true, 600);
@@ -301,57 +413,6 @@ const values = [
     icon: 'i-heroicons-users',
     title: 'Community',
     description: 'Building connections that last and being a cornerstone of the local community'
-  }
-]
-
-const stories = [
-  {
-    title: 'Grand Opening Night',
-    description: 'The unforgettable evening that marked the beginning of our journey. Local residents, families, and friends gathered to celebrate.',
-    image: 'https://images.unsplash.com/photo-1574391884720-bbc8681fda8d?w=500&h=400&fit=crop',
-    category: 'Milestone',
-    icon: 'i-heroicons-star',
-    date: 'March 2010'
-  },
-  {
-    title: 'Community Fundraiser',
-    description: 'When our neighbor needed support, we rallied together. This charity evening raised over $15,000 for local families.',
-    image: 'https://images.unsplash.com/photo-1530126483408-aa533e55bdb2?w=500&h=400&fit=crop',
-    category: 'Community',
-    icon: 'i-heroicons-heart',
-    date: 'September 2019'
-  },
-  {
-    title: 'Live Music Nights',
-    description: 'Every Friday brings incredible local talent to our stage. These musicians have become part of our extended family.',
-    image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&h=400&fit=crop',
-    category: 'Entertainment',
-    icon: 'i-heroicons-musical-note',
-    date: 'Every Friday'
-  },
-  {
-    title: 'Wedding Celebrations',
-    description: 'Sarah and Mike\'s reception in our private dining room was magical. We love being part of life\'s special moments.',
-    image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=500&h=400&fit=crop',
-    category: 'Celebration',
-    icon: 'i-heroicons-gift',
-    date: 'June 2022'
-  },
-  {
-    title: 'Sports Victory Party',
-    description: 'When the local team won the championship, the whole neighborhood celebrated here. The energy was electric!',
-    image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=400&fit=crop',
-    category: 'Sports',
-    icon: 'i-heroicons-trophy',
-    date: 'October 2023'
-  },
-  {
-    title: 'Anniversary Dinner',
-    description: 'John and Mary\'s 50th anniversary celebration touched everyone\'s hearts. They chose us for their golden milestone.',
-    image: 'https://images.unsplash.com/photo-1529543444438-832b8d3bbce3?w=500&h=400&fit=crop',
-    category: 'Romance',
-    icon: 'i-heroicons-heart',
-    date: 'February 2024'
   }
 ]
 

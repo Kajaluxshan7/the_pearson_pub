@@ -55,10 +55,19 @@ export interface PublicEventsData {
   events: Array<{
     id: string;
     name: string;
+    title: string;
     description?: string;
     images: string[];
+    image?: string; // Main image (first from images array)
     start_date: string;
     end_date: string;
+    startDate: string; // Frontend compatibility
+    endDate: string; // Frontend compatibility
+    status: 'upcoming' | 'ongoing' | 'ended';
+    category: string;
+    featured: boolean;
+    price: any;
+    location: string;
     created_at: string;
     updated_at: string;
   }>;
@@ -88,6 +97,21 @@ export interface PublicContactData {
     lat: number;
     lng: number;
   };
+}
+
+export interface ApiStory {
+  id: string;
+  title: string;
+  description?: string;
+  images: string[];
+  image?: string; // Main image (first from images array)
+  created_at: string;
+  updated_at: string;
+  // Mapped fields for UI compatibility
+  category?: string;
+  icon?: string;
+  date?: string;
+  createdAt?: string; // Alternative name for created_at
 }
 
 export interface LandingPageContent {
@@ -125,6 +149,15 @@ export const publicApi = {
 
   // Contact info with operation hours
   getContactInfo: (): Promise<PublicContactData> => api("/api/public/contact"),
+
+  // Stories data
+  getStoriesData: (): Promise<ApiStory[]> => api("/api/public/stories").then(response => {
+    // Handle both direct array response and wrapped response
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return response.stories || [];
+  }),
 };
 
 export default publicApi;
@@ -137,6 +170,7 @@ export const usePublicApi = () => {
     getMenuData: publicApi.getMenuData,
     getEventsData: publicApi.getEventsData,
     getContactInfo: publicApi.getContactInfo,
+    getStoriesData: publicApi.getStoriesData,
 
     // Direct API access
     api,

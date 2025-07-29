@@ -221,18 +221,46 @@
                 class="overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 bg-white dark:bg-gray-800 border-0 h-full"
               >
                 <template #header>
-                  <div class="relative overflow-hidden">                    <NuxtImg
-                      :src="event.image || '/images/entertainment/music.jpg'"
+                  <div class="relative overflow-hidden">
+                    <NuxtImg
+                      :key="`event-${event.id}-${index}-${currentImageIndexes[`${event.id}-${index}`] || 0}`"
+                      :src="getCurrentImage(event, index)"
                       :alt="event.title"
                       class="w-full h-48 lg:h-56 object-cover group-hover:scale-110 transition-transform duration-500"
                       format="webp"
                       quality="75"
                       loading="lazy"
                       :placeholder="[400, 240, 75]"
+                      @error="(e: any) => e.target.src = '/images/entertainment/music.jpg'"
                     />
                     <div
                       class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"
                     ></div>
+
+                    <!-- Image Indicators for Multiple Images -->
+                    <div 
+                      v-if="event.images && event.images.length > 1"
+                      class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1"
+                    >
+                      <div
+                        v-for="(img, imgIndex) in event.images"
+                        :key="imgIndex"
+                        :class="[
+                          'w-2 h-2 rounded-full transition-all duration-300',
+                          (currentImageIndexes[`${event.id}-${index}`] || 0) === imgIndex
+                            ? 'bg-yellow-400'
+                            : 'bg-white/50'
+                        ]"
+                      ></div>
+                    </div>
+
+                    <!-- Image Counter -->
+                    <div 
+                      v-if="event.images && event.images.length > 1"
+                      class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs"
+                    >
+                      {{ (currentImageIndexes[`${event.id}-${index}`] || 0) + 1 }}/{{ event.images.length }}
+                    </div>
 
                     <!-- Badges -->
                     <div class="absolute top-4 left-4 flex flex-col gap-2">
@@ -269,15 +297,7 @@
                       </UBadge>
                     </div>
 
-                    <!-- Price -->
-                    <div
-                      v-if="event.price && Object.keys(event.price).length > 0"
-                      class="absolute bottom-4 right-4 bg-black/70 text-white px-2 py-1 rounded-full"
-                    >
-                      <span class="text-xs font-semibold">
-                        From ${{ minPrice(event.price) }}
-                      </span>
-                    </div>
+                    <!-- Price - REMOVED -->
                   </div>
                 </template>
 
@@ -296,6 +316,7 @@
 
                   <div class="space-y-2 mb-4">
                     <div
+                      v-if="event.date"
                       class="flex items-center text-sm text-gray-500 dark:text-gray-400"
                     >
                       <UIcon
@@ -305,6 +326,7 @@
                       <span class="font-medium">{{ event.date }}</span>
                     </div>
                     <div
+                      v-if="event.time && event.time !== event.date"
                       class="flex items-center text-sm text-gray-500 dark:text-gray-400"
                     >
                       <UIcon
@@ -313,42 +335,9 @@
                       />
                       <span class="font-medium">{{ event.time }}</span>
                     </div>
-                    <div
-                      v-if="event.location"
-                      class="flex items-center text-sm text-gray-500 dark:text-gray-400"
-                    >
-                      <UIcon
-                        name="i-heroicons-map-pin"
-                        class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
-                      />
-                      <span class="font-medium">{{ event.location }}</span>
-                    </div>
                   </div>
 
-                  <!-- Rating -->
-                  <div
-                    v-if="event.averageRating"
-                    class="flex items-center gap-2 mb-4"
-                  >
-                    <div class="flex items-center">
-                      <UIcon
-                        v-for="star in 5"
-                        :key="star"
-                        name="i-heroicons-star-solid"
-                        :class="
-                          star <= Math.floor(event.averageRating)
-                            ? 'text-yellow-400'
-                            : 'text-gray-300'
-                        "
-                        class="w-4 h-4"
-                      />
-                    </div>
-                    <span class="text-xs text-gray-600 dark:text-gray-300">
-                      {{ event.averageRating.toFixed(1) }} ({{
-                        event.totalReviews
-                      }})
-                    </span>
-                  </div>
+                  <!-- Rating - REMOVED -->
 
                   <UButton
                     color="yellow"
@@ -381,15 +370,43 @@
               >
                 <div class="flex flex-col lg:flex-row">
                   <!-- Image -->
-                  <div class="lg:w-80 relative overflow-hidden">                    <NuxtImg
-                      :src="event.image || '/images/entertainment/music.jpg'"
+                  <div class="lg:w-80 relative overflow-hidden">
+                    <NuxtImg
+                      :key="`event-list-${event.id}-${index}-${currentImageIndexes[`${event.id}-${index}`] || 0}`"
+                      :src="getCurrentImage(event, index)"
                       :alt="event.title"
                       class="w-full h-48 lg:h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       format="webp"
                       quality="75"
                       loading="lazy"
                       :placeholder="[400, 240, 75]"
+                      @error="(e: any) => e.target.src = '/images/entertainment/music.jpg'"
                     />
+
+                    <!-- Image Indicators for Multiple Images -->
+                    <div 
+                      v-if="event.images && event.images.length > 1"
+                      class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1"
+                    >
+                      <div
+                        v-for="(img, imgIndex) in event.images"
+                        :key="imgIndex"
+                        :class="[
+                          'w-2 h-2 rounded-full transition-all duration-300',
+                          (currentImageIndexes[`${event.id}-${index}`] || 0) === imgIndex
+                            ? 'bg-yellow-400'
+                            : 'bg-white/50'
+                        ]"
+                      ></div>
+                    </div>
+
+                    <!-- Image Counter -->
+                    <div 
+                      v-if="event.images && event.images.length > 1"
+                      class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs"
+                    >
+                      {{ (currentImageIndexes[`${event.id}-${index}`] || 0) + 1 }}/{{ event.images.length }}
+                    </div>
 
                     <!-- Badges -->
                     <div class="absolute top-4 left-4 flex flex-col gap-2">
@@ -438,14 +455,7 @@
                               }}
                             </UBadge>
                           </div>
-                          <div v-if="event.price && Object.keys(event.price).length > 0" class="text-right">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">
-                              From
-                            </p>
-                            <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                              ${{ minPrice(event.price) }}
-                            </p>
-                          </div>
+                          <!-- Price - REMOVED -->
                         </div>
 
                         <p
@@ -455,9 +465,10 @@
                         </p>
 
                         <div
-                          class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4"
+                          class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4"
                         >
                           <div
+                            v-if="event.date"
                             class="flex items-center text-sm text-gray-500 dark:text-gray-400"
                           >
                             <UIcon
@@ -467,6 +478,7 @@
                             <span class="font-medium">{{ event.date }}</span>
                           </div>
                           <div
+                            v-if="event.time && event.time !== event.date"
                             class="flex items-center text-sm text-gray-500 dark:text-gray-400"
                           >
                             <UIcon
@@ -475,60 +487,11 @@
                             />
                             <span class="font-medium">{{ event.time }}</span>
                           </div>
-                          <div
-                            v-if="event.location"
-                            class="flex items-center text-sm text-gray-500 dark:text-gray-400"
-                          >
-                            <UIcon
-                              name="i-heroicons-map-pin"
-                              class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
-                            />
-                            <span class="font-medium">{{
-                              event.location
-                            }}</span>
-                          </div>
                         </div>
 
-                        <!-- Tags and Performers -->
-                        <div class="flex flex-wrap gap-2 mb-4">
-                          <UBadge
-                            v-for="tag in event.tags?.slice(0, 3)"
-                            :key="tag"
-                            color="gray"
-                            variant="subtle"
-                            class="text-xs"
-                          >
-                            {{ tag }}
-                          </UBadge>
-                        </div>
+                        <!-- Tags and Performers - REMOVED -->
 
-                        <!-- Rating -->
-                        <div
-                          v-if="event.averageRating"
-                          class="flex items-center gap-2"
-                        >
-                          <div class="flex items-center">
-                            <UIcon
-                              v-for="star in 5"
-                              :key="star"
-                              name="i-heroicons-star-solid"
-                              :class="
-                                star <= Math.floor(event.averageRating)
-                                  ? 'text-yellow-400'
-                                  : 'text-gray-300'
-                              "
-                              class="w-4 h-4"
-                            />
-                          </div>
-                          <span
-                            class="text-sm text-gray-600 dark:text-gray-300"
-                          >
-                            {{ event.averageRating.toFixed(1) }} ({{
-                              event.totalReviews
-                            }}
-                            reviews)
-                          </span>
-                        </div>
+                        <!-- Rating - REMOVED -->
                       </div>
 
                       <div class="lg:ml-6">
@@ -704,6 +667,9 @@ const selectedEvent = ref<Event | null>(null);
 const isEventModalOpen = ref(false);
 const modalLayout = ref<'portrait' | 'landscape'>('portrait');
 
+// Image rotation for events with multiple images
+const currentImageIndexes = ref<{ [key: string]: number }>({});
+
 // FAB Actions
 const fabActions = ref<FABAction[]>([
   {
@@ -761,47 +727,78 @@ const isLoading = ref(false);
 // Combine static events with backend events for display
 const allEvents = computed(() => {
   const dynamic = dynamicEvents.value || [];
-  const static_ = staticEvents.value || [];
   
+  // Helper function to calculate real-time event status
+  const calculateRealTimeStatus = (startDate: string, endDate: string) => {
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (now < start) {
+      return 'upcoming';
+    } else if (now >= start && now <= end) {
+      return 'ongoing';
+    } else {
+      return 'ended';
+    }
+  };
+
   // Transform backend events to match frontend interface
   const transformedDynamic = dynamic.map((event: any) => {
-    const getEventStatus = () => {
-      if (!event.start_date) return 'upcoming';
-      const now = new Date();
-      const start = new Date(event.start_date);
-      const end = new Date(event.end_date || event.start_date);
-      if (start > now) return 'upcoming';
-      if (end > now) return 'ongoing';
-      return 'completed';
-    };
+    // Use the formatted dates from backend
+    const startDateFormatted = event.startDate || ''; // "Jul 10, 2025"
+    const endDateFormatted = event.endDate || '';     // "Jul 18, 2025"
+    
+    // Create date and time display
+    let dateDisplay = startDateFormatted;
+    let timeDisplay = '';
+    
+    // If we have both start and end dates and they're different, show as time range
+    if (startDateFormatted && endDateFormatted && startDateFormatted !== endDateFormatted) {
+      timeDisplay = `Until ${endDateFormatted}`;
+    }
+    
+    // Calculate real-time status using ISO date strings for accurate comparison
+    const realTimeStatus = event.start_date && event.end_date 
+      ? calculateRealTimeStatus(event.start_date, event.end_date)
+      : (event.status || 'upcoming');
 
     return {
       id: event.id,
-      title: event.name,
+      title: event.title || event.name,
       description: event.description || '',
-      date: event.start_date ? new Date(event.start_date).toLocaleDateString() : '',
-      time: event.start_date && event.end_date ? 
-        `${new Date(event.start_date).toLocaleTimeString()} - ${new Date(event.end_date).toLocaleTimeString()}` : '',
+      date: dateDisplay,
+      time: timeDisplay,
       image: (event.images && event.images.length > 0) ? event.images[0] : '/images/entertainment/music.jpg',
       images: event.images || [],
-      location: 'The Pearson Pub', // Default location
-      tags: ['Event'], // Default tag
-      performers: [], // Default empty
-      featured: false, // Default featured state
-      category: 'special' as 'music' | 'quiz' | 'food' | 'special' | 'entertainment', // Default category
-      status: getEventStatus() as 'upcoming' | 'ongoing' | 'completed' | 'cancelled',
-      price: undefined,
-      averageRating: null,
-      totalReviews: 0,
+      featured: event.featured || false,
+      category: (event.category || 'event') as 'music' | 'quiz' | 'food' | 'special' | 'entertainment' | 'event',
+      status: realTimeStatus as 'upcoming' | 'ongoing' | 'completed' | 'cancelled' | 'ended',
       ctaText: "View Details",
       ctaLink: "#"
     };
   });
   
-  // Combine and sort by date (upcoming first)
-  return [...transformedDynamic, ...static_].sort((a, b) => {
-    const dateA = new Date(a.date || '1970-01-01');
-    const dateB = new Date(b.date || '1970-01-01');
+  // Sort by date (newest first) - handle both formatted dates and ISO strings
+  return transformedDynamic.sort((a, b) => {
+    // Try to parse the date from various formats
+    const parseDate = (dateStr: string) => {
+      if (!dateStr) return new Date('1970-01-01');
+      
+      // If it's already a valid date format, use it
+      const parsed = new Date(dateStr);
+      if (!isNaN(parsed.getTime())) return parsed;
+      
+      // Try parsing formatted date like "Jul 10, 2025"
+      try {
+        return new Date(dateStr);
+      } catch {
+        return new Date('1970-01-01');
+      }
+    };
+    
+    const dateA = parseDate(a.date);
+    const dateB = parseDate(b.date);
     return dateB.getTime() - dateA.getTime();
   });
 });
@@ -973,6 +970,49 @@ const loadMoreEvents = async () => {
   }
 };
 
+// Image rotation functions for events with multiple images
+const getCurrentImage = (event: any, index: number) => {
+  if (!event.images || event.images.length === 0) {
+    return event.image || '/images/entertainment/music.jpg';
+  }
+  if (event.images.length === 1) {
+    return event.images[0] || '/images/entertainment/music.jpg';
+  }
+  
+  const eventKey = `${event.id}-${index}`;
+  const currentIndex = currentImageIndexes.value[eventKey] || 0;
+  const imageUrl = event.images[currentIndex] || event.images[0] || '/images/entertainment/music.jpg';
+  
+  // Fallback for corrupted or invalid URLs
+  try {
+    new URL(imageUrl);
+    return imageUrl;
+  } catch {
+    return '/images/entertainment/music.jpg';
+  }
+};
+
+const initializeImageRotation = () => {
+  // Initialize rotation for all events with multiple images
+  if (allEvents.value) {
+    allEvents.value.forEach((event, index) => {
+      if (event.images && event.images.length > 1) {
+        const eventKey = `${event.id}-${index}`;
+        if (!(eventKey in currentImageIndexes.value)) {
+          currentImageIndexes.value[eventKey] = 0;
+        }
+        
+        // Start rotation
+        setInterval(() => {
+          const currentIndex = currentImageIndexes.value[eventKey] || 0;
+          const nextIndex = (currentIndex + 1) % event.images.length;
+          currentImageIndexes.value[eventKey] = nextIndex;
+        }, 3000); // Change image every 3 seconds
+      }
+    });
+  }
+};
+
 onMounted(async () => {
   // Fetch backend data
   await fetchEvents();
@@ -982,6 +1022,10 @@ onMounted(async () => {
     eventPagination.value.events.total = dynamicEvents.value.length;
     eventPagination.value.events.totalPages = Math.ceil(dynamicEvents.value.length / 50);
   }
+  
+  // Initialize image rotation for events with multiple images
+  await nextTick();
+  initializeImageRotation();
   
   checkViewMode();
   window.addEventListener("resize", checkViewMode);

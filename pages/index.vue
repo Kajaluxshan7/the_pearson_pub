@@ -37,10 +37,8 @@
               <div class="flex items-center gap-3">
                 <!-- <span class="font-medium">{{ currentDayHours.day }}</span> -->
                 <span>{{ currentDayHours.openTime }} - {{ currentDayHours.closeTime }}</span>
-                <span 
-                  class="px-2 py-1 rounded-full text-xs font-semibold"
-                  :class="currentDayHours.isOpen ? 'bg-green-500 text-white' : 'bg-red-500 text-white'"
-                >
+                <span class="px-2 py-1 rounded-full text-xs font-semibold"
+                  :class="currentDayHours.isOpen ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
                   {{ currentDayHours.isOpen ? 'OPEN NOW' : 'CLOSED' }}
                 </span>
               </div>
@@ -88,11 +86,21 @@
                   class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8">
                   <div class="flex flex-col lg:flex-row items-center lg:items-start gap-8">
                     <div class="lg:flex-1 order-2 lg:order-1">
-                      <h3 class="text-3xl font-bold mb-3 text-gray-900 dark:text-white">
+                      <!-- <h3 class="text-3xl font-bold mb-3 text-gray-900 dark:text-white">
                         {{ (selectedTab as any).name || selectedTab.title }}
-                      </h3>
-                      <p class="italic text-yellow-600 dark:text-yellow-400 mb-4 text-lg">{{ selectedTab.subtitle }}</p>
+                      </h3> -->
+                      <p class="italic text-yellow-600 dark:text-yellow-400 mb-4 text-lg">{{ selectedTab.title }}</p>
                       <p class="text-gray-700 dark:text-gray-300 leading-relaxed">{{ selectedTab.description }}</p>
+                      <!-- Date range for seasonal specials -->
+                      <div
+                        v-if="selectedTab.specialType === 'seasonal' && ('start_date' in selectedTab || 'end_date' in selectedTab)"
+                        class="mt-3">
+                        <p class="text-sm text-yellow-600 dark:text-yellow-400 font-medium">
+                          📅 {{ formatSpecialDate(selectedTab.start_date as any) }} - {{
+                            formatSpecialDate(selectedTab.end_date as any) }}
+                        </p>
+                      </div>
+
                       <div v-if="selectedTab && 'price' in selectedTab && selectedTab.price" class="mt-4">
                         <span class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${{ selectedTab.price
                           }}</span>
@@ -100,7 +108,7 @@
                     </div>
                     <div class="lg:w-80 order-1 lg:order-2 text-center">
                       <div class="relative overflow-hidden rounded-xl shadow-lg">
-                        <NuxtImg :src="selectedTab.img" :alt="selectedTab.title"
+                        <NuxtImg :src="currentImage" :alt="selectedTab.title"
                           class="w-full h-64 object-cover transform hover:scale-110 transition-transform duration-500"
                           width="320" height="256" format="webp" quality="80" loading="lazy" />
                       </div>
@@ -110,7 +118,7 @@
               </transition>
             </div>
           </div>
-          
+
           <!-- Three Dots Navigation -->
           <div class="flex justify-center mt-8">
             <div class="flex space-x-2">
@@ -281,6 +289,9 @@ const {
   menuData,
   eventsData,
   contactInfo,
+  dailySpecials,
+  seasonalSpecials,
+  lateNightSpecials,
   featuredMenuItems,
   menuCategories,
   upcomingEvents,
@@ -359,156 +370,186 @@ const features = computed(() => [
   },
 ]);
 
-// Specials Section State (dynamic from backend)
+// Specials Section State (dynamic from new backend API)
 const specialsTabs = computed(() => {
-  if (!landingContent.value?.todaysSpecials?.length) {
-    // Fallback static content with new category names
+  const tabs = [];
+
+  // Add Daily Special tab if data exists
+  if (dailySpecials.value?.specials?.length > 0) {
+    tabs.push({
+      id: 'daily-special',
+      title: dailySpecials.value.heading || 'Daily Special',
+      specialType: 'daily',
+      specials: dailySpecials.value.specials,
+      subtitle: dailySpecials.value.specials[0].description?.substring(0, 80) + '...' || 'Today\'s featured dish',
+      description: dailySpecials.value.specials[0].description || 'A delicious daily special prepared by our chef.',
+      images: dailySpecials.value.specials[0].image_urls || [dailySpecials.value.specials[0].image_url].filter(Boolean),
+      dayName: dailySpecials.value.dayName,
+    });
+  }
+
+  // Add Seasonal Special tab if data exists
+  if (seasonalSpecials.value?.specials?.length > 0) {
+    tabs.push({
+      id: 'seasonal-special',
+      title: 'Seasonal Specials',
+      specialType: 'seasonal',
+      specials: seasonalSpecials.value.specials,
+      subtitle: seasonalSpecials.value.specials[0].description?.substring(0, 80) + '...' || 'Fresh seasonal offering',
+      description: seasonalSpecials.value.specials[0].description || 'A delicious seasonal special prepared by our chef.',
+      images: seasonalSpecials.value.specials[0].image_urls || [seasonalSpecials.value.specials[0].image_url].filter(Boolean),
+      season_name: seasonalSpecials.value.specials[0].season_name,
+      start_date: seasonalSpecials.value.specials[0].seasonal_start_datetime,
+      end_date: seasonalSpecials.value.specials[0].seasonal_end_datetime,
+    });
+  }
+
+  // Add Late Night Special tab if data exists
+  if (lateNightSpecials.value?.specials?.length > 0) {
+    tabs.push({
+      id: 'latenight-special',
+      title: lateNightSpecials.value.heading || 'Latenight Special',
+      specialType: 'latenight',
+      specials: lateNightSpecials.value.specials,
+      subtitle: lateNightSpecials.value.specials[0].description?.substring(0, 80) + '...' || 'Late night favorite',
+      description: lateNightSpecials.value.specials[0].description || 'A delicious late night special.',
+      images: lateNightSpecials.value.specials[0].image_urls || [lateNightSpecials.value.specials[0].image_url].filter(Boolean),
+    });
+  }
+
+  // Fallback to static content if no specials from API
+  if (tabs.length === 0) {
     return [
-      {
-        id: 'seasonal-special',
-        title: 'Seasonal Special',
-        subtitle: 'Crispy battered fish served with golden fries and house tartar sauce.',
-        description: 'A British pub staple! Fresh cod fillets, hand-battered and fried to perfection, served with thick-cut fries, mushy peas, and our signature tartar sauce.',
-        img: '/images/food/fish_and_chips.jpg',
-      },
       {
         id: 'daily-special',
         title: 'Daily Special',
-        subtitle: 'Traditional comfort food with seasoned lamb and vegetables.',
-        description: 'A hearty helping of seasoned ground lamb and vegetables, topped with creamy mashed potatoes and baked until golden brown.',
-        img: '/images/food/shepherds_pie.jpg',
+        specialType: 'daily',
+        subtitle: 'Check back for today\'s special',
+        description: 'Our chef is preparing something special for today. Stay tuned!',
+        images: ['/images/food/fish_and_chips.jpg'],
       },
       {
-        id: 'late-night',
-        title: 'Late Night Specials',
-        subtitle: 'Traditional British sausages with creamy mashed potatoes.',
-        description: 'Premium pork sausages served with fluffy mashed potatoes, caramelized onions, and rich gravy.',
-        img: '/images/food/bangers_mash.jpg',
+        id: 'seasonal-special',
+        title: 'Seasonal Special',
+        specialType: 'seasonal',
+        subtitle: 'Fresh seasonal offerings',
+        description: 'Discover our seasonal menu crafted with the finest ingredients.',
+        images: ['/images/food/shepherds_pie.jpg'],
+      },
+      {
+        id: 'latenight-special',
+        title: 'Latenight Special',
+        specialType: 'latenight',
+        subtitle: 'Perfect for late night cravings',
+        description: 'Delicious options available for our night owls.',
+        images: ['/images/food/bangers_mash.jpg'],
       },
     ];
   }
 
-  // Dynamic content from backend - map to new categories
-  const specials = landingContent.value.todaysSpecials;
-  const seasonalSpecials = specials.filter((s: any) => s.special_type === 'seasonal');
-  const dailySpecials = specials.filter((s: any) => s.special_type === 'daily');
-  const lastNightSpecials = specials.filter((s: any) => s.special_type === 'latenight');
-
-  const tabs = [];
-
-  // Add Seasonal Special tab
-  if (seasonalSpecials.length > 0) {
-    tabs.push({
-      id: 'seasonal-special',
-      title: 'Seasonal Special',
-      specials: seasonalSpecials, // Store all seasonal specials for auto-swapping
-      subtitle: seasonalSpecials[0].description?.substring(0, 80) + '...' || 'Fresh seasonal offering',
-      description: seasonalSpecials[0].description || 'A delicious seasonal special prepared by our chef.',
-      img: seasonalSpecials[0].menuItem?.images?.[0] || '/images/food/fish_and_chips.jpg',
-      price: seasonalSpecials[0].price,
-      name: seasonalSpecials[0].name,
-    });
-  }
-
-  // Add Daily Special tab
-  if (dailySpecials.length > 0) {
-    const daily = dailySpecials[0];
-    tabs.push({
-      id: 'daily-special',
-      title: 'Daily Special',
-      subtitle: daily.description?.substring(0, 80) + '...' || 'Today\'s featured dish',
-      description: daily.description || 'A delicious daily special prepared by our chef.',
-      img: daily.menuItem?.images?.[0] || '/images/food/shepherds_pie.jpg',
-      price: daily.price,
-      name: daily.name,
-    });
-  }
-
-  // Add Last Night tab
-  if (lastNightSpecials.length > 0) {
-    const lastNight = lastNightSpecials[0];
-    tabs.push({
-      id: 'last-night',
-      title: 'Late Night Special',
-      subtitle: lastNight.description?.substring(0, 80) + '...' || 'Late Night Specials favorite',
-      description: lastNight.description || 'A delicious Late Night Specials special.',
-      img: lastNight.menuItem?.images?.[0] || '/images/food/bangers_mash.jpg',
-      price: lastNight.price,
-      name: lastNight.name,
-    });
-  }
-
-  return tabs.length > 0 ? tabs : [
-    // Fallback if no specials found
-    {
-      id: 'seasonal-special',
-      title: 'Seasonal Special',
-      subtitle: 'Check back soon for our seasonal offerings',
-      description: 'Our chef is preparing something special for this season. Stay tuned!',
-      img: '/images/food/fish_and_chips.jpg',
-    }
-  ];
+  return tabs;
 });
 
-const activeSpecialTab = ref('seasonal-special')
-const seasonalSpecialIndex = ref(0) // For auto-swapping seasonal specials
-let seasonalSwapInterval: NodeJS.Timeout | null = null
+const activeSpecialTab = ref('daily-special')
+const currentImageIndex = ref(0) // For cycling through images in current special
+let specialSwapInterval: NodeJS.Timeout | null = null
+let imageSwapInterval: NodeJS.Timeout | null = null
 
+// Get current active tab data
 const selectedTab = computed(() => {
-  const tab = specialsTabs.value.find((tab) => tab.id === activeSpecialTab.value)
-
-  // If this is the seasonal special tab and it has multiple specials, swap through them
-  if (tab?.id === 'seasonal-special' && (tab as any).specials?.length > 1) {
-    const currentSpecial = (tab as any).specials[seasonalSpecialIndex.value]
-    return {
-      ...tab,
-      subtitle: currentSpecial.description?.substring(0, 80) + '...' || 'Fresh seasonal offering',
-      description: currentSpecial.description || 'A delicious seasonal special prepared by our chef.',
-      img: currentSpecial.menuItem?.images?.[0] || '/images/food/fish_and_chips.jpg',
-      price: currentSpecial.price,
-      name: currentSpecial.name,
-    }
-  }
-
-  return tab
+  return specialsTabs.value.find((tab) => tab.id === activeSpecialTab.value) || null
 })
 
-// Auto-swap seasonal specials function
-const startSeasonalSpecialRotation = () => {
-  const seasonalTab = specialsTabs.value.find(tab => tab.id === 'seasonal-special')
-  if (seasonalTab && (seasonalTab as any).specials?.length > 1) {
-    seasonalSwapInterval = setInterval(() => {
-      seasonalSpecialIndex.value = (seasonalSpecialIndex.value + 1) % (seasonalTab as any).specials.length
-    }, 4000) // Swap every 4 seconds
+// Get current image to display
+const currentImage = computed(() => {
+  const images = selectedTab.value?.images
+  const imageIndex = currentImageIndex.value
+  
+  if (!images?.length) {
+    return '/images/food/default.jpg'
+  }
+  
+  return images[imageIndex] || images[0]
+})
+
+// Format date for seasonal specials
+const formatSpecialDate = (dateString: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+}
+
+// Auto-swap functions for categories and images
+const startSpecialRotation = () => {
+  // Stop any existing interval first
+  stopSpecialRotation()
+  
+  // Rotate between special categories (Daily → Seasonal → Latenight → Daily...)
+  if (specialsTabs.value.length > 1) {
+    specialSwapInterval = setInterval(() => {
+      const currentTabIndex = specialsTabs.value.findIndex(tab => tab.id === activeSpecialTab.value)
+      const nextTabIndex = (currentTabIndex + 1) % specialsTabs.value.length
+      activeSpecialTab.value = specialsTabs.value[nextTabIndex].id
+    }, 12000) // Swap categories every 12 seconds
   }
 }
 
-const stopSeasonalSpecialRotation = () => {
-  if (seasonalSwapInterval) {
-    clearInterval(seasonalSwapInterval)
-    seasonalSwapInterval = null
+const startImageRotation = () => {
+  // Stop any existing interval first
+  stopImageRotation()
+  
+  const images = selectedTab.value?.images
+  
+  if (images?.length && images.length > 1) {
+    imageSwapInterval = setInterval(() => {
+      const currentImages = selectedTab.value?.images
+      if (currentImages?.length && currentImages.length > 1) {
+        currentImageIndex.value = (currentImageIndex.value + 1) % currentImages.length
+      }
+    }, 2000) // Swap every 2 seconds
   }
 }
 
-// Watch for changes in active tab to manage rotation
+const stopSpecialRotation = () => {
+  if (specialSwapInterval) {
+    clearInterval(specialSwapInterval)
+    specialSwapInterval = null
+  }
+}
+
+const stopImageRotation = () => {
+  if (imageSwapInterval) {
+    clearInterval(imageSwapInterval)
+    imageSwapInterval = null
+  }
+}
+
+// Watch for changes in active tab to manage rotations
 watch(activeSpecialTab, (newTab) => {
-  if (newTab === 'seasonal-special') {
-    startSeasonalSpecialRotation()
-  } else {
-    stopSeasonalSpecialRotation()
-  }
+  // Reset image index when switching categories
+  currentImageIndex.value = 0
+  
+  // Restart image rotation for the new category
+  nextTick(() => {
+    startImageRotation()
+  })
 })
 
-// Watch for changes in specials data to restart rotation
+// Watch for changes in specials data to restart rotations
 watch(specialsTabs, () => {
-  if (activeSpecialTab.value === 'seasonal-special') {
-    stopSeasonalSpecialRotation()
-    seasonalSpecialIndex.value = 0
-    nextTick(() => {
-      startSeasonalSpecialRotation()
-    })
-  }
+  stopSpecialRotation()
+  stopImageRotation()
+  currentImageIndex.value = 0
+  nextTick(() => {
+    startSpecialRotation()
+    startImageRotation()
+  })
 }, { deep: true })
+
 // Get current day's operation hours with open/close status
 const currentDayHours = computed(() => {
   if (!operationHours.value?.length) return null;
@@ -594,10 +635,9 @@ onMounted(async () => {
   // Observe sections
   if (aboutRef.value) observer.observe(aboutRef.value)
 
-  // Start seasonal special rotation if on seasonal special tab
-  if (activeSpecialTab.value === 'seasonal-special') {
-    startSeasonalSpecialRotation()
-  }
+  // Start special and image rotation
+  startSpecialRotation()
+  startImageRotation()
 
   // Initialize 3D animations with more performance checks
   if (process.client && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
@@ -629,7 +669,9 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (observer) observer.disconnect()
-  stopSeasonalSpecialRotation() // Clean up interval
+  // Clean up intervals
+  stopSpecialRotation()
+  stopImageRotation()
 })
 </script>
 

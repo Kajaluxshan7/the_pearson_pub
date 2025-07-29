@@ -89,6 +89,26 @@ export interface ApiEvent {
   updated_at: string;
 }
 
+export interface ApiSpecial {
+  id: string;
+  special_type: "daily" | "seasonal" | "latenight";
+  season_name?: string;
+  description?: string;
+  image_url?: string;
+  image_urls?: string[];
+  seasonal_start_datetime?: string;
+  seasonal_end_datetime?: string;
+  specialsDay?: {
+    id: string;
+    day_name: string;
+    created_at: string;
+    updated_at: string;
+  };
+  heading?: string; // Dynamic heading based on special type
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ApiOperationHour {
   id: string;
   day:
@@ -104,6 +124,21 @@ export interface ApiOperationHour {
   status: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface ApiStory {
+  id: string;
+  title: string;
+  description?: string;
+  images: string[];
+  image?: string; // Main image (first from images array)
+  created_at: string;
+  updated_at: string;
+  // Mapped fields for UI compatibility
+  category?: string;
+  icon?: string;
+  date?: string;
+  createdAt?: string; // Alternative name for created_at
 }
 
 // Categories API with fallbacks
@@ -224,6 +259,32 @@ export const publicApi = {
       () => api("/api/public/contact"),
       null
     ),
+  // New specials endpoints
+  getSpecialsData: () => 
+    safeApiCall(
+      () => api("/api/public/specials"),
+      { specials: [], total: 0 }
+    ),
+  getDailySpecials: () => 
+    safeApiCall(
+      () => api("/api/public/specials/daily"),
+      { specials: [], total: 0, dayName: "", heading: "Daily Special" }
+    ),
+  getSeasonalSpecials: () => 
+    safeApiCall(
+      () => api("/api/public/specials/seasonal"),
+      { specials: [], total: 0 }
+    ),
+  getLateNightSpecials: () => 
+    safeApiCall(
+      () => api("/api/public/specials/latenight"),
+      { specials: [], total: 0, heading: "Latenight Special" }
+    ),
+  getStoriesData: () => 
+    safeApiCall(
+      () => api("/api/public/stories"),
+      []
+    ),
 };
 
 // Specials API for public use with fallbacks
@@ -233,9 +294,23 @@ export const specialsApi = {
     limit = 50,
     search?: string,
     specialType?: string
-  ): Promise<PaginatedResponse<any>> =>
+  ): Promise<PaginatedResponse<ApiSpecial>> =>
     safeApiCall(
-      () => api("/specials", {
+      () => api("/api/public/specials", {
+        query: { page, limit, search, specialType },
+      }),
+      { data: [], total: 0, page: 1, totalPages: 0 }
+    ),
+
+  // Alternative public endpoint
+  getAllPublic: (
+    page = 1,
+    limit = 50,
+    search?: string,
+    specialType?: string
+  ): Promise<PaginatedResponse<ApiSpecial>> =>
+    safeApiCall(
+      () => api("/specials/public", {
         query: { page, limit, search, specialType },
       }),
       { data: [], total: 0, page: 1, totalPages: 0 }
@@ -243,39 +318,67 @@ export const specialsApi = {
 
   getByType: (
     specialType: "daily" | "seasonal" | "latenight"
-  ): Promise<any[]> =>
+  ): Promise<any> =>
     safeApiCall(
-      () => api("/specials", {
-        query: { specialType, limit: 50 },
-      }).then((response) => response.data),
-      []
+      () => api(`/api/public/specials/${specialType}`),
+      { specials: [], total: 0, heading: "" }
     ),
 
-  getCurrentDaySpecials: (): Promise<any[]> => {
-    const currentDay = new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-    });
+  getDailySpecials: (): Promise<any> =>
+    safeApiCall(
+      () => api("/api/public/specials/daily"),
+      { 
+        specials: [], 
+        total: 0, 
+        dayName: "", 
+        heading: "Daily Special" 
+      }
+    ),
+
+  getSeasonalSpecials: (): Promise<any> =>
+    safeApiCall(
+      () => api("/api/public/specials/seasonal"),
+      { specials: [], total: 0 }
+    ),
+
+  getLateNightSpecials: (): Promise<any> =>
+    safeApiCall(
+      () => api("/api/public/specials/latenight"),
+      { 
+        specials: [], 
+        total: 0, 
+        heading: "Latenight Special" 
+      }
+    ),
+
+  // Helper method to get current day specials with proper heading
+  getCurrentDaySpecials: (): Promise<any> => {
+    return specialsApi.getDailySpecials();
+  },
+
+  // Legacy methods for backward compatibility
+  getCurrentDaySpecialsLegacy: (): Promise<ApiSpecial[]> => {
     return safeApiCall(
-      () => api("/specials", {
-        query: { specialType: "daily", limit: 50 },
-      }).then((response) => response.data),
+      () => specialsApi.getDailySpecials().then((response) => 
+        response.specials || []
+      ),
       []
     );
   },
 
-  getSeasonalSpecials: (): Promise<any[]> =>
+  getSeasonalSpecialsLegacy: (): Promise<ApiSpecial[]> =>
     safeApiCall(
-      () => api("/specials", {
-        query: { specialType: "seasonal", limit: 50 },
-      }).then((response) => response.data),
+      () => specialsApi.getSeasonalSpecials().then((response) => 
+        response.specials || []
+      ),
       []
     ),
 
-  getLastNightSpecials: (): Promise<any[]> =>
+  getLastNightSpecials: (): Promise<ApiSpecial[]> =>
     safeApiCall(
-      () => api("/specials", {
-        query: { specialType: "latenight", limit: 50 },
-      }).then((response) => response.data),
+      () => specialsApi.getLateNightSpecials().then((response) => 
+        response.specials || []
+      ),
       []
     ),
 };
@@ -301,12 +404,29 @@ export const useApi = () => {
     getOperationHours: operationHoursApi.getAll,
     getOperationHourById: operationHoursApi.getById,
 
-    // Specials
+    // Specials - New improved methods
     getSpecials: specialsApi.getAll,
+    getSpecialsPublic: specialsApi.getAllPublic,
     getSpecialsByType: specialsApi.getByType,
-    getCurrentDaySpecials: specialsApi.getCurrentDaySpecials,
+    getDailySpecials: specialsApi.getDailySpecials,
     getSeasonalSpecials: specialsApi.getSeasonalSpecials,
+    getLateNightSpecials: specialsApi.getLateNightSpecials,
+    getCurrentDaySpecials: specialsApi.getCurrentDaySpecials,
+    
+    // Legacy methods for backward compatibility
+    getCurrentDaySpecialsLegacy: specialsApi.getCurrentDaySpecialsLegacy,
+    getSeasonalSpecialsLegacy: specialsApi.getSeasonalSpecialsLegacy,
     getLastNightSpecials: specialsApi.getLastNightSpecials,
+
+    // Public API methods
+    getPublicLandingContent: publicApi.getLandingContent,
+    getPublicMenuData: publicApi.getMenuData,
+    getPublicEventsData: publicApi.getEventsData,
+    getPublicContactInfo: publicApi.getContactInfo,
+    getPublicSpecialsData: publicApi.getSpecialsData,
+    getPublicDailySpecials: publicApi.getDailySpecials,
+    getPublicSeasonalSpecials: publicApi.getSeasonalSpecials,
+    getPublicLateNightSpecials: publicApi.getLateNightSpecials,
 
     // Direct API access
     api,
