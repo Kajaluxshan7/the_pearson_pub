@@ -1,15 +1,49 @@
 import { $fetch } from "ofetch";
 
-const API_BASE_URL = "http://localhost:5000";
+// Function to get API base URL from runtime config
+const getApiBaseUrl = () => {
+  try {
+    const config = useRuntimeConfig();
+    return (config.public.apiBaseUrl as string) || "http://15.223.253.194:5000";
+  } catch {
+    // Fallback for SSR or when runtime config is not available
+    return "http://15.223.253.194:5000";
+  }
+};
 
-// Create fetch instance with base configuration
-const api = $fetch.create({
-  baseURL: API_BASE_URL,
-  credentials: "include", // Include cookies
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+// Create fetch instance with base configuration and error handling
+const createApiClient = () => {
+  const API_BASE_URL = getApiBaseUrl();
+
+  return $fetch.create({
+    baseURL: API_BASE_URL,
+    credentials: "include", // Include cookies
+    headers: {
+      "Content-Type": "application/json",
+    },
+    onRequestError({ error }) {
+      console.warn("API Request Error:", error);
+      // Don't throw error, let components handle gracefully
+    },
+    onResponseError({ response }) {
+      console.warn("API Response Error:", response.status, response.statusText);
+      // Don't throw error, let components handle gracefully
+    },
+  });
+};
+
+// Create the API client
+const api = createApiClient();
+
+// Helper function to handle API calls with fallback
+const safeApiCall = async <T>(apiCall: () => Promise<T>, fallback: T): Promise<T> => {
+  try {
+    return await apiCall();
+  } catch (error) {
+    console.warn("API call failed, using fallback data:", error);
+    return fallback;
+  }
+};
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -55,6 +89,26 @@ export interface ApiEvent {
   updated_at: string;
 }
 
+export interface ApiSpecial {
+  id: string;
+  special_type: "daily" | "seasonal" | "latenight";
+  season_name?: string;
+  description?: string;
+  image_url?: string;
+  image_urls?: string[];
+  seasonal_start_datetime?: string;
+  seasonal_end_datetime?: string;
+  specialsDay?: {
+    id: string;
+    day_name: string;
+    created_at: string;
+    updated_at: string;
+  };
+  heading?: string; // Dynamic heading based on special type
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ApiOperationHour {
   id: string;
   day:
@@ -72,21 +126,41 @@ export interface ApiOperationHour {
   updated_at: string;
 }
 
-// Categories API
+export interface ApiStory {
+  id: string;
+  title: string;
+  description?: string;
+  images: string[];
+  image?: string; // Main image (first from images array)
+  created_at: string;
+  updated_at: string;
+  // Mapped fields for UI compatibility
+  category?: string;
+  icon?: string;
+  date?: string;
+  createdAt?: string; // Alternative name for created_at
+}
+
+// Categories API with fallbacks
 export const categoriesApi = {
   getAll: (
     page = 1,
     limit = 50,
     search?: string
   ): Promise<PaginatedResponse<ApiCategory>> =>
-    api("/categories", {
-      query: { page, limit, search },
-    }),
+    safeApiCall(
+      () => api("/categories", { query: { page, limit, search } }),
+      { data: [], total: 0, page: 1, totalPages: 0 }
+    ),
 
-  getById: (id: string): Promise<ApiCategory> => api(`/categories/${id}`),
+  getById: (id: string): Promise<ApiCategory | null> =>
+    safeApiCall(
+      () => api(`/categories/${id}`),
+      null
+    ),
 };
 
-// Items API
+// Items API with fallbacks
 export const itemsApi = {
   getAll: (
     page = 1,
@@ -97,22 +171,29 @@ export const itemsApi = {
     visibility?: boolean,
     is_favourite?: boolean
   ): Promise<PaginatedResponse<ApiItem>> =>
-    api("/items", {
-      query: {
-        page,
-        limit,
-        search,
-        categoryId,
-        availability,
-        visibility,
-        is_favourite,
-      },
-    }),
+    safeApiCall(
+      () => api("/items", {
+        query: {
+          page,
+          limit,
+          search,
+          categoryId,
+          availability,
+          visibility,
+          is_favourite,
+        },
+      }),
+      { data: [], total: 0, page: 1, totalPages: 0 }
+    ),
 
-  getById: (id: string): Promise<ApiItem> => api(`/items/${id}`),
+  getById: (id: string): Promise<ApiItem | null> =>
+    safeApiCall(
+      () => api(`/items/${id}`),
+      null
+    ),
 };
 
-// Events API
+// Events API with fallbacks
 export const eventsApi = {
   getAll: (
     page = 1,
@@ -121,34 +202,185 @@ export const eventsApi = {
     startDate?: string,
     endDate?: string
   ): Promise<PaginatedResponse<ApiEvent>> =>
-    api("/events", {
-      query: { page, limit, search, startDate, endDate },
-    }),
+    safeApiCall(
+      () => api("/events", {
+        query: { page, limit, search, startDate, endDate },
+      }),
+      { data: [], total: 0, page: 1, totalPages: 0 }
+    ),
 
-  getById: (id: string): Promise<ApiEvent> => api(`/events/${id}`),
+  getById: (id: string): Promise<ApiEvent | null> =>
+    safeApiCall(
+      () => api(`/events/${id}`),
+      null
+    ),
 };
 
-// Operation Hours API
+// Operation Hours API with fallbacks
 export const operationHoursApi = {
   getAll: (
     page = 1,
     limit = 20,
     day?: string
   ): Promise<PaginatedResponse<ApiOperationHour>> =>
-    api("/operation-hours", {
-      query: { page, limit, day },
-    }),
+    safeApiCall(
+      () => api("/operation-hours", {
+        query: { page, limit, day },
+      }),
+      { data: [], total: 0, page: 1, totalPages: 0 }
+    ),
 
-  getById: (id: string): Promise<ApiOperationHour> =>
-    api(`/operation-hours/${id}`),
+  getById: (id: string): Promise<ApiOperationHour | null> =>
+    safeApiCall(
+      () => api(`/operation-hours/${id}`),
+      null
+    ),
 };
 
-// Public API for landing page content
+// Public API for landing page content - these endpoints are optional
 export const publicApi = {
-  getLandingContent: () => api("/api/public/landing-content"),
-  getMenuData: () => api("/api/public/menu"),
-  getEventsData: () => api("/api/public/events"),
-  getContactInfo: () => api("/api/public/contact"),
+  getLandingContent: () => 
+    safeApiCall(
+      () => api("/api/public/landing-content"),
+      null
+    ),
+  getMenuData: () => 
+    safeApiCall(
+      () => api("/api/public/menu"),
+      null
+    ),
+  getEventsData: () => 
+    safeApiCall(
+      () => api("/api/public/events"),
+      null
+    ),
+  getContactInfo: () => 
+    safeApiCall(
+      () => api("/api/public/contact"),
+      null
+    ),
+  // New specials endpoints
+  getSpecialsData: () => 
+    safeApiCall(
+      () => api("/api/public/specials"),
+      { specials: [], total: 0 }
+    ),
+  getDailySpecials: () => 
+    safeApiCall(
+      () => api("/api/public/specials/daily"),
+      { specials: [], total: 0, dayName: "", heading: "Daily Special" }
+    ),
+  getSeasonalSpecials: () => 
+    safeApiCall(
+      () => api("/api/public/specials/seasonal"),
+      { specials: [], total: 0 }
+    ),
+  getLateNightSpecials: () => 
+    safeApiCall(
+      () => api("/api/public/specials/latenight"),
+      { specials: [], total: 0, heading: "Latenight Special" }
+    ),
+  getStoriesData: () => 
+    safeApiCall(
+      () => api("/api/public/stories"),
+      []
+    ),
+};
+
+// Specials API for public use with fallbacks
+export const specialsApi = {
+  getAll: (
+    page = 1,
+    limit = 50,
+    search?: string,
+    specialType?: string
+  ): Promise<PaginatedResponse<ApiSpecial>> =>
+    safeApiCall(
+      () => api("/api/public/specials", {
+        query: { page, limit, search, specialType },
+      }),
+      { data: [], total: 0, page: 1, totalPages: 0 }
+    ),
+
+  // Alternative public endpoint
+  getAllPublic: (
+    page = 1,
+    limit = 50,
+    search?: string,
+    specialType?: string
+  ): Promise<PaginatedResponse<ApiSpecial>> =>
+    safeApiCall(
+      () => api("/specials/public", {
+        query: { page, limit, search, specialType },
+      }),
+      { data: [], total: 0, page: 1, totalPages: 0 }
+    ),
+
+  getByType: (
+    specialType: "daily" | "seasonal" | "latenight"
+  ): Promise<any> =>
+    safeApiCall(
+      () => api(`/api/public/specials/${specialType}`),
+      { specials: [], total: 0, heading: "" }
+    ),
+
+  getDailySpecials: (): Promise<any> =>
+    safeApiCall(
+      () => api("/api/public/specials/daily"),
+      { 
+        specials: [], 
+        total: 0, 
+        dayName: "", 
+        heading: "Daily Special" 
+      }
+    ),
+
+  getSeasonalSpecials: (): Promise<any> =>
+    safeApiCall(
+      () => api("/api/public/specials/seasonal"),
+      { specials: [], total: 0 }
+    ),
+
+  getLateNightSpecials: (): Promise<any> =>
+    safeApiCall(
+      () => api("/api/public/specials/latenight"),
+      { 
+        specials: [], 
+        total: 0, 
+        heading: "Latenight Special" 
+      }
+    ),
+
+  // Helper method to get current day specials with proper heading
+  getCurrentDaySpecials: (): Promise<any> => {
+    return specialsApi.getDailySpecials();
+  },
+
+  // Legacy methods for backward compatibility
+  getCurrentDaySpecialsLegacy: (): Promise<ApiSpecial[]> => {
+    return safeApiCall(
+      () => specialsApi.getDailySpecials().then((response) => 
+        response.specials || []
+      ),
+      []
+    );
+  },
+
+  getSeasonalSpecialsLegacy: (): Promise<ApiSpecial[]> =>
+    safeApiCall(
+      () => specialsApi.getSeasonalSpecials().then((response) => 
+        response.specials || []
+      ),
+      []
+    ),
+
+  getLastNightSpecials: (): Promise<ApiSpecial[]> =>
+    safeApiCall(
+      () => specialsApi.getLateNightSpecials().then((response) => 
+        response.specials || []
+      ),
+      []
+    ),
 };
 
 export default api;
@@ -172,12 +404,37 @@ export const useApi = () => {
     getOperationHours: operationHoursApi.getAll,
     getOperationHourById: operationHoursApi.getById,
 
+    // Specials - New improved methods
+    getSpecials: specialsApi.getAll,
+    getSpecialsPublic: specialsApi.getAllPublic,
+    getSpecialsByType: specialsApi.getByType,
+    getDailySpecials: specialsApi.getDailySpecials,
+    getSeasonalSpecials: specialsApi.getSeasonalSpecials,
+    getLateNightSpecials: specialsApi.getLateNightSpecials,
+    getCurrentDaySpecials: specialsApi.getCurrentDaySpecials,
+    
+    // Legacy methods for backward compatibility
+    getCurrentDaySpecialsLegacy: specialsApi.getCurrentDaySpecialsLegacy,
+    getSeasonalSpecialsLegacy: specialsApi.getSeasonalSpecialsLegacy,
+    getLastNightSpecials: specialsApi.getLastNightSpecials,
+
+    // Public API methods
+    getPublicLandingContent: publicApi.getLandingContent,
+    getPublicMenuData: publicApi.getMenuData,
+    getPublicEventsData: publicApi.getEventsData,
+    getPublicContactInfo: publicApi.getContactInfo,
+    getPublicSpecialsData: publicApi.getSpecialsData,
+    getPublicDailySpecials: publicApi.getDailySpecials,
+    getPublicSeasonalSpecials: publicApi.getSeasonalSpecials,
+    getPublicLateNightSpecials: publicApi.getLateNightSpecials,
+
     // Direct API access
     api,
     categoriesApi,
     itemsApi,
     eventsApi,
     operationHoursApi,
+    specialsApi,
     publicApi,
   };
 };

@@ -1,5 +1,25 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
+
+  // Runtime configuration for environment variables
+  runtimeConfig: {
+    // Private keys (only available on server-side)
+    smtpHost: process.env.SMTP_HOST,
+    smtpPort: process.env.SMTP_PORT,
+    smtpUser: process.env.SMTP_USER,
+    smtpPass: process.env.SMTP_PASS,
+    contactEmail: process.env.CONTACT_EMAIL,
+
+    // Public keys (exposed to client-side)
+    public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
+      appName: process.env.NUXT_PUBLIC_APP_NAME || "The Pearson Pub",
+      appDescription:
+        process.env.NUXT_PUBLIC_APP_DESCRIPTION ||
+        "A traditional pub atmosphere with modern amenities in Whitby",
+    },
+  },
+
   app: {
     head: {
       title: "The Pearson Pub",
@@ -13,11 +33,7 @@ export default defineNuxtConfig({
         },
       ],
       link: [
-        {
-          rel: "icon",
-          type: "image/x-icon",
-          href: "/favicon.ico",
-        },
+        { rel: "icon", type: "image/png", href: "/images/pub/logo.png" },
         {
           rel: "stylesheet",
           href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
@@ -30,16 +46,9 @@ export default defineNuxtConfig({
   modules: [
     "@nuxt/ui",
     "@nuxt/image",
-    "nuxt-icon",
     "@vite-pwa/nuxt",
     "@nuxtjs/color-mode", // Added color mode module
   ],
-  icon: {
-    // To prevent multiple Icon component registration warnings
-    addComponent: {
-      priority: 10,
-    },
-  },
   ui: {
     global: true,
   },
@@ -77,8 +86,10 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: "vercel",
-    compatibilityDate: "2025-06-16",
+    compatibilityDate: "2025-07-19",
   },
+
+  compatibilityDate: "2025-07-19",
 
   build: {
     transpile: ["@heroicons/vue"],

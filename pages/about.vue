@@ -1,15 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">    <!-- Hero Section -->
     <section class="relative py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
-      <!-- 3D Background -->
-      <Background3D 
-        :intensity="1.0" 
-        :enable-particles="true" 
-        :enable-rays="true" 
-        :enable-morphing="true"
-        :particle-count="40"
-        color-scheme="golden"
-      />
       
       <div class="absolute inset-0">
         <NuxtImg 
@@ -119,7 +110,111 @@
           </div>
         </div>
       </div>
-    </section>    <!-- Values Section -->
+    </section>
+
+    <!-- Our Stories Section -->
+    <section class="py-20 bg-gray-50 dark:bg-gray-800 relative overflow-hidden">
+      <!-- Background decorations -->
+      <div class="absolute inset-0 opacity-5">
+        <div class="absolute top-20 right-10 w-48 h-48 rounded-full border-2 border-yellow-500"></div>
+        <div class="absolute bottom-20 left-10 w-32 h-32 rounded-full bg-yellow-300"></div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center mb-16">
+          <div class="inline-block mb-4">
+            <span class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase">Memorable Moments</span>
+            <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2"></div>
+          </div>
+          <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6" style="font-family: 'Cinzel', 'Georgia', serif;">
+            Our <span class="text-yellow-600 dark:text-yellow-400">Stories</span>
+          </h2>
+          <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            Capturing the moments, celebrations, and memories that make The Pearson Pub special
+          </p>
+        </div>
+
+        <!-- Stories Gallery -->
+        <div v-if="storiesLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Loading skeletons -->
+          <div 
+            v-for="i in 6" 
+            :key="i"
+            class="relative overflow-hidden rounded-2xl shadow-lg h-80 bg-gray-200 dark:bg-gray-700 animate-pulse"
+          >
+            <div class="w-full h-full bg-gradient-to-t from-gray-300 to-gray-200 dark:from-gray-600 dark:to-gray-700"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-6">
+              <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
+              <div class="h-6 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
+              <div class="h-12 bg-gray-300 dark:bg-gray-600 rounded"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div v-else-if="stories.length === 0" class="text-center py-16">
+          <UIcon name="i-heroicons-photo" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <p class="text-gray-500 dark:text-gray-400 text-lg">No stories available at the moment.</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div 
+            v-for="(story, index) in stories" 
+            :key="story.id || index"
+            class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-500 hover:scale-105"
+          >
+            <div class="relative h-80 overflow-hidden">
+              <img 
+                :src="getCurrentImage(story)" 
+                :alt="story.title"
+                class="w-full h-full object-cover transform group-hover:scale-110 transition-all duration-700"
+                :key="getCurrentImage(story)"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
+              
+              <!-- Image indicator dots for multiple images -->
+              <div v-if="story.images && story.images.length > 1" class="absolute top-4 right-4 flex space-x-1">
+                <div 
+                  v-for="(_, index) in story.images" 
+                  :key="index"
+                  class="w-2 h-2 rounded-full transition-all duration-300"
+                  :class="index === (currentImageIndexes[story.id] || 0) ? 'bg-yellow-400' : 'bg-white/50'"
+                ></div>
+              </div>
+              
+              <!-- Image count badge for multiple images -->
+              <div v-if="story.images && story.images.length > 1" class="absolute bottom-4 left-4">
+                <span class="bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                  {{ (currentImageIndexes[story.id] || 0) + 1 }} / {{ story.images.length }}
+                </span>
+              </div>
+            </div>
+            
+            <!-- Story Content Overlay -->
+            <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+              <div class="flex items-center mb-3">
+                <UIcon :name="story.icon || 'i-heroicons-heart'" class="w-5 h-5 text-yellow-400 mr-2" />
+                <span class="text-yellow-400 text-sm font-semibold uppercase tracking-wide">{{ story.category || 'Story' }}</span>
+              </div>
+              <h3 class="text-xl font-bold mb-2 group-hover:text-yellow-300 transition-colors">{{ story.title }}</h3>
+              <p class="text-gray-200 text-sm leading-relaxed">{{ story.description }}</p>
+              <div class="flex items-center mt-3 text-xs text-gray-300">
+                <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-1" />
+                <span>{{ story.date || 'Recently' }}</span>
+              </div>
+            </div>
+
+            <!-- Hover Effect Badge -->
+            <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                <UIcon name="i-heroicons-eye" class="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Values Section -->
     <section 
       class="py-20 bg-white dark:bg-gray-800 relative overflow-hidden"
       :class="{
@@ -209,29 +304,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
-import { use3DAnimations } from '~/composables/use3DAnimations'
-import { useAdvancedLoading } from '~/composables/useAdvancedLoading'
-import Background3D from '~/components/Background3D.vue'
+import { ref, onMounted } from 'vue'
+import { publicApi } from '~/composables/usePublicApi'
+import type { ApiStory } from '~/composables/usePublicApi'
 
-// 3D Animations
-const { 
-  addFloatingElement, 
-  addParallaxElement, 
-  createMorphingEffect,
-  createGSAPAnimation
-} = use3DAnimations({
-  enableParallax: true,
-  enableFloating: true,
-  enableRotation: true,
-  intensity: 1.0,
-  speed: 0.8
-});
-
-// Loading state
-const { loadingState } = useAdvancedLoading();
-
-// Animation state
+// Simple animation state
 const animationState = ref({
   history: false,
   values: false,
@@ -239,173 +316,85 @@ const animationState = ref({
   stats: false
 })
 
-// Trigger animations on mount with enhanced 3D effects
+// Stories data from API
+const stories = ref<ApiStory[]>([])
+const storiesLoading = ref(true)
+
+// Image rotation for stories with multiple images
+const currentImageIndexes = ref<{ [key: string]: number }>({})
+
+// Load stories from API
+const loadStories = async () => {
+  try {
+    storiesLoading.value = true
+    const data = await publicApi.getStoriesData()
+    if (data && Array.isArray(data)) {
+      stories.value = data.map(story => ({
+        ...story,
+        // Map API fields to template expectations
+        image: story.image || (story.images && story.images.length > 0 ? story.images[0] : '/images/placeholder.jpg'),
+        category: 'Story', // Default category since backend doesn't have this field
+        icon: 'i-heroicons-heart', // Default icon
+        date: story.createdAt ? new Date(story.createdAt).toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long' 
+        }) : 'Recently'
+      }))
+    }
+  } catch (error) {
+    console.error('Failed to load stories:', error)
+    // Keep stories as empty array on error
+    stories.value = []
+  } finally {
+    storiesLoading.value = false
+  }
+}
+
+// Get current image for a story
+const getCurrentImage = (story: ApiStory) => {
+  if (!story.images || story.images.length === 0) {
+    return story.image || '/images/placeholder.jpg'
+  }
+  
+  if (story.images.length === 1) {
+    return story.images[0]
+  }
+  
+  const currentIndex = currentImageIndexes.value[story.id] || 0
+  return story.images[currentIndex] || story.images[0]
+}
+
+// Initialize image rotation for stories with multiple images
+const initializeImageRotation = () => {
+  stories.value.forEach(story => {
+    if (story.images && story.images.length > 1) {
+      // Initialize index for this story
+      currentImageIndexes.value[story.id] = 0
+      
+      // Set up rotation interval for this story
+      setInterval(() => {
+        const currentIndex = currentImageIndexes.value[story.id] || 0
+        const nextIndex = (currentIndex + 1) % story.images.length
+        currentImageIndexes.value[story.id] = nextIndex
+      }, 3000) // Change image every 3 seconds
+    }
+  })
+}
+
+// Simple fade-in animations on mount
 onMounted(() => {
   if (process.client) {
-    nextTick(async () => {
-      // Enhanced GSAP animations with 3D effects
-      const nuxtApp = useNuxtApp();
-      const $gsap = (nuxtApp as any)?.$gsap;
-      
-      if ($gsap && $gsap.utils && typeof $gsap.from === "function") {
-        // Animate hero content
-        $gsap.timeline()
-          .from(".hero-content h1", {
-            opacity: 0,
-            y: 60,
-            rotationX: -20,
-            duration: 1.2,
-            ease: "power3.out"
-          })
-          .from(".hero-content p", {
-            opacity: 0,
-            y: 40,
-            duration: 0.8,
-            ease: "power2.out"
-          }, "-=0.6");
-
-        // Animate history section
-        $gsap.utils.toArray(".history-card").forEach((el: any, i: number) => {
-          addFloatingElement(el, 10, 0.001, i * 0.3);
-          createMorphingEffect(el);
-          
-          createGSAPAnimation(el, {
-            from: {
-              opacity: 0,
-              x: i % 2 === 0 ? -80 : 80,
-              rotationY: i % 2 === 0 ? -15 : 15,
-              scale: 0.8,
-              transformPerspective: 1000
-            },
-            to: {
-              opacity: 1,
-              x: 0,
-              rotationY: 0,
-              scale: 1,
-              duration: 1.4,
-              delay: i * 0.2,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 80%",
-                end: "bottom 20%",
-                toggleActions: "play none none reverse"
-              }
-            }
-          });
-        });
-
-        // Animate value cards
-        $gsap.utils.toArray(".value-card").forEach((el: any, i: number) => {
-          addFloatingElement(el, 12, 0.0015, i * 0.4);
-          
-          createGSAPAnimation(el, {
-            from: {
-              opacity: 0,
-              y: 50,
-              rotationX: -10,
-              scale: 0.9,
-              transformPerspective: 1000
-            },
-            to: {
-              opacity: 1,
-              y: 0,
-              rotationX: 0,
-              scale: 1,
-              duration: 1.0,
-              delay: i * 0.15,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 85%",
-                end: "bottom 15%",
-                toggleActions: "play none none reverse"
-              }
-            }
-          });
-        });
-
-        // Animate team cards
-        $gsap.utils.toArray(".team-card").forEach((el: any, i: number) => {
-          addFloatingElement(el, 8, 0.002, i * 0.5);
-          
-          createGSAPAnimation(el, {
-            from: {
-              opacity: 0,
-              y: 60,
-              rotationZ: i % 2 === 0 ? -5 : 5,
-              scale: 0.85,
-              transformPerspective: 1000
-            },
-            to: {
-              opacity: 1,
-              y: 0,
-              rotationZ: 0,
-              scale: 1,
-              duration: 1.1,
-              delay: i * 0.2,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 80%",
-                end: "bottom 20%",
-                toggleActions: "play none none reverse"
-              }
-            }
-          });
-        });
-
-        // Animate stats with counter effect
-        $gsap.utils.toArray(".stat-item").forEach((el: any, i: number) => {
-          const numberEl = el.querySelector('.stat-number');
-          if (numberEl) {
-            const targetValue = parseInt(numberEl.textContent);
-            
-            createGSAPAnimation(el, {
-              from: {
-                opacity: 0,
-                scale: 0.5,
-                rotation: -10
-              },
-              to: {
-                opacity: 1,
-                scale: 1,
-                rotation: 0,
-                duration: 0.8,
-                delay: i * 0.1,
-                ease: "back.out(1.7)",
-                scrollTrigger: {
-                  trigger: el,
-                  start: "top 80%",
-                  onEnter: () => {
-                    // Counter animation
-                    $gsap.to(numberEl, {
-                      textContent: targetValue,
-                      duration: 2,
-                      ease: "power2.out",
-                      snap: { textContent: 1 },
-                      stagger: 0.1
-                    });
-                  }
-                }
-              }
-            });
-          }
-        });
-      }
-      
-      // Add parallax effects
-      const heroSection = document.querySelector('.hero-section');
-      if (heroSection) {
-        addParallaxElement(heroSection as HTMLElement);
-      }
-
-      // Trigger state animations
-      setTimeout(() => animationState.value.history = true, 300);
-      setTimeout(() => animationState.value.values = true, 600);
-      setTimeout(() => animationState.value.team = true, 900);
-      setTimeout(() => animationState.value.stats = true, 1200);
-    });
+    // Load stories from API
+    loadStories().then(() => {
+      // Initialize image rotation after stories are loaded
+      initializeImageRotation()
+    })
+    
+    // Trigger section animations with simple transitions
+    setTimeout(() => animationState.value.history = true, 300);
+    setTimeout(() => animationState.value.values = true, 600);
+    setTimeout(() => animationState.value.team = true, 900);
+    setTimeout(() => animationState.value.stats = true, 1200);
   }
 });
 
@@ -458,76 +447,25 @@ useHead({
 </script>
 
 <style scoped>
-/* Enhanced 3D animations */
-.history-card {
-  perspective: 1000px;
-  transform-style: preserve-3d;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+/* Simple hover effects */
+.history-card, .value-card, .team-card, .stat-item {
+  transition: all 0.3s ease;
 }
 
-.history-card:hover {
-  transform: translateY(-10px) rotateX(5deg) rotateY(5deg) scale(1.02);
-  box-shadow: 
-    0 25px 50px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.value-card {
-  perspective: 1000px;
-  transform-style: preserve-3d;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.value-card:hover {
-  transform: translateY(-8px) rotateX(8deg) scale(1.05);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 215, 0, 0.1);
-}
-
-.team-card {
-  perspective: 1000px;
-  transform-style: preserve-3d;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.team-card:hover {
-  transform: translateY(-12px) rotateZ(2deg) scale(1.03);
-  box-shadow: 
-    0 30px 60px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 215, 0, 0.2);
-}
-
-.stat-item {
-  perspective: 1000px;
-  transform-style: preserve-3d;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+.history-card:hover, .value-card:hover, .team-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 .stat-item:hover {
-  transform: translateY(-5px) rotateX(10deg) scale(1.1);
+  transform: translateY(-3px) scale(1.05);
 }
 
-/* Floating animation for cards */
-@keyframes cardFloat {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-.floating {
-  animation: cardFloat 3s ease-in-out infinite;
-}
-
-/* Enhanced fade animations */
+/* Simple fade animations */
 @keyframes fade-in-up {
   0% {
     opacity: 0;
-    transform: translateY(2rem);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;
@@ -535,94 +473,7 @@ useHead({
   }
 }
 
-@keyframes fade-in-left {
-  0% {
-    opacity: 0;
-    transform: translateX(-2rem);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fade-in-right {
-  0% {
-    opacity: 0;
-    transform: translateX(2rem);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes bounce-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  70% {
-    transform: scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 .animate-fade-in-up {
-  animation: fade-in-up 0.7s ease forwards;
-}
-
-.animate-fade-in-left {
-  animation: fade-in-left 0.7s ease forwards;
-}
-
-.animate-fade-in-right {
-  animation: fade-in-right 0.7s ease forwards;
-}
-
-.animate-bounce-in {
-  animation: bounce-in 0.8s ease forwards;
-}
-
-/* Parallax effect enhancement */
-.parallax-element {
-  will-change: transform;
-}
-
-/* Loading state animation */
-.loading-shimmer {
-  position: relative;
-  overflow: hidden;
-}
-
-.loading-shimmer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 100%;
-  }
+  animation: fade-in-up 0.6s ease forwards;
 }
 </style>

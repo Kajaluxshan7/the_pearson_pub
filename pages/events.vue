@@ -4,15 +4,6 @@
     <section
       class="hero-section relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
     >
-      <!-- 3D Background -->
-      <Background3D 
-        :intensity="1.5" 
-        :enable-particles="true" 
-        :enable-rays="true" 
-        :enable-morphing="true"
-        :particle-count="80"
-        color-scheme="blue"
-      />
       
       <div class="absolute inset-0">
         <NuxtImg
@@ -25,7 +16,9 @@
         <div
           class="absolute inset-0 bg-gradient-to-r from-black/85 to-black/65"
         ></div>
-      </div>      <div
+      </div>
+      
+      <div
         class="hero-content relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10"
       >
         <div class="inline-block mb-4">
@@ -130,32 +123,24 @@
           </UBadge>
         </div>
       </div>
-    </section>    <!-- Events Section -->
+    </section>
+
+    <!-- Events Section -->
     <section class="py-12 lg:py-20">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">        <!-- Results Summary -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Unified Events & Parties Heading -->
         <div class="flex justify-between items-center mb-8">
           <div>
             <h2
               class="text-2xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2"
               style="font-family: 'Cinzel', 'Georgia', serif"
             >
-              <span v-if="searchQuery">Search Results</span>
-              <span v-else-if="selectedCategory !== 'all'"
-                >{{
-                  categories.find((c: Category) => c.id === selectedCategory)?.name
-                }}
-                Events</span
-              >
-              <span v-else>Upcoming Events</span>
+              Events & Parties
             </h2>
             <p class="text-gray-600 dark:text-gray-300">
-              {{ filteredEvents.length }} event{{
-                filteredEvents.length !== 1 ? "s" : ""
-              }}
-              found
+              {{ filteredEvents.length }} event{{ filteredEvents.length !== 1 ? "s" : "" }} found
             </p>
           </div>
-          <!-- View Mode Indicators -->
           <div class="hidden sm:flex items-center gap-2">
             <span class="text-sm text-gray-500 dark:text-gray-400">Layout:</span>
             <UBadge 
@@ -175,7 +160,8 @@
               List
             </UBadge>
           </div>
-        </div>        <!-- Error State -->
+        </div>
+        <!-- Error State -->
         <div v-if="error || backendError" class="text-center py-16">
           <UIcon
             name="i-heroicons-exclamation-triangle"
@@ -194,40 +180,15 @@
           >
             Try Again
           </UButton>
-        </div>        <!-- Loading State with Skeleton Cards -->
-        <div v-else-if="isLoading || loadingState.isLoading || backendLoading">
-          <!-- Skeleton Results Summary -->
-          <div class="flex justify-between items-center mb-8">
-            <div>
-              <div class="h-8 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
-              <div class="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-            </div>
-            <div class="hidden sm:flex items-center gap-2">
-              <div class="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-              <div class="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-              <div class="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-            </div>
-          </div>
-          
-          <!-- Skeleton Events Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
-            <SkeletonCard 
-              v-for="i in 9" 
-              :key="`skeleton-event-${i}`"
-              type="event"
-              :delay="i * 0.1"
-            />
-          </div>
         </div>
 
-        <!-- Events Grid/List -->
+        <!-- Simple Loading State -->
+
+        <!-- Unified Events Section -->
         <div v-if="filteredEvents.length > 0">
-          <!-- Grid View -->
-          <div
-            v-if="viewMode === 'grid'"
-            class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8"
-          >            <div
-              v-for="(event, index) in paginatedEvents"
+          <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+            <div
+              v-for="(event, index) in filteredEvents"
               :key="event.id"
               class="event-card group transform transition-all duration-500 hover:scale-105 cursor-pointer"
               :style="{ animationDelay: `${index * 100}ms` }"
@@ -242,151 +203,77 @@
                 class="overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 bg-white dark:bg-gray-800 border-0 h-full"
               >
                 <template #header>
-                  <div class="relative overflow-hidden">                    <NuxtImg
-                      :src="event.image || '/images/entertainment/music.jpg'"
+                  <div class="relative overflow-hidden">
+                    <NuxtImg
+                      :key="`event-${event.id}-${index}-${currentImageIndexes[`${event.id}-${index}`] || 0}`"
+                      :src="getCurrentImage(event, index)"
                       :alt="event.title"
                       class="w-full h-48 lg:h-56 object-cover group-hover:scale-110 transition-transform duration-500"
                       format="webp"
                       quality="75"
                       loading="lazy"
                       :placeholder="[400, 240, 75]"
+                      @error="(e: any) => e.target.src = '/images/entertainment/music.jpg'"
                     />
-                    <div
-                      class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"
-                    ></div>
-
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    <!-- Image Indicators for Multiple Images -->
+                    <div v-if="event.images && event.images.length > 1" class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                      <div
+                        v-for="(img, imgIndex) in event.images"
+                        :key="imgIndex"
+                        :class="[
+                          'w-2 h-2 rounded-full transition-all duration-300',
+                          (currentImageIndexes[`${event.id}-${index}`] || 0) === imgIndex
+                            ? 'bg-yellow-400'
+                            : 'bg-white/50'
+                        ]"
+                      ></div>
+                    </div>
+                    <!-- Image Counter -->
+                    <div v-if="event.images && event.images.length > 1" class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs">
+                      {{ (currentImageIndexes[`${event.id}-${index}`] || 0) + 1 }}/{{ event.images.length }}
+                    </div>
                     <!-- Badges -->
                     <div class="absolute top-4 left-4 flex flex-col gap-2">
-                      <UBadge
-                        v-if="event.featured"
-                        color="yellow"
-                        variant="solid"
-                        class="font-semibold text-xs"
-                      >
-                        Featured
-                      </UBadge>
-                      <UBadge
-                        :color="getStatusColor(event.status)"
-                        variant="solid"
-                        class="font-semibold text-xs"
-                      >
-                        {{
-                          event.status.charAt(0).toUpperCase() +
-                          event.status.slice(1)
-                        }}
+                      <UBadge v-if="event.featured" color="yellow" variant="solid" class="font-semibold text-xs">Featured</UBadge>
+                      <UBadge :color="getStatusColor(event.status)" variant="solid" class="font-semibold text-xs">
+                        {{ event.status.charAt(0).toUpperCase() + event.status.slice(1) }}
                       </UBadge>
                     </div>
-
                     <div class="absolute top-4 right-4">
-                      <UBadge
-                        :color="getCategoryColor(event.category)"
-                        variant="subtle"
-                        class="font-semibold text-xs"
-                      >
-                        {{
-                          event.category.charAt(0).toUpperCase() +
-                          event.category.slice(1)
-                        }}
+                      <UBadge :color="getCategoryColor(event.category)" variant="subtle" class="font-semibold text-xs">
+                        {{ event.category.charAt(0).toUpperCase() + event.category.slice(1) }}
                       </UBadge>
-                    </div>
-
-                    <!-- Price -->
-                    <div
-                      v-if="event.price && Object.keys(event.price).length > 0"
-                      class="absolute bottom-4 right-4 bg-black/70 text-white px-2 py-1 rounded-full"
-                    >
-                      <span class="text-xs font-semibold">
-                        From ${{ minPrice(event.price) }}
-                      </span>
                     </div>
                   </div>
                 </template>
-
                 <div class="p-4 lg:p-6 flex flex-col h-full">
-                  <h3
-                    class="text-xl lg:text-2xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors line-clamp-2"
-                  >
+                  <h3 class="text-xl lg:text-2xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors line-clamp-2">
                     {{ event.title }}
                   </h3>
-
-                  <p
-                    class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed line-clamp-3 flex-grow"
-                  >
+                  <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed line-clamp-3 flex-grow">
                     {{ event.description }}
                   </p>
-
                   <div class="space-y-2 mb-4">
-                    <div
-                      class="flex items-center text-sm text-gray-500 dark:text-gray-400"
-                    >
-                      <UIcon
-                        name="i-heroicons-calendar"
-                        class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
-                      />
+                    <div v-if="event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400" />
                       <span class="font-medium">{{ event.date }}</span>
                     </div>
-                    <div
-                      class="flex items-center text-sm text-gray-500 dark:text-gray-400"
-                    >
-                      <UIcon
-                        name="i-heroicons-clock"
-                        class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
-                      />
+                    <div v-if="event.time && event.time !== event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <UIcon name="i-heroicons-clock" class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400" />
                       <span class="font-medium">{{ event.time }}</span>
                     </div>
-                    <div
-                      v-if="event.location"
-                      class="flex items-center text-sm text-gray-500 dark:text-gray-400"
-                    >
-                      <UIcon
-                        name="i-heroicons-map-pin"
-                        class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
-                      />
-                      <span class="font-medium">{{ event.location }}</span>
-                    </div>
                   </div>
-
-                  <!-- Rating -->
-                  <div
-                    v-if="event.averageRating"
-                    class="flex items-center gap-2 mb-4"
-                  >
-                    <div class="flex items-center">
-                      <UIcon
-                        v-for="star in 5"
-                        :key="star"
-                        name="i-heroicons-star-solid"
-                        :class="
-                          star <= Math.floor(event.averageRating)
-                            ? 'text-yellow-400'
-                            : 'text-gray-300'
-                        "
-                        class="w-4 h-4"
-                      />
-                    </div>
-                    <span class="text-xs text-gray-600 dark:text-gray-300">
-                      {{ event.averageRating.toFixed(1) }} ({{
-                        event.totalReviews
-                      }})
-                    </span>
-                  </div>
-
-                  <UButton
-                    color="yellow"
-                    variant="solid"
-                    class="w-full transform transition-all hover:scale-105 mt-auto"
-                    size="md"
-                  >
+                  <UButton color="yellow" variant="solid" class="w-full transform transition-all hover:scale-105 mt-auto" size="md">
                     View Details
                   </UButton>
                 </div>
               </UCard>
             </div>
           </div>
-
-          <!-- List View -->
-          <div v-else class="space-y-6">            <div
-              v-for="(event, index) in paginatedEvents"
+          <div v-else class="space-y-6">
+            <div
+              v-for="(event, index) in filteredEvents"
               :key="event.id"
               class="event-card group cursor-pointer"
               :style="{ animationDelay: `${index * 100}ms` }"
@@ -397,168 +284,76 @@
               role="button"
               :aria-label="`View details for ${event.title}`"
             >
-              <UCard
-                class="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white dark:bg-gray-800 border-0"
-              >
+              <UCard class="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white dark:bg-gray-800 border-0">
                 <div class="flex flex-col lg:flex-row">
                   <!-- Image -->
-                  <div class="lg:w-80 relative overflow-hidden">                    <NuxtImg
-                      :src="event.image || '/images/entertainment/music.jpg'"
+                  <div class="lg:w-80 relative overflow-hidden">
+                    <NuxtImg
+                      :key="`event-list-${event.id}-${index}-${currentImageIndexes[`${event.id}-${index}`] || 0}`"
+                      :src="getCurrentImage(event, index)"
                       :alt="event.title"
                       class="w-full h-48 lg:h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       format="webp"
                       quality="75"
                       loading="lazy"
                       :placeholder="[400, 240, 75]"
+                      @error="(e: any) => e.target.src = '/images/entertainment/music.jpg'"
                     />
-
+                    <!-- Image Indicators for Multiple Images -->
+                    <div v-if="event.images && event.images.length > 1" class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                      <div
+                        v-for="(img, imgIndex) in event.images"
+                        :key="imgIndex"
+                        :class="[
+                          'w-2 h-2 rounded-full transition-all duration-300',
+                          (currentImageIndexes[`${event.id}-${index}`] || 0) === imgIndex
+                            ? 'bg-yellow-400'
+                            : 'bg-white/50'
+                        ]"
+                      ></div>
+                    </div>
+                    <!-- Image Counter -->
+                    <div v-if="event.images && event.images.length > 1" class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs">
+                      {{ (currentImageIndexes[`${event.id}-${index}`] || 0) + 1 }}/{{ event.images.length }}
+                    </div>
                     <!-- Badges -->
                     <div class="absolute top-4 left-4 flex flex-col gap-2">
-                      <UBadge
-                        v-if="event.featured"
-                        color="yellow"
-                        variant="solid"
-                        class="font-semibold text-xs"
-                      >
-                        Featured
-                      </UBadge>
-                      <UBadge
-                        :color="getStatusColor(event.status)"
-                        variant="solid"
-                        class="font-semibold text-xs"
-                      >
-                        {{
-                          event.status.charAt(0).toUpperCase() +
-                          event.status.slice(1)
-                        }}
+                      <UBadge v-if="event.featured" color="yellow" variant="solid" class="font-semibold text-xs">Featured</UBadge>
+                      <UBadge :color="getStatusColor(event.status)" variant="solid" class="font-semibold text-xs">
+                        {{ event.status.charAt(0).toUpperCase() + event.status.slice(1) }}
                       </UBadge>
                     </div>
                   </div>
-
                   <!-- Content -->
                   <div class="flex-1 p-6 lg:p-8">
-                    <div
-                      class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4"
-                    >
+                    <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                       <div class="flex-1">
                         <div class="flex items-start justify-between mb-4">
                           <div>
-                            <h3
-                              class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors mb-2"
-                            >
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors mb-2">
                               {{ event.title }}
                             </h3>
-                            <UBadge
-                              :color="getCategoryColor(event.category)"
-                              variant="subtle"
-                              class="font-semibold text-sm"
-                            >
-                              {{
-                                event.category.charAt(0).toUpperCase() +
-                                event.category.slice(1)
-                              }}
+                            <UBadge :color="getCategoryColor(event.category)" variant="subtle" class="font-semibold text-sm">
+                              {{ event.category.charAt(0).toUpperCase() + event.category.slice(1) }}
                             </UBadge>
                           </div>
-                          <div v-if="event.price && Object.keys(event.price).length > 0" class="text-right">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">
-                              From
-                            </p>
-                            <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                              ${{ minPrice(event.price) }}
-                            </p>
-                          </div>
                         </div>
-
-                        <p
-                          class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed"
-                        >
+                        <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
                           {{ event.description }}
                         </p>
-
-                        <div
-                          class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4"
-                        >
-                          <div
-                            class="flex items-center text-sm text-gray-500 dark:text-gray-400"
-                          >
-                            <UIcon
-                              name="i-heroicons-calendar"
-                              class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
-                            />
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                          <div v-if="event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400" />
                             <span class="font-medium">{{ event.date }}</span>
                           </div>
-                          <div
-                            class="flex items-center text-sm text-gray-500 dark:text-gray-400"
-                          >
-                            <UIcon
-                              name="i-heroicons-clock"
-                              class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
-                            />
+                          <div v-if="event.time && event.time !== event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <UIcon name="i-heroicons-clock" class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400" />
                             <span class="font-medium">{{ event.time }}</span>
                           </div>
-                          <div
-                            v-if="event.location"
-                            class="flex items-center text-sm text-gray-500 dark:text-gray-400"
-                          >
-                            <UIcon
-                              name="i-heroicons-map-pin"
-                              class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
-                            />
-                            <span class="font-medium">{{
-                              event.location
-                            }}</span>
-                          </div>
-                        </div>
-
-                        <!-- Tags and Performers -->
-                        <div class="flex flex-wrap gap-2 mb-4">
-                          <UBadge
-                            v-for="tag in event.tags?.slice(0, 3)"
-                            :key="tag"
-                            color="gray"
-                            variant="subtle"
-                            class="text-xs"
-                          >
-                            {{ tag }}
-                          </UBadge>
-                        </div>
-
-                        <!-- Rating -->
-                        <div
-                          v-if="event.averageRating"
-                          class="flex items-center gap-2"
-                        >
-                          <div class="flex items-center">
-                            <UIcon
-                              v-for="star in 5"
-                              :key="star"
-                              name="i-heroicons-star-solid"
-                              :class="
-                                star <= Math.floor(event.averageRating)
-                                  ? 'text-yellow-400'
-                                  : 'text-gray-300'
-                              "
-                              class="w-4 h-4"
-                            />
-                          </div>
-                          <span
-                            class="text-sm text-gray-600 dark:text-gray-300"
-                          >
-                            {{ event.averageRating.toFixed(1) }} ({{
-                              event.totalReviews
-                            }}
-                            reviews)
-                          </span>
                         </div>
                       </div>
-
                       <div class="lg:ml-6">
-                        <UButton
-                          color="yellow"
-                          variant="solid"
-                          size="lg"
-                          class="w-full lg:w-auto"
-                        >
+                        <UButton color="yellow" variant="solid" size="lg" class="w-full lg:w-auto">
                           View Details
                         </UButton>
                       </div>
@@ -567,77 +362,36 @@
                 </div>
               </UCard>
             </div>
-          </div>          <!-- Pagination -->
-          <div v-if="totalPages > 1" class="flex justify-center mt-12">
-            <UPagination
-              v-model="currentPage"
-              :total="totalPages"
-              :ui="{
-                wrapper: 'flex items-center gap-1',
-                base: 'flex items-center justify-center min-w-[32px] h-8 px-3 rounded text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
-                default: {
-                  active: 'bg-yellow-500 text-white hover:bg-yellow-600',
-                  inactive:
-                    'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700',
-                },
-              }"
-            />
-          </div>
-
-          <!-- Load More Button for Backend Events -->
-          <div v-if="eventPagination.events.page < eventPagination.events.totalPages" class="flex justify-center mt-8">
-            <UButton
-              color="yellow"
-              variant="outline"
-              size="lg"
-              @click="loadMoreEvents"
-              :loading="backendLoading"
-            >
-              Load More Events ({{ eventPagination.events.total - eventPagination.events.page * 50 }} remaining)
-            </UButton>
           </div>
         </div>
-
         <!-- No Results -->
         <div v-else class="text-center py-16">
-          <UIcon
-            name="i-heroicons-calendar-x"
-            class="w-16 h-16 text-gray-400 mx-auto mb-4"
-          />
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            No events found
-          </h3>
+          <UIcon name="i-heroicons-calendar-x" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No events found</h3>
           <p class="text-gray-600 dark:text-gray-300 mb-6">
-            <span v-if="searchQuery || selectedCategory !== 'all'">
-              Try adjusting your search or filters to find more events.
-            </span>
-            <span v-else> Check back soon for upcoming events! </span>
+            <span v-if="searchQuery || selectedCategory !== 'all'">Try adjusting your search or filters to find more events.</span>
+            <span v-else>Check back soon for upcoming events!</span>
           </p>
-          <UButton
-            v-if="searchQuery || selectedCategory !== 'all'"
-            color="yellow"
-            variant="outline"
-            @click="clearFilters"
-          >
-            Clear Filters
-          </UButton>
+          <UButton v-if="searchQuery || selectedCategory !== 'all'" color="yellow" variant="outline" @click="clearFilters">Clear Filters</UButton>
         </div>
       </div>
-    </section>    <!-- Event Details Modal - Portrait -->
-    <EventDetailsModal
-      v-if="modalLayout === 'portrait'"
-      :event="selectedEvent"
-      :is-open="isEventModalOpen"
-      @close="closeEventModal"
-    />
+    </section>
 
-    <!-- Event Details Modal - Landscape -->
-    <EventDetailsModalLandscape
-      v-else
-      :event="selectedEvent"
-      :is-open="isEventModalOpen"
-      @close="closeEventModal"
-    />
+    <!-- Event Details Modal -->
+    <template v-if="isEventModalOpen">
+      <EventDetailsModal
+        v-if="modalLayout === 'portrait'"
+        :event="selectedEvent"
+        :is-open="isEventModalOpen"
+        @close="closeEventModal"
+      ></EventDetailsModal>
+      <EventDetailsModalLandscape
+        v-else
+        :event="selectedEvent"
+        :is-open="isEventModalOpen"
+        @close="closeEventModal"
+      ></EventDetailsModalLandscape>
+    </template>
 
     <!-- Modal Layout Toggle (when modal is open) -->
     <div
@@ -656,11 +410,7 @@
       </UButton>
     </div>    <!-- Weekly Schedule Section -->
     <WeeklyEntertainment />    <!-- Floating Action Button -->
-    <FloatingActionButton
-      :actions="fabActions"
-      main-icon="i-heroicons-calendar-days"
-      @action="handleFABAction"
-    />
+    <!-- Removed Floating Action Button component usage -->
 
   </div>
 </template>
@@ -669,13 +419,7 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { useEvents } from "~/composables/useEvents";
 import { useLandingPageData } from "~/composables/useLandingPageData";
-import { useAdvancedLoading } from "~/composables/useAdvancedLoading";
-import { use3DAnimations } from "~/composables/use3DAnimations";
 import { usePerformance } from "~/composables/usePerformance";
-import Background3D from "~/components/Background3D.vue";
-import LoadingScreen3D from "~/components/loading/LoadingScreen3D.vue";
-import SkeletonCard from "~/components/loading/SkeletonCard.vue";
-import FloatingActionButton from "~/components/ui/FloatingActionButton.vue";
 import EventDetailsModal from "~/components/events/EventDetailsModal.vue";
 import EventDetailsModalLandscape from "~/components/events/EventDetailsModalLandscape.vue";  // SSR/SSG: useAsyncData for events data
 const { data: eventsData } = await useAsyncData('events-data', async () => {
@@ -697,38 +441,9 @@ const {
 const fetchEvents = fetchEventsData;
 import type { Event } from "~/types/events";
 import type { Category } from "~/types/events-ui";
-import type { FABAction } from "~/components/ui/FloatingActionButton.vue";
 
 // Composables
 const { events: staticEvents } = useEvents(); // Keep for weekly schedule
-
-// Advanced loading with custom events texts
-const { loadingState, startLoading, finishLoading } = useAdvancedLoading({
-  duration: 2200,
-  showProgress: true,
-  customTexts: [
-    'Loading exciting events...',
-    'Preparing entertainment lineup...',
-    'Setting up the party...',
-    'Almost time to rock...',
-    'Let the fun begin!'
-  ]
-});
-
-// 3D Animations for events
-const { 
-  addFloatingElement, 
-  addParallaxElement, 
-  createMorphingEffect,
-  createLoadingAnimation,
-  createGSAPAnimation
-} = use3DAnimations({
-  enableParallax: true,
-  enableFloating: true,
-  enableRotation: true,
-  intensity: 1.5,
-  speed: 1.2
-});
 
 // Performance monitoring
 const { 
@@ -758,45 +473,8 @@ const selectedEvent = ref<Event | null>(null);
 const isEventModalOpen = ref(false);
 const modalLayout = ref<'portrait' | 'landscape'>('portrait');
 
-// FAB Actions
-const fabActions = ref<FABAction[]>([
-  {
-    id: 'scroll-top',
-    label: 'Scroll to Top',
-    icon: 'i-heroicons-arrow-up',
-    action: () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  },
-  {
-    id: 'view-mode',
-    label: `Switch to ${viewMode.value === 'grid' ? 'List' : 'Grid'} View`,
-    icon: viewMode.value === 'grid' ? 'i-heroicons-list-bullet' : 'i-heroicons-squares-2x2',
-    action: () => {
-      viewMode.value = viewMode.value === 'grid' ? 'list' : 'grid';
-    }
-  },
-  {
-    id: 'filter-music',
-    label: 'Show Music Events',
-    icon: 'i-heroicons-musical-note',
-    action: () => {
-      selectedCategory.value = selectedCategory.value === 'music' ? 'all' : 'music';
-    }
-  },
-  {
-    id: 'search',
-    label: 'Focus Search',
-    icon: 'i-heroicons-magnifying-glass',
-    action: () => {
-      const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
-      if (searchInput) {
-        searchInput.focus();
-        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
-  }
-]);
+// Image rotation for events with multiple images
+const currentImageIndexes = ref<{ [key: string]: number }>({});
 
 // Categories with proper typing
 const categories = ref<Category[]>([
@@ -815,47 +493,93 @@ const isLoading = ref(false);
 // Combine static events with backend events for display
 const allEvents = computed(() => {
   const dynamic = dynamicEvents.value || [];
-  const static_ = staticEvents.value || [];
   
+  // Helper function to calculate real-time event status
+  const calculateRealTimeStatus = (startDate: string, endDate: string) => {
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (now < start) {
+      return 'upcoming';
+    } else if (now >= start && now <= end) {
+      return 'ongoing';
+    } else {
+      return 'ended';
+    }
+  };
+
+  // Log the raw backend events data
+  console.log('Backend dynamic events:', dynamic);
+  console.log('Current date for comparison:', new Date());
+
   // Transform backend events to match frontend interface
   const transformedDynamic = dynamic.map((event: any) => {
-    const getEventStatus = () => {
-      if (!event.start_date) return 'upcoming';
-      const now = new Date();
-      const start = new Date(event.start_date);
-      const end = new Date(event.end_date || event.start_date);
-      if (start > now) return 'upcoming';
-      if (end > now) return 'ongoing';
-      return 'completed';
-    };
+    // Log each event's dates and status from the backend
+    console.log('Event from backend:', {
+      name: event.name,
+      start_date: event.start_date,
+      end_date: event.end_date,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      status: event.status
+    });
+
+    // Use the formatted dates from backend
+    const startDateFormatted = event.startDate || ''; // "Jul 10, 2025"
+    const endDateFormatted = event.endDate || '';     // "Jul 18, 2025"
+    
+    // Create date and time display
+    let dateDisplay = startDateFormatted;
+    let timeDisplay = '';
+    
+    // If we have both start and end dates and they're different, show as time range
+    if (startDateFormatted && endDateFormatted && startDateFormatted !== endDateFormatted) {
+      timeDisplay = `Until ${endDateFormatted}`;
+    }    
+
+    // Use the status from backend (already calculated correctly)
+    const eventStatus = event.status;
 
     return {
       id: event.id,
-      title: event.name,
+      title: event.title || event.name,
       description: event.description || '',
-      date: event.start_date ? new Date(event.start_date).toLocaleDateString() : '',
-      time: event.start_date && event.end_date ? 
-        `${new Date(event.start_date).toLocaleTimeString()} - ${new Date(event.end_date).toLocaleTimeString()}` : '',
+      date: dateDisplay,
+      time: timeDisplay,
       image: (event.images && event.images.length > 0) ? event.images[0] : '/images/entertainment/music.jpg',
       images: event.images || [],
-      location: 'The Pearson Pub', // Default location
-      tags: ['Event'], // Default tag
-      performers: [], // Default empty
-      featured: false, // Default featured state
-      category: 'special' as 'music' | 'quiz' | 'food' | 'special' | 'entertainment', // Default category
-      status: getEventStatus() as 'upcoming' | 'ongoing' | 'completed' | 'cancelled',
-      price: undefined,
-      averageRating: null,
-      totalReviews: 0,
+      featured: event.featured || false,
+      category: (event.category || 'event') as 'music' | 'quiz' | 'food' | 'special' | 'entertainment' | 'event',
+      status: eventStatus as 'upcoming' | 'ongoing' | 'current' | 'completed' | 'cancelled' | 'ended',
       ctaText: "View Details",
       ctaLink: "#"
     };
   });
   
-  // Combine and sort by date (upcoming first)
-  return [...transformedDynamic, ...static_].sort((a, b) => {
-    const dateA = new Date(a.date || '1970-01-01');
-    const dateB = new Date(b.date || '1970-01-01');
+  // Log the transformed events
+  console.log('Transformed events:', transformedDynamic);
+
+  // Sort by date (newest first) - handle both formatted dates and ISO strings
+  return transformedDynamic.sort((a, b) => {
+    // Try to parse the date from various formats
+    const parseDate = (dateStr: string) => {
+      if (!dateStr) return new Date('1970-01-01');
+      
+      // If it's already a valid date format, use it
+      const parsed = new Date(dateStr);
+      if (!isNaN(parsed.getTime())) return parsed;
+      
+      // Try parsing formatted date like "Jul 10, 2025"
+      try {
+        return new Date(dateStr);
+      } catch {
+        return new Date('1970-01-01');
+      }
+    };
+    
+    const dateA = parseDate(a.date);
+    const dateB = parseDate(b.date);
     return dateB.getTime() - dateA.getTime();
   });
 });
@@ -895,23 +619,45 @@ const filteredEvents = computed(() => {
   }
 });
 
-const totalPages = computed(() =>
-  Math.ceil(filteredEvents.value.length / itemsPerPage)
-);
+// Separate upcoming and past events
+const upcomingEvents = computed(() => {
+  return filteredEvents.value.filter(event => 
+    event.status === 'upcoming' || event.status === 'ongoing' || event.status === 'current'
+  ).sort((a, b) => {
+    // Sort upcoming events by date (earliest first)
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateA.getTime() - dateB.getTime();
+  });
+});
+
+const pastEvents = computed(() => {
+  return filteredEvents.value.filter(event => 
+    event.status === 'ended' || event.status === 'completed'
+  ).sort((a, b) => {
+    // Sort past events by date (most recent first)
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateB.getTime() - dateA.getTime();
+  });
+});
+
+const totalPages = computed(() => 1); // No pagination needed since we show all events
 
 const paginatedEvents = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return filteredEvents.value.slice(start, end);
+  // This is kept for backward compatibility but not used
+  return filteredEvents.value;
 });
 
 // Helper functions with proper error handling
 const getStatusColor = (status: string) => {
   const statusColors = {
     upcoming: "green",
-    ongoing: "blue", 
+    ongoing: "blue",
+    current: "blue", 
     completed: "gray",
-    cancelled: "red"
+    cancelled: "red",
+    ended: "gray"
   } as const;
   return statusColors[status as keyof typeof statusColors] || "gray";
 };
@@ -951,23 +697,6 @@ const showEventDetails = (event: any, layout: 'portrait' | 'landscape' = 'portra
   selectedEvent.value = event as Event;
   modalLayout.value = layout;
   isEventModalOpen.value = true;
-};
-
-const handleFABAction = (actionId: string) => {
-  console.log(`FAB action triggered: ${actionId}`);
-  
-  // Update view mode label dynamically
-  const viewModeAction = fabActions.value.find(action => action.id === 'view-mode');
-  if (viewModeAction) {
-    viewModeAction.label = `Switch to ${viewMode.value === 'grid' ? 'List' : 'Grid'} View`;
-    viewModeAction.icon = viewMode.value === 'grid' ? 'i-heroicons-list-bullet' : 'i-heroicons-squares-2x2';
-  }
-  
-  // Update filter action label dynamically
-  const filterAction = fabActions.value.find(action => action.id === 'filter-music');
-  if (filterAction) {
-    filterAction.label = selectedCategory.value === 'music' ? 'Show All Events' : 'Show Music Events';
-  }
 };
 
 const closeEventModal = () => {
@@ -1027,10 +756,50 @@ const loadMoreEvents = async () => {
   }
 };
 
-onMounted(async () => {
-  // Start loading animation
-  startLoading();
+// Image rotation functions for events with multiple images
+const getCurrentImage = (event: any, index: number) => {
+  if (!event.images || event.images.length === 0) {
+    return event.image || '/images/entertainment/music.jpg';
+  }
+  if (event.images.length === 1) {
+    return event.images[0] || '/images/entertainment/music.jpg';
+  }
   
+  const eventKey = `${event.id}-${index}`;
+  const currentIndex = currentImageIndexes.value[eventKey] || 0;
+  const imageUrl = event.images[currentIndex] || event.images[0] || '/images/entertainment/music.jpg';
+  
+  // Fallback for corrupted or invalid URLs
+  try {
+    new URL(imageUrl);
+    return imageUrl;
+  } catch {
+    return '/images/entertainment/music.jpg';
+  }
+};
+
+const initializeImageRotation = () => {
+  // Initialize rotation for all events with multiple images
+  if (allEvents.value) {
+    allEvents.value.forEach((event, index) => {
+      if (event.images && event.images.length > 1) {
+        const eventKey = `${event.id}-${index}`;
+        if (!(eventKey in currentImageIndexes.value)) {
+          currentImageIndexes.value[eventKey] = 0;
+        }
+        
+        // Start rotation
+        setInterval(() => {
+          const currentIndex = currentImageIndexes.value[eventKey] || 0;
+          const nextIndex = (currentIndex + 1) % event.images.length;
+          currentImageIndexes.value[eventKey] = nextIndex;
+        }, 3000); // Change image every 3 seconds
+      }
+    });
+  }
+};
+
+onMounted(async () => {
   // Fetch backend data
   await fetchEvents();
   
@@ -1040,99 +809,61 @@ onMounted(async () => {
     eventPagination.value.events.totalPages = Math.ceil(dynamicEvents.value.length / 50);
   }
   
-  // Simulate loading time for better UX
-  await new Promise(resolve => setTimeout(resolve, 1200));
+  // Initialize image rotation for events with multiple images
+  await nextTick();
+  initializeImageRotation();
   
   checkViewMode();
   window.addEventListener("resize", checkViewMode);
   document.addEventListener("keydown", handleKeyNavigation);
   
-  // Initialize 3D animations and enhanced interactions
+  // Initialize enhanced interactions without heavy 3D animations
   if (process.client) {
     nextTick(async () => {
-      // Finish loading
-      await finishLoading();
-      
       // Enhanced GSAP animations with 3D effects
       const nuxtApp = useNuxtApp();
       const $gsap = (nuxtApp as any)?.$gsap;
       
       if ($gsap && $gsap.utils && typeof $gsap.from === "function") {
-        // Animate event cards with staggered 3D effects
+        // Simple event card animations
         $gsap.utils.toArray(".event-card").forEach((el: any, i: number) => {
-          // Add floating and morphing effects
-          addFloatingElement(el, 12, 0.0015, i * 0.3);
-          createMorphingEffect(el);
-          
-          // Enhanced GSAP animation with music-themed effects
-          createGSAPAnimation(el, {
-            from: {
-              opacity: 0,
-              y: 80,
-              rotationY: -25,
-              scale: 0.7,
-              transformPerspective: 1200
-            },
-            to: {
-              opacity: 1,
-              y: 0,
-              rotationY: 0,
-              scale: 1,
-              duration: 1.4,
-              delay: i * 0.15,
-              ease: "back.out(1.7)",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 85%",
-                end: "bottom 15%",
-                toggleActions: "play none none reverse"
-              }
+          $gsap.from(el, {
+            opacity: 0,
+            y: 30,
+            duration: 0.6,
+            delay: i * 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 90%",
+              toggleActions: "play none none reverse"
             }
           });
         });
         
-        // Animate filter section with music pulse effect
+        // Simple filter section animation
         $gsap.from(".filter-section", {
           opacity: 0,
-          y: -40,
-          duration: 1,
-          ease: "power3.out",
-          delay: 0.4
+          y: -20,
+          duration: 0.8,
+          ease: "power2.out",
+          delay: 0.2
         });
         
-        // Animate hero content with rhythmic timing
+        // Simple hero content animation
         $gsap.timeline()
           .from(".hero-content h1", {
             opacity: 0,
-            y: 60,
-            rotationX: 15,
-            duration: 1.2,
-            ease: "power3.out"
+            y: 30,
+            duration: 0.8,
+            ease: "power2.out"
           })
           .from(".hero-content p", {
             opacity: 0,
-            y: 40,
-            duration: 1,
+            y: 20,
+            duration: 0.6,
             ease: "power2.out"
-          }, "-=0.6");
-        
-        // Add pulsing animation to category buttons
-        $gsap.utils.toArray(".category-btn").forEach((el: any, i: number) => {
-          $gsap.to(el, {
-            scale: 1.05,
-            duration: 0.3,
-            ease: "power2.out",
-            paused: true,
-            repeat: -1,
-            yoyo: true
-          });
-        });
-      }
-      
-      // Add parallax effect to hero section
-      const heroSection = document.querySelector('.hero-section');
-      if (heroSection) {
-        addParallaxElement(heroSection as HTMLElement);
+          }, "-=0.4");
       }
     });
   }

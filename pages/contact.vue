@@ -2,15 +2,6 @@
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Contact Hero Section -->
     <section class="hero-section relative py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
-      <!-- 3D Background -->
-      <Background3D 
-        :intensity="1.2" 
-        :enable-particles="true" 
-        :enable-rays="true" 
-        :enable-morphing="true"
-        :particle-count="60"
-        color-scheme="golden"
-      />
       
       <div class="absolute inset-0">
         <NuxtImg
@@ -22,10 +13,6 @@
         />
         <div class="absolute inset-0 bg-gradient-to-r from-black/85 to-black/65"></div>
       </div>
-      
-      <!-- Decorative Elements -->
-      <div class="absolute top-10 left-10 w-16 h-16 lg:w-24 lg:h-24 rounded-full border border-yellow-500/30 animate-pulse"></div>
-      <div class="absolute bottom-20 right-10 w-20 h-20 lg:w-32 lg:h-32 rounded-full bg-yellow-500/20"></div>
       
       <div class="hero-content relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
         <div class="inline-block mb-4">
@@ -46,11 +33,7 @@
       <div class="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">          <!-- Contact Information -->
           <div
-            class="contact-info transition-all duration-700 space-y-8"
-            :class="{
-              'opacity-0 translate-x-8': !isVisible.info,
-              'opacity-100 translate-x-0': isVisible.info,
-            }"
+            class="contact-info space-y-8"
           >
             <div class="space-y-6">
               <div class="inline-block">
@@ -71,7 +54,7 @@
               <div
                 v-for="(item, index) in contactInfo"
                 :key="index"
-                class="group flex items-start space-x-4 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-700"
+                class="group flex items-start space-x-4 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700"
               >
                 <div class="flex-shrink-0">
                   <div class="w-12 h-12 bg-yellow-500/10 rounded-full flex items-center justify-center group-hover:bg-yellow-500/20 transition-colors duration-300">
@@ -80,7 +63,17 @@
                 </div>
                 <div class="flex-1">
                   <h3 class="font-bold text-lg text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">{{ item.title }}</h3>
-                  <p class="text-gray-600 dark:text-gray-300 mt-1">{{ item.value }}</p>
+                  <!-- Special handling for hours to display multiple lines -->
+                  <div v-if="item.title === 'Hours'" class="text-gray-600 dark:text-gray-300 mt-1">
+                    <div 
+                      v-for="(line, lineIndex) in item.value.split('\n')" 
+                      :key="lineIndex"
+                      class="py-1 font-medium"
+                    >
+                      {{ line }}
+                    </div>
+                  </div>
+                  <p v-else class="text-gray-600 dark:text-gray-300 mt-1">{{ item.value }}</p>
                   <p v-if="item.extra" class="text-gray-500 dark:text-gray-400 text-sm mt-1">{{ item.extra }}</p>
                 </div>
               </div>
@@ -90,12 +83,7 @@
           <!-- Contact Form -->
           <div
             ref="formRef"
-            class="transition-all duration-700"
-            :class="{
-              'opacity-0 -translate-x-8': !isVisible.form,
-              'opacity-100 translate-x-0': isVisible.form,
-            }"
-
+            class=""
           >
 
                       <!-- Quick Links -->
@@ -107,7 +95,6 @@
                   color="yellow"
                   variant="outline"
                   size="lg"
-                  class="transform transition hover:scale-105"
                 >
                   View Menu
                 </UButton>
@@ -116,7 +103,6 @@
                   color="yellow"
                   variant="outline"
                   size="lg"
-                  class="transform transition hover:scale-105"
                 >
                   See Events
                 </UButton>
@@ -130,31 +116,40 @@
               
               <form @submit.prevent="submitForm" novalidate class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <UFormGroup label="Name" required :error="formErrors.name">
+                  <UFormGroup label="First Name" required :error="formErrors.firstName">
                     <UInput
-                      v-model="form.name"
-                      placeholder="Your name"
-                      :error="!!formErrors.name"
-                      autocomplete="name"
+                      v-model="form.firstName"
+                      placeholder="First name"
+                      :error="!!formErrors.firstName"
+                      autocomplete="given-name"
                       size="lg"
-                      class="transform transition focus:scale-105"
                     />
-                    <p v-if="formErrors.name" class="text-red-600 text-sm mt-1">{{ formErrors.name }}</p>
+                    <p v-if="formErrors.firstName" class="text-red-600 text-sm mt-1">{{ formErrors.firstName }}</p>
                   </UFormGroup>
 
-                  <UFormGroup label="Email" required :error="formErrors.email">
+                  <UFormGroup label="Last Name" required :error="formErrors.lastName">
                     <UInput
-                      v-model="form.email"
-                      type="email"
-                      placeholder="Your email"
-                      :error="!!formErrors.email"
-                      autocomplete="email"
+                      v-model="form.lastName"
+                      placeholder="Last name"
+                      :error="!!formErrors.lastName"
+                      autocomplete="family-name"
                       size="lg"
-                      class="transform transition focus:scale-105"
                     />
-                    <p v-if="formErrors.email" class="text-red-600 text-sm mt-1">{{ formErrors.email }}</p>
+                    <p v-if="formErrors.lastName" class="text-red-600 text-sm mt-1">{{ formErrors.lastName }}</p>
                   </UFormGroup>
                 </div>
+                <UFormGroup label="Email" required :error="formErrors.email" class="mt-6">
+                  <UInput
+                    v-model="form.email"
+                    type="email"
+                    placeholder="Your email"
+                    :error="!!formErrors.email"
+                    autocomplete="email"
+                    size="lg"
+                    class="w-full"
+                  />
+                  <p v-if="formErrors.email" class="text-red-600 text-sm mt-1">{{ formErrors.email }}</p>
+                </UFormGroup>
 
                 <UFormGroup label="Subject" required :error="formErrors.subject">
                   <UInput
@@ -162,7 +157,6 @@
                     placeholder="Subject"
                     :error="!!formErrors.subject"
                     size="lg"
-                    class="transform transition focus:scale-105"
                   />
                   <p v-if="formErrors.subject" class="text-red-600 text-sm mt-1">{{ formErrors.subject }}</p>
                 </UFormGroup>
@@ -174,7 +168,6 @@
                     :rows="6"
                     :error="!!formErrors.message"
                     size="lg"
-                    class="transform transition focus:scale-105"
                   />
                   <p v-if="formErrors.message" class="text-red-600 text-sm mt-1">{{ formErrors.message }}</p>
                 </UFormGroup>
@@ -185,7 +178,7 @@
                   variant="solid"
                   size="xl"
                   :loading="isSubmitting"
-                  class="w-auto mx-auto block transform transition hover:scale-105"
+                  class="w-auto mx-auto block"
                   :disabled="isSubmitting"
                 >
                   <UIcon name="i-heroicons-paper-airplane" class="w-5 h-5 mr-2" />
@@ -200,11 +193,6 @@
 
     <!-- Map Section -->
     <section class="py-14 bg-white dark:bg-gray-800 relative overflow-hidden">
-      <div class="absolute inset-0 opacity-5">
-        <div class="absolute top-10 left-10 w-40 h-40 rounded-full border-2 border-yellow-500"></div>
-        <div class="absolute bottom-10 right-10 w-32 h-32 rounded-full bg-yellow-300"></div>
-      </div>
-      
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center mb-6">
           <div class="inline-block mb-4">
@@ -243,7 +231,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
 import { useLandingPageData } from "~/composables/useLandingPageData";
-import Background3D from "~/components/Background3D.vue";
 
 interface ContactInfo {
   icon: string
@@ -253,7 +240,8 @@ interface ContactInfo {
 }
 
 interface FormData {
-  name: string
+  firstName: string
+  lastName: string
   email: string
   subject: string
   message: string
@@ -274,7 +262,8 @@ const {
 } = useLandingPageData();
 
 const form = ref<FormData>({
-  name: "",
+  firstName: "",
+  lastName: "",
   email: "",
   subject: "",
   message: "",
@@ -284,28 +273,40 @@ const formErrors = ref<Record<string, string>>({})
 const isSubmitting = ref(false)
 const formRef = ref<HTMLElement>()
 
-const isVisible = ref({
-  info: false,
-  form: false,
-})
-
-// Generate dynamic operation hours from backend
+// Enhanced operation hours formatting with categories
 const formatOperationHours = (hours: any[]) => {
   if (!hours || hours.length === 0) return "";
   
+  // Helper function to format time to "11:00 AM" format
+  const formatTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  // Helper function to capitalize day names
+  const capitalizeDay = (day: string) => {
+    return day.charAt(0).toUpperCase() + day.slice(1);
+  };
+
   // Group by similar times
   const grouped = hours.reduce((acc: any, hour: any) => {
     const timeKey = `${hour.open_time}-${hour.close_time}`;
     if (!acc[timeKey]) acc[timeKey] = [];
-    acc[timeKey].push(hour.day);
+    acc[timeKey].push(capitalizeDay(hour.day));
     return acc;
   }, {});
   
+  // Format each group and join with line breaks
   return Object.entries(grouped)
     .map(([time, days]: [string, any]) => {
       const [open, close] = time.split('-');
-      const daysList = days.join(', ');
-      return `${daysList}: ${open} - ${close}`;
+      const formattedDays = days.join(', ');
+      const formattedOpen = formatTime(open);
+      const formattedClose = formatTime(close);
+      return `${formattedDays}: ${formattedOpen} - ${formattedClose}`;
     })
     .join('\n');
 }
@@ -366,24 +367,23 @@ const contactInfo = computed(() => {
 const validateForm = (data: FormData) => {
   const errors: Record<string, string> = {}
 
-  if (!data.name.trim()) {
-    errors.name = "Name is required"
+  if (!data.firstName.trim()) {
+    errors.firstName = "First name is required"
   }
-
+  if (!data.lastName.trim()) {
+    errors.lastName = "Last name is required"
+  }
   if (!data.email.trim()) {
     errors.email = "Email is required"
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
     errors.email = "Invalid email format"
   }
-
   if (!data.subject.trim()) {
     errors.subject = "Subject is required"
   }
-
   if (!data.message.trim()) {
     errors.message = "Message is required"
   }
-
   return {
     isValid: Object.keys(errors).length === 0,
     errors,
@@ -398,21 +398,49 @@ const submitForm = async () => {
     formErrors.value = errors
     return
   }
+  
   isSubmitting.value = true
-  await new Promise((r) => setTimeout(r, 1500))
-  form.value = {
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
+  
+  try {
+    // Map form fields to match the API expected format
+    const contactData = {
+      firstName: form.value.firstName,
+      lastName: form.value.lastName,
+      email: form.value.email,
+      message: `Subject: ${form.value.subject}\n\nMessage: ${form.value.message}`
+    }
+
+    const response = await $fetch('/api/contact', {
+      method: 'POST',
+      body: contactData
+    })
+
+    // Success
+    form.value = {
+      firstName: "",
+      lastName: "",
+      email: "",
+      subject: "",
+      message: "",
+    }
+    formErrors.value = {}
+    
+    toast.add({
+      title: "Success!",
+      description: "Your message has been sent successfully. We'll get back to you soon!",
+      color: "green",
+    })
+  } catch (error: any) {
+    console.error('Contact form error:', error)
+    
+    toast.add({
+      title: "Error",
+      description: error.data?.message || "Failed to send message. Please try again or contact us directly.",
+      color: "red",
+    })
+  } finally {
+    isSubmitting.value = false
   }
-  formErrors.value = {}
-  toast.add({
-    title: "Success!",
-    description: "Your message has been sent successfully.",
-    color: "green",
-  })
-  isSubmitting.value = false
 }
 
 onMounted(async () => {
@@ -420,9 +448,6 @@ onMounted(async () => {
   if (!backendContactInfo.value) {
     await fetchContactInfo();
   }
-  
-  setTimeout(() => { isVisible.value.info = true }, 300)
-  setTimeout(() => { isVisible.value.form = true }, 600)
 });
 
 // Page meta

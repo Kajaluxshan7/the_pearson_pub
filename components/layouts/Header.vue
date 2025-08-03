@@ -73,118 +73,87 @@ onUnmounted(() => {
 const callLink = "tel:+19054305699";
 </script>
 
-<template>  <!-- Header Spacer -->
+<template> <!-- Header Spacer -->
   <div class="h-20"></div>
-  <header
-    :class="[
-      'fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out',
-      {
-        '-translate-y-full': !isHeaderVisible && !isOpen,
-        'bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl border-b border-gray-200/50 dark:border-gray-700/50': true,
-      },
-    ]"
-  >    <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+  <header :class="[
+    'fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out',
+    {
+      '-translate-y-full': !isHeaderVisible && !isOpen,
+      'bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl border-b border-gray-200/50 dark:border-gray-700/50': true,
+    },
+  ]">
+    <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-20">
         <!-- Logo and Brand Name Left -->
         <div class="flex items-center space-x-2">
           <NuxtLink to="/" class="flex items-center space-x-2 group">
-            <span class="text-2xl lg:text-3xl font-extrabold text-yellow-600 dark:text-yellow-400 tracking-widest transition-all duration-300 group-hover:scale-105" style="font-family: 'Cinzel', 'Georgia', serif; letter-spacing: 0.08em;">The Pearson Pub</span>
+            <span
+              class="text-2xl lg:text-3xl font-extrabold text-yellow-600 dark:text-yellow-400 tracking-widest transition-all duration-300 group-hover:scale-105"
+              style="font-family: 'Cinzel', 'Georgia', serif; letter-spacing: 0.08em;">The Pearson Pub</span>
           </NuxtLink>
-        </div>        <!-- Desktop Navigation Center -->
+        </div> <!-- Desktop Navigation Center -->
         <div class="hidden md:flex items-center space-x-8 flex-1 justify-center">
-          <NuxtLink
-            v-for="(item, index) in navigationItems"
-            :key="index"
-            :to="item.path"
-            class="relative px-4 py-2 text-sm lg:text-base font-semibold transition-all duration-300 group"
-            :class="[
+          <NuxtLink v-for="(item, index) in navigationItems" :key="index" :to="item.path"
+            class="relative px-4 py-2 text-sm lg:text-base font-semibold transition-all duration-300 group" :class="[
               index === activeIndex
                 ? 'text-yellow-600 dark:text-yellow-400'
                 : 'text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400',
-            ]"
-          >
+            ]">
             {{ item.name }}
-            <div
-              :class="[
-                'absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-yellow-500 to-yellow-600 transition-all duration-300 transform origin-center',
-                index === activeIndex ? 'w-full scale-x-100' : 'w-0 scale-x-0 group-hover:w-full group-hover:scale-x-100'
-              ]"
-            ></div>
+            <div :class="[
+              'absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-yellow-500 to-yellow-600 transition-all duration-300 transform origin-center',
+              index === activeIndex ? 'w-full scale-x-100' : 'w-0 scale-x-0 group-hover:w-full group-hover:scale-x-100'
+            ]"></div>
             <!-- Hover effect background -->
-            <div class="absolute inset-0 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+            <div
+              class="absolute inset-0 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10">
+            </div>
           </NuxtLink>
-        </div>        <!-- Dark Mode Toggle Right -->
+        </div> <!-- Dark Mode Toggle Right -->
         <div class="hidden md:flex items-center space-x-4">
           <button
             class="p-3 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 transition-all duration-300 hover:shadow-lg"
-            @click="colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'"
-            aria-label="Toggle dark mode"
-          >
-            <UIcon
-              :name="
-                colorMode.value === 'dark'
-                  ? 'i-heroicons-moon'
-                  : 'i-heroicons-sun'
-              "
-              class="w-5 h-5"
-            />
+            @click="colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'" aria-label="Toggle dark mode">
+            <UIcon :name="(colorMode.value || 'light') === 'dark'
+                ? 'i-heroicons-moon'
+                : 'i-heroicons-sun'
+              " class="w-5 h-5" />
           </button>
-        </div>        <div class="md:hidden flex items-center space-x-4">
+        </div>
+        <div class="md:hidden flex items-center space-x-4">
           <!-- Dark Mode Toggle Mobile -->
           <button
             class="p-3 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 transition-all duration-300"
-            @click="colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'"
-            aria-label="Toggle dark mode"
-          >
-            <UIcon
-              :name="
-                colorMode.value === 'dark'
-                  ? 'i-heroicons-moon'
-                  : 'i-heroicons-sun'
-              "
-              class="w-5 h-5"
-            />
+            @click="colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'" aria-label="Toggle dark mode">
+            <UIcon :name="(colorMode.value || 'light') === 'dark'
+                ? 'i-heroicons-moon'
+                : 'i-heroicons-sun'
+              " class="w-5 h-5" />
           </button>
 
           <!-- Mobile Menu Button -->
           <button
             class="p-3 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 transition-all duration-300"
-            @click="toggleMenu"
-            aria-label="Toggle menu"
-          >
-            <UIcon
-              :name="isOpen ? 'i-heroicons-x-mark' : 'i-heroicons-bars-3'"
-              class="w-6 h-6 transition-transform duration-300"
-              :class="{ 'rotate-180': isOpen }"
-            />
+            @click="toggleMenu" aria-label="Toggle menu">
+            <UIcon :name="isOpen ? 'i-heroicons-x-mark' : 'i-heroicons-bars-3'"
+              class="w-6 h-6 transition-transform duration-300" :class="{ 'rotate-180': isOpen }" />
           </button>
         </div>
-      </div>      <!-- Mobile Navigation -->
-      <transition
-        enter-active-class="transition duration-300 ease-out"
-        enter-from-class="opacity-0 -translate-y-8 scale-95"
-        enter-to-class="opacity-100 translate-y-0 scale-100"
-        leave-active-class="transition duration-200 ease-in"
-        leave-from-class="opacity-100 translate-y-0 scale-100"
-        leave-to-class="opacity-0 -translate-y-8 scale-95"
-      >
-        <div
-          v-if="isOpen"
-          class="md:hidden absolute top-20 inset-x-0 bg-white/98 dark:bg-gray-900/98 backdrop-blur-xl shadow-2xl rounded-b-2xl border-t border-gray-200/50 dark:border-gray-700/50"
-        >
+      </div> <!-- Mobile Navigation -->
+      <transition enter-active-class="transition duration-300 ease-out"
+        enter-from-class="opacity-0 -translate-y-8 scale-95" enter-to-class="opacity-100 translate-y-0 scale-100"
+        leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100 translate-y-0 scale-100"
+        leave-to-class="opacity-0 -translate-y-8 scale-95">
+        <div v-if="isOpen"
+          class="md:hidden absolute top-20 inset-x-0 bg-white/98 dark:bg-gray-900/98 backdrop-blur-xl shadow-2xl rounded-b-2xl border-t border-gray-200/50 dark:border-gray-700/50">
           <div class="px-4 pt-4 pb-6 space-y-2">
-            <NuxtLink
-              v-for="(item, index) in navigationItems"
-              :key="index"
-              :to="item.path"
+            <NuxtLink v-for="(item, index) in navigationItems" :key="index" :to="item.path"
               class="block px-4 py-3 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-105"
               :class="[
                 index === activeIndex
                   ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 shadow-md'
                   : 'text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20',
-              ]"
-              @click="toggleMenu"
-            >
+              ]" @click="toggleMenu">
               {{ item.name }}
             </NuxtLink>
           </div>
@@ -193,15 +162,11 @@ const callLink = "tel:+19054305699";
     </nav>
   </header>
 
-  <a
-  :href="callLink"
-  target="_blank"
-  rel="noopener noreferrer"
-  class="fixed bottom-5 right-5 z-50 bg-yellow-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-yellow-600 transition-colors duration-200"
-  aria-label="Call Us"
->
-  <UIcon name="i-heroicons-phone" class="w-5 h-5" />
-</a>
+  <a :href="callLink" target="_blank" rel="noopener noreferrer"
+    class="fixed bottom-5 right-5 z-50 bg-yellow-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-yellow-600 transition-colors duration-200"
+    aria-label="Call Us">
+    <UIcon name="i-heroicons-phone" class="w-5 h-5" />
+  </a>
 
 </template>
 

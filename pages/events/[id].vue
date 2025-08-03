@@ -1,14 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- 3D Background -->
-    <Background3D 
-      :intensity="0.6" 
-      :enable-particles="true" 
-      :enable-rays="false" 
-      :enable-morphing="true"
-      :particle-count="30"
-      color-scheme="blue"
-    />
     
     <!-- Loading State -->
     <div v-if="loading" class="flex items-center justify-center min-h-screen">
@@ -58,20 +49,117 @@
           </ol>
         </nav>
 
-        <!-- Responsive layout: stack on mobile, side-by-side on desktop -->
-        <div class="lg:grid lg:grid-cols-12 lg:gap-8 space-y-8 lg:space-y-0">          <!-- Main Event Content -->
+        <!-- Enhanced landscape layout: side-by-side design -->
+        <div class="lg:grid lg:grid-cols-12 lg:gap-12 space-y-8 lg:space-y-0">
+          <!-- Main Event Content -->
           <div class="lg:col-span-8">
-            <EventCard :event="event" :is-detail-view="true" class="h-fit" />
-          </div>
+            <UCard class="bg-white dark:bg-gray-800 overflow-hidden">
+              <!-- Enhanced Event Image -->
+              <template #header>
+                <div class="relative">
+                  <NuxtImg
+                    :src="event.image || '/images/events/default-event.jpg'"
+                    :alt="event.title"
+                    class="w-full h-96 lg:h-[600px] object-cover"
+                    format="webp"
+                    quality="90"
+                    loading="eager"
+                  />
+                  
+                  <!-- Event Status Badge -->
+                  <div class="absolute top-4 right-4 flex flex-col gap-2">
+                    <UBadge
+                      :color="getEventStatusColor(event)"
+                      variant="solid"
+                      class="font-semibold text-sm"
+                    >
+                      {{ getEventStatus(event) }}
+                    </UBadge>
+                    <UBadge
+                      v-if="event.isFeatured"
+                      color="yellow"
+                      variant="solid"
+                      class="font-semibold text-sm"
+                    >
+                      Featured Event
+                    </UBadge>
+                  </div>
 
-          <!-- Sidebar -->
+                  <!-- Date Badge -->
+                  <div class="absolute bottom-4 left-4 bg-black/80 text-white p-4 rounded-lg">
+                    <div class="text-center">
+                      <div class="text-2xl font-bold">{{ formatDateDay(event.startDate) }}</div>
+                      <div class="text-sm">{{ formatDateMonth(event.startDate) }}</div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+              <!-- Event Details -->
+              <div class="p-6 lg:p-8 space-y-6">
+                <div class="space-y-4">
+                  <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white leading-tight">
+                    {{ event.title }}
+                  </h1>
+                  
+                  <!-- Event Meta Information -->
+                  <div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
+                    <div class="flex items-center">
+                      <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 mr-2" />
+                      {{ formatEventDate(event) }}
+                    </div>
+                    <div class="flex items-center">
+                      <UIcon name="i-heroicons-clock" class="w-4 h-4 mr-2" />
+                      {{ formatEventTime(event) }}
+                    </div>
+                    <div v-if="event.location" class="flex items-center">
+                      <UIcon name="i-heroicons-map-pin" class="w-4 h-4 mr-2" />
+                      {{ event.location }}
+                    </div>
+                    <div v-if="event.price" class="flex items-center">
+                      <UIcon name="i-heroicons-currency-dollar" class="w-4 h-4 mr-2" />
+                      {{ event.price }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Event Description -->
+                <div class="prose prose-lg max-w-none dark:prose-invert">
+                  <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {{ event.description }}
+                  </p>
+                  
+                  <!-- Additional Details -->
+                  <div v-if="event.details" class="mt-6 space-y-4">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Event Details</h3>
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                      <p class="text-gray-600 dark:text-gray-300">{{ event.details }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Event Features -->
+                  <div v-if="event.features && event.features.length > 0" class="mt-6">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">What to Expect</h3>
+                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <li v-for="feature in event.features" :key="feature" class="flex items-center">
+                        <UIcon name="i-heroicons-check-circle" class="w-5 h-5 mr-2 text-green-500" />
+                        <span class="text-gray-600 dark:text-gray-300">{{ feature }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </UCard>
+
+          <!-- Enhanced Sidebar -->
           <div class="lg:col-span-4 space-y-6">
-            <!-- Quick Actions -->
+            <!-- Quick Actions Card -->
             <UCard class="bg-white dark:bg-gray-800">
               <template #header>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Quick Actions</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Event Actions</h3>
               </template>
-              <div class="space-y-3">
+              <div class="space-y-4">
+                <!-- Primary CTA -->
                 <UButton 
                   v-if="event.ctaLink" 
                   :to="event.ctaLink" 
@@ -83,14 +171,92 @@
                   <UIcon name="i-heroicons-ticket" class="w-5 h-5 mr-2" />
                   {{ event.ctaText || 'Book Now' }}
                 </UButton>
-                <UButton color="gray" variant="outline" class="w-full justify-center" @click="shareEvent">
-                  <UIcon name="i-heroicons-share" class="w-5 h-5 mr-2" />
-                  Share Event
-                </UButton>
-                <UButton color="gray" variant="outline" class="w-full justify-center" @click="addToCalendar">
-                  <UIcon name="i-heroicons-calendar-plus" class="w-5 h-5 mr-2" />
-                  Add to Calendar
-                </UButton>
+                
+                <!-- Secondary Actions -->
+                <div class="grid grid-cols-2 gap-3">
+                  <UButton 
+                    color="gray" 
+                    variant="outline" 
+                    class="justify-center text-sm" 
+                    @click="shareEvent"
+                  >
+                    <UIcon name="i-heroicons-share" class="w-4 h-4 mr-1" />
+                    Share
+                  </UButton>
+                  <UButton 
+                    color="gray" 
+                    variant="outline" 
+                    class="justify-center text-sm" 
+                    @click="addToCalendar"
+                  >
+                    <UIcon name="i-heroicons-calendar-plus" class="w-4 h-4 mr-1" />
+                    Calendar
+                  </UButton>
+                </div>
+              </div>
+            </UCard>
+
+            <!-- Event Info Card -->
+            <UCard class="bg-white dark:bg-gray-800">
+              <template #header>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Event Information</h3>
+              </template>
+              <div class="space-y-4">
+                <!-- Date & Time -->
+                <div class="flex items-start space-x-3">
+                  <UIcon name="i-heroicons-calendar-days" class="w-5 h-5 text-yellow-600 mt-0.5" />
+                  <div>
+                    <p class="font-medium text-gray-900 dark:text-white">Date & Time</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ formatEventDate(event) }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ formatEventTime(event) }}</p>
+                  </div>
+                </div>
+
+                <!-- Location -->
+                <div v-if="event.location" class="flex items-start space-x-3">
+                  <UIcon name="i-heroicons-map-pin" class="w-5 h-5 text-yellow-600 mt-0.5" />
+                  <div>
+                    <p class="font-medium text-gray-900 dark:text-white">Location</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ event.location }}</p>
+                  </div>
+                </div>
+
+                <!-- Price -->
+                <div v-if="event.price" class="flex items-start space-x-3">
+                  <UIcon name="i-heroicons-currency-dollar" class="w-5 h-5 text-yellow-600 mt-0.5" />
+                  <div>
+                    <p class="font-medium text-gray-900 dark:text-white">Price</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ event.price }}</p>
+                  </div>
+                </div>
+
+                <!-- Performers -->
+                <div v-if="event.performers && event.performers.length > 0" class="flex items-start space-x-3">
+                  <UIcon name="i-heroicons-musical-note" class="w-5 h-5 text-yellow-600 mt-0.5" />
+                  <div>
+                    <p class="font-medium text-gray-900 dark:text-white">Performers</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ event.performers.join(', ') }}</p>
+                  </div>
+                </div>
+
+                <!-- Tags -->
+                <div v-if="event.tags && event.tags.length > 0" class="flex items-start space-x-3">
+                  <UIcon name="i-heroicons-tag" class="w-5 h-5 text-yellow-600 mt-0.5" />
+                  <div>
+                    <p class="font-medium text-gray-900 dark:text-white">Tags</p>
+                    <div class="flex flex-wrap gap-1 mt-1">
+                      <UBadge 
+                        v-for="tag in event.tags" 
+                        :key="tag" 
+                        color="gray" 
+                        variant="subtle" 
+                        class="text-xs"
+                      >
+                        {{ tag }}
+                      </UBadge>
+                    </div>
+                  </div>
+                </div>
               </div>
             </UCard>
 
@@ -100,13 +266,78 @@
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Related Events</h3>
               </template>
               <div class="space-y-4">
+                <!-- Fix the v-for loop in the Related Events section -->
                 <div 
-                  v-for="relatedEvent in relatedEvents.slice(0, 3)" 
-                  :key="relatedEvent.id"
-                  class="group cursor-pointer"
+                  v-for="relatedEvent in relatedEvents" 
+                  :key="relatedEvent.id" 
+                  class="group cursor-pointer transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-3 -m-3"
                   @click="navigateToEvent(relatedEvent.id)"
                 >
                   <div class="flex space-x-3">
+                    <NuxtImg
+                      :src="relatedEvent.image || '/images/events/default-event.jpg'"
+                      :alt="relatedEvent.title"
+                      class="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                      format="webp"
+                      quality="75"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors truncate">
+                        {{ relatedEvent.title }}
+                      </p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        {{ formatDate(relatedEvent.startDate || relatedEvent.date) }}
+                      </p>
+                      <div class="flex items-center mt-2">
+                        <UBadge
+                          :color="getCategoryColor(relatedEvent.category)"
+                          variant="subtle"
+                          class="text-xs"
+                        >
+                          {{ relatedEvent.category }}
+                        </UBadge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </UCard>
+
+            <!-- Contact Card -->
+            <UCard class="bg-white dark:bg-gray-800">
+              <template #header>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                  Questions?
+                </h3>
+              </template>
+              <div class="space-y-3">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  Contact us for more information about this event.
+                </p>
+                <div class="flex flex-col gap-2">
+                  <UButton
+                    color="gray"
+                    variant="outline"
+                    size="sm"
+                    class="justify-center"
+                  >
+                    <UIcon name="i-heroicons-phone" class="w-4 h-4 mr-2" />
+                    Call Us
+                  </UButton>
+                  <UButton
+                    color="gray"
+                    variant="outline"
+                    size="sm"
+                    class="justify-center"
+                  >
+                    <UIcon name="i-heroicons-envelope" class="w-4 h-4 mr-2" />
+                    Email Us
+                  </UButton>
+                </div>
+              </div>
+            </UCard>
+          </div>
+        </div>
                     <div class="flex-shrink-0">
                       <NuxtImg
                         :src="relatedEvent.image || '/images/entertainment/music.jpg'"
@@ -123,7 +354,8 @@
                       <p class="text-xs text-gray-500 dark:text-gray-400">
                         {{ formatDate(relatedEvent.date) }}
                       </p>
-                      <div class="flex items-center mt-1">                        <UBadge 
+                      <div class="flex items-center mt-1">
+                        <UBadge 
                           :color="getCategoryColor(relatedEvent.category) as any" 
                           variant="subtle" 
                           class="text-xs"
@@ -134,8 +366,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
-            </UCard>
+            <!-- End of Related Events List -->
 
             <!-- Contact Information -->
             <UCard class="bg-white dark:bg-gray-800">
@@ -192,15 +423,12 @@
             </UButton>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
+      <!-- End main content wrapper -->
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import EventCard from "~/components/events/EventCard.vue";
-import Background3D from "~/components/Background3D.vue";
 import { eventsApi } from "~/composables/useApi";
 
 const route = useRoute();
@@ -232,6 +460,7 @@ onMounted(async () => {
       // Transform backend event to UI format
       event.value = {
         ...foundEvent,
+        category: foundEvent.category || 'general', // Default to 'general' if category is missing
         image: foundEvent.images?.[0] || foundEvent.image || '/images/entertainment/music.jpg',
         images: foundEvent.images || [foundEvent.image || '/images/entertainment/music.jpg'],
         date: foundEvent.startDate ? new Date(foundEvent.startDate).toLocaleDateString('en-US', {
@@ -324,12 +553,15 @@ onMounted(async () => {
 const relatedEvents = computed(() => {
   if (!event.value || !allEvents.value.length) return [];
   
-  return allEvents.value
+  const filteredEvents = allEvents.value
     .filter(e => 
       e.id !== event.value.id && 
-      e.category === event.value.category
+      e.category === event.value.category // Ensure same category
     )
-    .slice(0, 4);
+    .slice(0, 4); // Limit to 4 related events
+
+  console.log('Filtered Related Events:', filteredEvents);
+  return filteredEvents;
 });
 
 // Navigation between events
@@ -350,7 +582,7 @@ const nextEvent = computed(() => {
   return allEvents.value[index + 1];
 });
 
-// Utility functions
+// Enhanced utility functions
 const formatDate = (dateString: string) => {
   try {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -362,16 +594,118 @@ const formatDate = (dateString: string) => {
   }
 };
 
-const getCategoryColor = (category: string): string => {
-  const colors = {
-    music: 'purple',
-    entertainment: 'blue',
-    food: 'orange',
-    sports: 'green',
-    special: 'red',
-    default: 'gray'
+const formatDateDay = (dateString: string) => {
+  try {
+    return new Date(dateString).getDate().toString();
+  } catch {
+    return '1';
+  }
+};
+
+const formatDateMonth = (dateString: string) => {
+  try {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short'
+    });
+  } catch {
+    return 'Jan';
+  }
+};
+
+const formatEventDate = (event: any) => {
+  try {
+    const startDate = new Date(event.startDate || event.date);
+    const endDate = event.endDate ? new Date(event.endDate) : null;
+    
+    if (endDate && startDate.toDateString() !== endDate.toDateString()) {
+      return `${startDate.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric'
+      })} - ${endDate.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      })}`;
+    } else {
+      return startDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+  } catch {
+    return event.date || 'Date TBA';
+  }
+};
+
+const formatEventTime = (event: any) => {
+  if (event.time) return event.time;
+  
+  try {
+    const startDate = new Date(event.startDate);
+    const endDate = event.endDate ? new Date(event.endDate) : null;
+    
+    const startTime = startDate.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    
+    if (endDate) {
+      const endTime = endDate.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      return `${startTime} - ${endTime}`;
+    }
+    
+    return startTime;
+  } catch {
+    return 'Time TBA';
+  }
+};
+
+const getEventStatus = (event: any) => {
+  const now = new Date();
+  const eventDate = new Date(event.startDate || event.date);
+  const eventEndDate = event.endDate ? new Date(event.endDate) : eventDate;
+  
+  if (now > eventEndDate) {
+    return 'Ended';
+  } else if (now >= eventDate && now <= eventEndDate) {
+    return 'Live Now';
+  } else {
+    return 'Upcoming';
+  }
+};
+
+const getEventStatusColor = (event: any) => {
+  const status = getEventStatus(event);
+  switch (status) {
+    case 'Live Now':
+      return 'green';
+    case 'Ended':
+      return 'red';
+    case 'Upcoming':
+      return 'blue';
+    default:
+      return 'gray';
+  }
+};
+
+// Define the BadgeColor type
+export type BadgeColor = 'blue' | 'green' | 'red' | 'yellow' | 'gray';
+
+const getCategoryColor = (category: string): BadgeColor => {
+  const colors: Record<string, BadgeColor> = {
+    Music: 'blue',
+    Art: 'green',
+    Food: 'red',
+    Sports: 'yellow',
   };
-  return colors[category as keyof typeof colors] || colors.default;
+  return colors[category] || 'gray';
 };
 
 const navigateToEvent = (eventId: string | number) => {
@@ -420,19 +754,19 @@ useHead({
   meta: [
     {
       name: 'description',
-      content: () => event.value?.description || 'Event at The Pearson Pub'
+      content: event.value?.description || 'Event at The Pearson Pub'
     },
     {
       property: 'og:title',
-      content: () => event.value ? `${event.value.title} - The Pearson Pub` : 'Event - The Pearson Pub'
+      content: event.value ? `${event.value.title} - The Pearson Pub` : 'Event - The Pearson Pub'
     },
     {
       property: 'og:description',
-      content: () => event.value?.description || 'Event at The Pearson Pub'
+      content: event.value?.description || 'Discover events at The Pearson Pub'
     },
     {
       property: 'og:image',
-      content: () => event.value?.image || '/images/entertainment/music.jpg'
+      content: event.value?.image || '/images/entertainment/music.jpg'
     }
   ]
 });

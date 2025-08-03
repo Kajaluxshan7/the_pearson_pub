@@ -3,19 +3,24 @@
     :model-value="isOpen"
     @update:model-value="(val: boolean) => emit('update:isOpen', val)"
     class="z-50"
+    :ui="{
+      width: 'max-w-5xl',
+      height: 'max-h-[90vh]',
+      container: 'items-center justify-center min-h-full p-4'
+    }"
   >
-    <UCard v-if="event" class="max-w-4xl mx-auto">
+    <UCard v-if="event" class="w-full h-full max-h-[90vh] overflow-hidden">
       <template #header>
         <div class="relative overflow-hidden rounded-t-lg">
           <!-- Image Carousel for Multiple Images -->
           <template v-if="event.images && event.images.length > 1">
-            <div class="relative w-full h-80">
+            <div class="relative w-full h-64 md:h-80 lg:h-96">
               <NuxtImg
                 v-for="(img, idx) in event.images"
                 :key="img"
                 v-show="carouselIndex === idx"
                 :src="img"
-                class="w-full h-80 object-cover absolute top-0 left-0 transition-opacity duration-500"
+                class="w-full h-full object-cover absolute top-0 left-0 transition-opacity duration-500"
                 :alt="event.title + ' image ' + (idx + 1)"
                 format="webp"
                 quality="80"
@@ -25,79 +30,110 @@
               <button
                 v-if="event.images.length > 1"
                 @click="previousImage"
-                class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full transition-all duration-200 shadow-lg"
               >
                 <UIcon name="i-heroicons-chevron-left" class="w-5 h-5" />
               </button>
               <button
                 v-if="event.images.length > 1"
                 @click="nextImage"
-                class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full transition-all duration-200 shadow-lg"
               >
                 <UIcon name="i-heroicons-chevron-right" class="w-5 h-5" />
               </button>
               
               <!-- Dots indicator -->
-              <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2">
+              <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
                 <button
                   v-for="(img, idx) in event.images"
                   :key="idx"
                   @click="carouselIndex = idx"
                   :class="[
-                    'w-2 h-2 rounded-full transition-colors',
-                    carouselIndex === idx ? 'bg-white' : 'bg-white/50'
+                    'w-3 h-3 rounded-full transition-all duration-300 shadow-md',
+                    carouselIndex === idx ? 'bg-yellow-400 scale-110' : 'bg-white/70 hover:bg-white/90'
                   ]"
                 />
               </div>
+              
+              <!-- Image counter -->
+              <div class="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                {{ carouselIndex + 1 }} / {{ event.images.length }}
+              </div>
+              
+              <!-- Close button -->
+              <button
+                @click="closeModal"
+                class="absolute top-4 left-4 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full transition-all duration-200 shadow-lg z-10"
+              >
+                <UIcon name="i-heroicons-x-mark" class="w-5 h-5" />
+              </button>
             </div>
           </template>
           
           <!-- Single Image -->
           <template v-else>
-            <NuxtImg
-              :src="event.image || '/images/entertainment/music.jpg'"
-              class="w-full h-80 object-cover"
-              :alt="event.title"
-              format="webp"
-              quality="80"
-            />
+            <div class="relative">
+              <NuxtImg
+                :src="event.image || '/images/entertainment/music.jpg'"
+                class="w-full h-64 md:h-80 lg:h-96 object-cover"
+                :alt="event.title"
+                format="webp"
+                quality="80"
+              />
+              <!-- Close button -->
+              <button
+                @click="closeModal"
+                class="absolute top-4 left-4 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full transition-all duration-200 shadow-lg z-10"
+              >
+                <UIcon name="i-heroicons-x-mark" class="w-5 h-5" />
+              </button>
+            </div>
           </template>
 
           <!-- Event Status Badge -->
           <div class="absolute top-4 left-4">
-            <UBadge
-              :color="getStatusColor(event.status)"
-              variant="solid"
-              class="font-semibold"
-            >
-              {{ event.status.charAt(0).toUpperCase() + event.status.slice(1) }}
-            </UBadge>
+            <!-- Badges moved to header section below -->
           </div>
 
           <!-- Featured Badge -->
           <div v-if="event.featured" class="absolute top-4 right-4">
-            <UBadge color="yellow" variant="solid" class="font-semibold">
-              Featured
-            </UBadge>
+            <!-- Badge moved to header section below -->
           </div>
         </div>
       </template>
 
-      <div class="p-6 space-y-6">
+      <div class="p-4 md:p-6 space-y-6 overflow-y-auto max-h-[50vh]">
         <!-- Event Header -->
         <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
           <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
             <div class="flex-1">
-              <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
                 {{ event.title }}
               </h2>
-              <UBadge
-                :color="getCategoryColor(event.category)"
-                variant="subtle"
-                class="mb-4"
-              >
-                {{ event.category.charAt(0).toUpperCase() + event.category.slice(1) }}
-              </UBadge>
+              <div class="flex flex-wrap items-center gap-2 mb-4">
+                <UBadge
+                  :color="getCategoryColor(event.category)"
+                  variant="subtle"
+                  size="md"
+                >
+                  {{ event.category.charAt(0).toUpperCase() + event.category.slice(1) }}
+                </UBadge>
+                <UBadge
+                  :color="getStatusColor(event.status)"
+                  variant="solid"
+                  size="md"
+                >
+                  {{ event.status.charAt(0).toUpperCase() + event.status.slice(1) }}
+                </UBadge>
+                <UBadge
+                  v-if="event.featured"
+                  color="yellow"
+                  variant="solid"
+                  size="md"
+                >
+                  Featured
+                </UBadge>
+              </div>
               <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
                 {{ event.fullDescription || event.description }}
               </p>
@@ -248,8 +284,13 @@
       </div>
 
       <template #footer>
-        <div class="flex flex-col sm:flex-row justify-end gap-3">
-          <UButton color="gray" variant="outline" @click="closeModal">
+        <div class="flex flex-col sm:flex-row justify-end gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700">
+          <UButton 
+            color="gray" 
+            variant="outline" 
+            @click="closeModal"
+            class="w-full sm:w-auto"
+          >
             Close
           </UButton>
           <UButton
@@ -258,6 +299,7 @@
             color="yellow"
             variant="solid"
             @click="closeModal"
+            class="w-full sm:w-auto"
           >
             {{ event.ctaText || 'Book Now' }}
           </UButton>
