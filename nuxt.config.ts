@@ -33,11 +33,7 @@ export default defineNuxtConfig({
         },
       ],
       link: [
-        {
-          rel: "icon",
-          type: "image/png",
-          href: "/the_pearson_pub/public/images/pub/logo.png",
-        },
+        { rel: "icon", type: "image/png", href: "/images/pub/logo.png" },
         {
           rel: "stylesheet",
           href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",

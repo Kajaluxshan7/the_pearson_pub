@@ -113,7 +113,7 @@ export const useLandingPageData = () => {
     ctaLink: "/contact",
     price: { general: 0 },
     ticketsAvailable: 100,
-    status: "upcoming",
+    status: apiEvent.status || "upcoming", // Use the status from the API
     category: "entertainment",
     ageRestriction: "19+",
     specialRequirements: [],

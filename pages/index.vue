@@ -37,10 +37,6 @@
               <div class="flex items-center gap-3">
                 <!-- <span class="font-medium">{{ currentDayHours.day }}</span> -->
                 <span>{{ currentDayHours.openTime }} - {{ currentDayHours.closeTime }}</span>
-                <span class="px-2 py-1 rounded-full text-xs font-semibold"
-                  :class="currentDayHours.isOpen ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
-                  {{ currentDayHours.isOpen ? 'OPEN NOW' : 'CLOSED' }}
-                </span>
               </div>
             </div>
             <div v-else class="text-white text-sm md:text-base">
@@ -52,83 +48,156 @@
         </div>
       </section>
 
-      <!-- Specials Section -->
-      <section id="specials" class="specials section py-20 bg-gray-50 dark:bg-gray-900">
+      <!-- Specials Section - Enhanced with Instagram Portrait Layout -->
+      <section id="specials" class="specials section py-20 bg-gradient-to-br from-gray-50 via-white to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <!-- Specials Title -->
-          <div class="mb-12 text-center" data-aos="fade-up">
-            <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white"
+          <div class="mb-16 text-center" data-aos="fade-up">
+            <div class="inline-block mb-4">
+              <span class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase">
+                Chef's Recommendations
+              </span>
+              <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2"></div>
+            </div>
+            <h2 class="text-4xl md:text-6xl font-bold mb-6 text-gray-900 dark:text-white"
               style="font-family: 'Cinzel', 'Georgia', serif;">
-              <span class="text-yellow-600 dark:text-yellow-400">Specials</span>
+              Today's <span class="text-yellow-600 dark:text-yellow-400">Specials</span>
             </h2>
-            <div class="w-16 h-1 bg-yellow-500 mx-auto mb-4"></div>
-            <p class="text-xl text-gray-600 dark:text-gray-300">Check Our Chef's Recommendations</p>
+            <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+              Discover our handcrafted daily selections, featuring the finest seasonal ingredients and chef's special creations
+            </p>
           </div>
-          <div class="flex flex-col lg:flex-row gap-12">
-            <!-- Tabs List -->
-            <nav class="lg:w-1/4">
-              <div
-                class="flex lg:flex-col space-x-4 lg:space-x-0 lg:space-y-4 overflow-x-auto lg:overflow-visible border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 pb-4 lg:pb-0 lg:pr-8">
-                <button v-for="(tab, index) in specialsTabs" :key="tab.id" @click="activeSpecialTab = tab.id" :class="[
-                  'py-3 px-6 font-medium text-left whitespace-nowrap transition-all duration-300 rounded-lg lg:rounded-none lg:rounded-l-lg',
-                  activeSpecialTab === tab.id
-                    ? 'bg-yellow-500 text-white shadow-lg lg:bg-transparent lg:text-yellow-600 dark:lg:text-yellow-400 lg:font-bold lg:border-l-4 lg:border-yellow-500 lg:shadow-none'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
-                ]">
-                  {{ tab.title }}
-                </button>
-              </div>
-            </nav>
-            <!-- Tabs Content -->
-            <div class="lg:flex-1">
-              <transition name="fade" mode="out-in" appear>
-                <div v-if="selectedTab" :key="selectedTab.id"
-                  class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8">
-                  <div class="flex flex-col lg:flex-row items-center lg:items-start gap-8">
-                    <div class="lg:flex-1 order-2 lg:order-1">
-                      <!-- <h3 class="text-3xl font-bold mb-3 text-gray-900 dark:text-white">
-                        {{ (selectedTab as any).name || selectedTab.title }}
-                      </h3> -->
-                      <p class="italic text-yellow-600 dark:text-yellow-400 mb-4 text-lg">{{ selectedTab.title }}</p>
-                      <p class="text-gray-700 dark:text-gray-300 leading-relaxed">{{ selectedTab.description }}</p>
-                      <!-- Date range for seasonal specials -->
-                      <div
-                        v-if="selectedTab.specialType === 'seasonal' && ('start_date' in selectedTab || 'end_date' in selectedTab)"
-                        class="mt-3">
-                        <p class="text-sm text-yellow-600 dark:text-yellow-400 font-medium">
-                          📅 {{ formatSpecialDate(selectedTab.start_date as any) }} - {{
-                            formatSpecialDate(selectedTab.end_date as any) }}
-                        </p>
+
+          <!-- Enhanced Specials Grid -->
+          <!-- Detailed View for Selected Special -->
+          <transition name="fade" mode="out-in">
+            <div v-if="selectedTab" :key="selectedTab.id" 
+                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                <!-- Image Gallery -->
+                <div class="relative">
+                  <div class="aspect-[4/5] lg:aspect-[3/4] relative overflow-hidden">
+                    <template v-if="selectedTab.images && selectedTab.images.length > 1">
+                      <div v-for="(img, idx) in selectedTab.images" :key="img"
+                           v-show="currentImageIndex === idx"
+                           class="absolute inset-0">
+                        <NuxtImg
+                          :src="img"
+                          :alt="`${selectedTab.title} image ${idx + 1}`"
+                          class="w-full h-full object-cover transition-opacity duration-500"
+                          format="webp"
+                          quality="90"
+                        />
                       </div>
 
-                      <div v-if="selectedTab && 'price' in selectedTab && selectedTab.price" class="mt-4">
-                        <span class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${{ selectedTab.price
-                          }}</span>
+                      <!-- Navigation Controls -->
+                      <div class="absolute inset-0 flex items-center justify-between p-4">
+                        <button @click="previousSpecialImage" 
+                                class="bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all">
+                          <UIcon name="i-heroicons-chevron-left" class="w-6 h-6" />
+                        </button>
+                        <button @click="nextSpecialImage" 
+                                class="bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all">
+                          <UIcon name="i-heroicons-chevron-right" class="w-6 h-6" />
+                        </button>
                       </div>
+
+                      <!-- Image Indicators -->
+                      <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                        <button v-for="(img, idx) in selectedTab.images" :key="idx"
+                                @click="currentImageIndex = idx"
+                                :class="[
+                                  'w-3 h-3 rounded-full transition-all',
+                                  currentImageIndex === idx ? 'bg-yellow-500 scale-125' : 'bg-white/60 hover:bg-white/80'
+                                ]">
+                        </button>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <NuxtImg
+                        :src="currentImage"
+                        :alt="selectedTab.title"
+                        class="w-full h-full object-cover"
+                        format="webp"
+                        quality="90"
+                      />
+                    </template>
+                  </div>
+                </div>
+
+                <!-- Content Area -->
+                <div class="p-8 lg:p-12 flex flex-col justify-center">
+                  <div class="space-y-6">
+                    <!-- Special Type Badge -->
+                    <div>
+                      <span :class="[
+                        'inline-block px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide',
+                        selectedTab.specialType === 'daily' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                        selectedTab.specialType === 'seasonal' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                        'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                      ]">
+                        {{ selectedTab.specialType }} Special
+                      </span>
                     </div>
-                    <div class="lg:w-80 order-1 lg:order-2 text-center">
-                      <div class="relative overflow-hidden rounded-xl shadow-lg">
-                        <NuxtImg :src="currentImage" :alt="selectedTab.title"
-                          class="w-full h-64 object-cover transform hover:scale-110 transition-transform duration-500"
-                          width="320" height="256" format="webp" quality="80" loading="lazy" />
-                      </div>
+
+                    <!-- Title -->
+                    <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white leading-tight">
+                      {{ selectedTab.title }}
+                    </h3>
+
+                    <!-- Description -->
+                    <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+                      {{ selectedTab.description }}
+                    </p>
+
+                    <!-- Seasonal Date Range -->
+                    <div v-if="selectedTab.specialType === 'seasonal' && ('start_date' in selectedTab || 'end_date' in selectedTab)"
+                         class="flex items-center space-x-2 text-green-600 dark:text-green-400">
+                      <UIcon name="i-heroicons-calendar-days" class="w-5 h-5" />
+                      <span class="font-medium">
+                        Available: {{ formatSpecialDate(selectedTab.start_date as any) }} - {{ formatSpecialDate(selectedTab.end_date as any) }}
+                      </span>
+                    </div>
+
+                    <!-- Day Name for Daily Specials -->
+                    <div v-if="selectedTab.specialType === 'daily' && selectedTab.dayName"
+                         class="flex items-center space-x-2 text-blue-600 dark:text-blue-400">
+                      <UIcon name="i-heroicons-calendar" class="w-5 h-5" />
+                      <span class="font-medium">Available on {{ selectedTab.dayName }}s</span>
+                    </div>
+
+                    <!-- Price -->
+                    <div v-if="selectedTab && 'price' in selectedTab && selectedTab.price" 
+                         class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                      ${{ selectedTab.price }}
+                    </div>
+
+                    <!-- Call to Action -->
+                    <div class="pt-4">
+                      <UButton to="/menu" color="yellow" size="lg" class="w-full sm:w-auto">
+                        <UIcon name="i-heroicons-eye" class="w-5 h-5 mr-2" />
+                        View Full Menu
+                      </UButton>
                     </div>
                   </div>
                 </div>
-              </transition>
+              </div>
             </div>
-          </div>
+          </transition>
 
-          <!-- Three Dots Navigation -->
-          <div class="flex justify-center mt-8">
-            <div class="flex space-x-2">
-              <button v-for="(tab, index) in specialsTabs" :key="`dot-${tab.id}`" @click="activeSpecialTab = tab.id"
-                :class="[
-                  'w-3 h-3 rounded-full transition-all duration-300',
-                  activeSpecialTab === tab.id
-                    ? 'bg-yellow-500 scale-125'
-                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-yellow-400'
-                ]" :aria-label="`Go to ${tab.title}`"></button>
+          <!-- Navigation Dots -->
+          <div class="flex justify-center mt-12">
+            <div class="flex space-x-3">
+              <button v-for="(tab, index) in specialsTabs" :key="`dot-${tab.id}`" 
+                      @click="activeSpecialTab = tab.id"
+                      :class="[
+                        'transition-all duration-300 rounded-full',
+                        activeSpecialTab === tab.id
+                          ? 'w-8 h-3 bg-yellow-500'
+                          : 'w-3 h-3 bg-gray-300 dark:bg-gray-600 hover:bg-yellow-400'
+                      ]" 
+                      :aria-label="`Go to ${tab.title}`">
+              </button>
             </div>
           </div>
         </div>
@@ -233,22 +302,92 @@
             <div class="relative"
               :class="{ 'opacity-0 transform translate-x-8': !isVisible.about, 'animate-fade-in-right': isVisible.about }"
               style="animation-delay: 400ms">
-              <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-4">
-                  <NuxtImg src="/images/about/interior-1.jpg" alt="Restaurant Interior"
-                    class="w-full h-48 object-cover rounded-2xl shadow-lg" width="200" height="192" format="webp"
-                    quality="80" loading="lazy" />
-                  <NuxtImg src="/images/about/food-1.jpg" alt="Delicious Food"
-                    class="w-full h-32 object-cover rounded-2xl shadow-lg" width="200" height="128" format="webp"
-                    quality="80" loading="lazy" />
+              <!-- Instagram Portrait Grid (4:5 Aspect Ratio) -->
+              <div class="grid grid-cols-2 gap-4 lg:gap-6">
+                <!-- Left Column -->
+                <div class="space-y-4 lg:space-y-6">
+                  <!-- Restaurant Interior - Instagram Portrait -->
+                  <div class="aspect-[4/5] rounded-2xl overflow-hidden shadow-xl group">
+                    <NuxtImg 
+                      src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&h=750&q=80" 
+                      alt="Restaurant Interior - Cozy dining atmosphere"
+                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      format="webp"
+                      quality="85" 
+                      loading="lazy" 
+                    />
+                  </div>
+                  <!-- Delicious Food - Instagram Portrait -->
+                  <div class="aspect-[4/5] rounded-2xl overflow-hidden shadow-xl group">
+                    <NuxtImg 
+                      src="https://images.unsplash.com/photo-1606149059549-6042addafc5a?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                      alt="Delicious Food - Gourmet burger and fries"
+                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      format="webp"
+                      quality="85" 
+                      loading="lazy" 
+                    />
+                  </div>
                 </div>
-                <div class="space-y-4 pt-8">
-                  <NuxtImg src="/images/about/bar-1.jpg" alt="Bar Area"
-                    class="w-full h-32 object-cover rounded-2xl shadow-lg" width="200" height="128" format="webp"
-                    quality="80" loading="lazy" />
-                  <NuxtImg src="/images/about/exterior-1.jpg" alt="Restaurant Exterior"
-                    class="w-full h-48 object-cover rounded-2xl shadow-lg" width="200" height="192" format="webp"
-                    quality="80" loading="lazy" />
+                
+                <!-- Right Column -->
+                <div class="space-y-4 lg:space-y-6 pt-8 lg:pt-12">
+                  <!-- Bar Area - Instagram Portrait -->
+                  <div class="aspect-[4/5] rounded-2xl overflow-hidden shadow-xl group">
+                    <NuxtImg 
+                      src="https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=600&h=750&q=80" 
+                      alt="Bar Area - Stylish bar with craft cocktails"
+                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      format="webp"
+                      quality="85" 
+                      loading="lazy" 
+                    />
+                  </div>
+                  <!-- Restaurant Exterior - Instagram Portrait -->
+                  <div class="aspect-[4/5] rounded-2xl overflow-hidden shadow-xl group">
+                    <NuxtImg 
+                      src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=600&h=750&q=80" 
+                      alt="Restaurant Exterior - Welcoming storefront"
+                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      format="webp"
+                      quality="85" 
+                      loading="lazy" 
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Photo Labels Overlay -->
+              <div class="absolute inset-0 pointer-events-none">
+                <div class="grid grid-cols-2 gap-4 lg:gap-6 h-full">
+                  <div class="space-y-4 lg:space-y-6">
+                    <!-- Interior Label -->
+                    <div class="aspect-[4/5] relative">
+                      <div class="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        Restaurant Interior
+                      </div>
+                    </div>
+                    <!-- Food Label -->
+                    <div class="aspect-[4/5] relative">
+                      <div class="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        Signature Dishes
+                      </div>
+                    </div>
+                  </div>
+                  <div class="space-y-4 lg:space-y-6 pt-8 lg:pt-12">
+                    <!-- Bar Label -->
+                    <div class="aspect-[4/5] relative">
+                      <div class="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        Bar & Lounge
+                      </div>
+                    </div>
+                    <!-- Exterior Label -->
+                    <div class="aspect-[4/5] relative">
+                      <div class="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        Welcome to Our Pub
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -528,6 +667,23 @@ const stopImageRotation = () => {
   }
 }
 
+// Manual image navigation functions for specials
+const previousSpecialImage = () => {
+  const images = selectedTab.value?.images
+  if (!images?.length || images.length <= 1) return
+  
+  currentImageIndex.value = currentImageIndex.value === 0 
+    ? images.length - 1 
+    : currentImageIndex.value - 1
+}
+
+const nextSpecialImage = () => {
+  const images = selectedTab.value?.images
+  if (!images?.length || images.length <= 1) return
+  
+  currentImageIndex.value = (currentImageIndex.value + 1) % images.length
+}
+
 // Watch for changes in active tab to manage rotations
 watch(activeSpecialTab, (newTab) => {
   // Reset image index when switching categories
@@ -555,12 +711,12 @@ const currentDayHours = computed(() => {
   if (!operationHours.value?.length) return null;
 
   const currentDay = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const todayHours = operationHours.value.find((hour: any) => hour.day === currentDay);
-  
+  const todayHours = operationHours.value.find((hour) => hour.day === currentDay);
+
   if (!todayHours) return null;
 
   // Format time from HH:MM:SS to HH:MM AM/PM
-  const formatTime = (timeString: string) => {
+  const formatTime = (timeString) => {
     const [hours, minutes] = timeString.split(':');
     const hour = parseInt(hours, 10);
     const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -568,12 +724,12 @@ const currentDayHours = computed(() => {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  // Check if currently open
+  // Determine if currently open
   const now = new Date();
   const currentTime = now.getHours() * 100 + now.getMinutes();
   const openTime = parseInt(todayHours.open_time.replace(':', ''));
   const closeTime = parseInt(todayHours.close_time.replace(':', ''));
-  
+
   let isOpen = false;
   if (closeTime < openTime) {
     // Spans midnight (e.g., 11 PM to 2 AM)
@@ -583,10 +739,19 @@ const currentDayHours = computed(() => {
     isOpen = currentTime >= openTime && currentTime <= closeTime;
   }
 
+  // Handle display for hours spanning past midnight
+  const nextDay = new Date(now);
+  nextDay.setDate(now.getDate() + 1);
+  const nextDayName = nextDay.toLocaleDateString('en-US', { weekday: 'long' });
+
+  const displayCloseTime = closeTime < openTime
+    ? `${nextDayName} ${formatTime(todayHours.close_time)}`
+    : formatTime(todayHours.close_time);
+
   return {
     day: currentDay.charAt(0).toUpperCase() + currentDay.slice(1),
     openTime: formatTime(todayHours.open_time),
-    closeTime: formatTime(todayHours.close_time),
+    closeTime: displayCloseTime,
     isOpen: isOpen && todayHours.status,
     status: todayHours.status
   };
@@ -732,5 +897,52 @@ onUnmounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Line clamp utility for text truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Instagram aspect ratio */
+.aspect-\[4\/5\] {
+  aspect-ratio: 4 / 5;
+}
+
+/* Improved gradient overlays */
+.gradient-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+}
+
+@keyframes slide-in-left {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.5s ease-out;
 }
 </style>

@@ -123,32 +123,24 @@
           </UBadge>
         </div>
       </div>
-    </section>    <!-- Events Section -->
+    </section>
+
+    <!-- Events Section -->
     <section class="py-12 lg:py-20">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">        <!-- Results Summary -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Unified Events & Parties Heading -->
         <div class="flex justify-between items-center mb-8">
           <div>
             <h2
               class="text-2xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2"
               style="font-family: 'Cinzel', 'Georgia', serif"
             >
-              <span v-if="searchQuery">Search Results</span>
-              <span v-else-if="selectedCategory !== 'all'"
-                >{{
-                  categories.find((c: Category) => c.id === selectedCategory)?.name
-                }}
-                Events</span
-              >
-              <span v-else>Upcoming Events</span>
+              Events & Parties
             </h2>
             <p class="text-gray-600 dark:text-gray-300">
-              {{ filteredEvents.length }} event{{
-                filteredEvents.length !== 1 ? "s" : ""
-              }}
-              found
+              {{ filteredEvents.length }} event{{ filteredEvents.length !== 1 ? "s" : "" }} found
             </p>
           </div>
-          <!-- View Mode Indicators -->
           <div class="hidden sm:flex items-center gap-2">
             <span class="text-sm text-gray-500 dark:text-gray-400">Layout:</span>
             <UBadge 
@@ -168,7 +160,8 @@
               List
             </UBadge>
           </div>
-        </div>        <!-- Error State -->
+        </div>
+        <!-- Error State -->
         <div v-if="error || backendError" class="text-center py-16">
           <UIcon
             name="i-heroicons-exclamation-triangle"
@@ -190,23 +183,12 @@
         </div>
 
         <!-- Simple Loading State -->
-        <div v-else-if="isLoading || backendLoading">
-          <div class="flex justify-center items-center py-20">
-            <div class="text-center">
-              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
-              <p class="text-gray-600 dark:text-gray-400">Loading events...</p>
-            </div>
-          </div>
-        </div>
 
-        <!-- Events Grid/List -->
+        <!-- Unified Events Section -->
         <div v-if="filteredEvents.length > 0">
-          <!-- Grid View -->
-          <div
-            v-if="viewMode === 'grid'"
-            class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8"
-          >            <div
-              v-for="(event, index) in paginatedEvents"
+          <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+            <div
+              v-for="(event, index) in filteredEvents"
               :key="event.id"
               class="event-card group transform transition-all duration-500 hover:scale-105 cursor-pointer"
               :style="{ animationDelay: `${index * 100}ms` }"
@@ -233,15 +215,9 @@
                       :placeholder="[400, 240, 75]"
                       @error="(e: any) => e.target.src = '/images/entertainment/music.jpg'"
                     />
-                    <div
-                      class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"
-                    ></div>
-
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                     <!-- Image Indicators for Multiple Images -->
-                    <div 
-                      v-if="event.images && event.images.length > 1"
-                      class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1"
-                    >
+                    <div v-if="event.images && event.images.length > 1" class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
                       <div
                         v-for="(img, imgIndex) in event.images"
                         :key="imgIndex"
@@ -253,108 +229,51 @@
                         ]"
                       ></div>
                     </div>
-
                     <!-- Image Counter -->
-                    <div 
-                      v-if="event.images && event.images.length > 1"
-                      class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs"
-                    >
+                    <div v-if="event.images && event.images.length > 1" class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs">
                       {{ (currentImageIndexes[`${event.id}-${index}`] || 0) + 1 }}/{{ event.images.length }}
                     </div>
-
                     <!-- Badges -->
                     <div class="absolute top-4 left-4 flex flex-col gap-2">
-                      <UBadge
-                        v-if="event.featured"
-                        color="yellow"
-                        variant="solid"
-                        class="font-semibold text-xs"
-                      >
-                        Featured
-                      </UBadge>
-                      <UBadge
-                        :color="getStatusColor(event.status)"
-                        variant="solid"
-                        class="font-semibold text-xs"
-                      >
-                        {{
-                          event.status.charAt(0).toUpperCase() +
-                          event.status.slice(1)
-                        }}
+                      <UBadge v-if="event.featured" color="yellow" variant="solid" class="font-semibold text-xs">Featured</UBadge>
+                      <UBadge :color="getStatusColor(event.status)" variant="solid" class="font-semibold text-xs">
+                        {{ event.status.charAt(0).toUpperCase() + event.status.slice(1) }}
                       </UBadge>
                     </div>
-
                     <div class="absolute top-4 right-4">
-                      <UBadge
-                        :color="getCategoryColor(event.category)"
-                        variant="subtle"
-                        class="font-semibold text-xs"
-                      >
-                        {{
-                          event.category.charAt(0).toUpperCase() +
-                          event.category.slice(1)
-                        }}
+                      <UBadge :color="getCategoryColor(event.category)" variant="subtle" class="font-semibold text-xs">
+                        {{ event.category.charAt(0).toUpperCase() + event.category.slice(1) }}
                       </UBadge>
                     </div>
-
-                    <!-- Price - REMOVED -->
                   </div>
                 </template>
-
                 <div class="p-4 lg:p-6 flex flex-col h-full">
-                  <h3
-                    class="text-xl lg:text-2xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors line-clamp-2"
-                  >
+                  <h3 class="text-xl lg:text-2xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors line-clamp-2">
                     {{ event.title }}
                   </h3>
-
-                  <p
-                    class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed line-clamp-3 flex-grow"
-                  >
+                  <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed line-clamp-3 flex-grow">
                     {{ event.description }}
                   </p>
-
                   <div class="space-y-2 mb-4">
-                    <div
-                      v-if="event.date"
-                      class="flex items-center text-sm text-gray-500 dark:text-gray-400"
-                    >
-                      <UIcon
-                        name="i-heroicons-calendar"
-                        class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
-                      />
+                    <div v-if="event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400" />
                       <span class="font-medium">{{ event.date }}</span>
                     </div>
-                    <div
-                      v-if="event.time && event.time !== event.date"
-                      class="flex items-center text-sm text-gray-500 dark:text-gray-400"
-                    >
-                      <UIcon
-                        name="i-heroicons-clock"
-                        class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
-                      />
+                    <div v-if="event.time && event.time !== event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <UIcon name="i-heroicons-clock" class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400" />
                       <span class="font-medium">{{ event.time }}</span>
                     </div>
                   </div>
-
-                  <!-- Rating - REMOVED -->
-
-                  <UButton
-                    color="yellow"
-                    variant="solid"
-                    class="w-full transform transition-all hover:scale-105 mt-auto"
-                    size="md"
-                  >
+                  <UButton color="yellow" variant="solid" class="w-full transform transition-all hover:scale-105 mt-auto" size="md">
                     View Details
                   </UButton>
                 </div>
               </UCard>
             </div>
           </div>
-
-          <!-- List View -->
-          <div v-else class="space-y-6">            <div
-              v-for="(event, index) in paginatedEvents"
+          <div v-else class="space-y-6">
+            <div
+              v-for="(event, index) in filteredEvents"
               :key="event.id"
               class="event-card group cursor-pointer"
               :style="{ animationDelay: `${index * 100}ms` }"
@@ -365,9 +284,7 @@
               role="button"
               :aria-label="`View details for ${event.title}`"
             >
-              <UCard
-                class="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white dark:bg-gray-800 border-0"
-              >
+              <UCard class="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white dark:bg-gray-800 border-0">
                 <div class="flex flex-col lg:flex-row">
                   <!-- Image -->
                   <div class="lg:w-80 relative overflow-hidden">
@@ -382,12 +299,8 @@
                       :placeholder="[400, 240, 75]"
                       @error="(e: any) => e.target.src = '/images/entertainment/music.jpg'"
                     />
-
                     <!-- Image Indicators for Multiple Images -->
-                    <div 
-                      v-if="event.images && event.images.length > 1"
-                      class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1"
-                    >
+                    <div v-if="event.images && event.images.length > 1" class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
                       <div
                         v-for="(img, imgIndex) in event.images"
                         :key="imgIndex"
@@ -399,108 +312,48 @@
                         ]"
                       ></div>
                     </div>
-
                     <!-- Image Counter -->
-                    <div 
-                      v-if="event.images && event.images.length > 1"
-                      class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs"
-                    >
+                    <div v-if="event.images && event.images.length > 1" class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs">
                       {{ (currentImageIndexes[`${event.id}-${index}`] || 0) + 1 }}/{{ event.images.length }}
                     </div>
-
                     <!-- Badges -->
                     <div class="absolute top-4 left-4 flex flex-col gap-2">
-                      <UBadge
-                        v-if="event.featured"
-                        color="yellow"
-                        variant="solid"
-                        class="font-semibold text-xs"
-                      >
-                        Featured
-                      </UBadge>
-                      <UBadge
-                        :color="getStatusColor(event.status)"
-                        variant="solid"
-                        class="font-semibold text-xs"
-                      >
-                        {{
-                          event.status.charAt(0).toUpperCase() +
-                          event.status.slice(1)
-                        }}
+                      <UBadge v-if="event.featured" color="yellow" variant="solid" class="font-semibold text-xs">Featured</UBadge>
+                      <UBadge :color="getStatusColor(event.status)" variant="solid" class="font-semibold text-xs">
+                        {{ event.status.charAt(0).toUpperCase() + event.status.slice(1) }}
                       </UBadge>
                     </div>
                   </div>
-
                   <!-- Content -->
                   <div class="flex-1 p-6 lg:p-8">
-                    <div
-                      class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4"
-                    >
+                    <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                       <div class="flex-1">
                         <div class="flex items-start justify-between mb-4">
                           <div>
-                            <h3
-                              class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors mb-2"
-                            >
+                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors mb-2">
                               {{ event.title }}
                             </h3>
-                            <UBadge
-                              :color="getCategoryColor(event.category)"
-                              variant="subtle"
-                              class="font-semibold text-sm"
-                            >
-                              {{
-                                event.category.charAt(0).toUpperCase() +
-                                event.category.slice(1)
-                              }}
+                            <UBadge :color="getCategoryColor(event.category)" variant="subtle" class="font-semibold text-sm">
+                              {{ event.category.charAt(0).toUpperCase() + event.category.slice(1) }}
                             </UBadge>
                           </div>
-                          <!-- Price - REMOVED -->
                         </div>
-
-                        <p
-                          class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed"
-                        >
+                        <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
                           {{ event.description }}
                         </p>
-
-                        <div
-                          class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4"
-                        >
-                          <div
-                            v-if="event.date"
-                            class="flex items-center text-sm text-gray-500 dark:text-gray-400"
-                          >
-                            <UIcon
-                              name="i-heroicons-calendar"
-                              class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
-                            />
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                          <div v-if="event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400" />
                             <span class="font-medium">{{ event.date }}</span>
                           </div>
-                          <div
-                            v-if="event.time && event.time !== event.date"
-                            class="flex items-center text-sm text-gray-500 dark:text-gray-400"
-                          >
-                            <UIcon
-                              name="i-heroicons-clock"
-                              class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400"
-                            />
+                          <div v-if="event.time && event.time !== event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <UIcon name="i-heroicons-clock" class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400" />
                             <span class="font-medium">{{ event.time }}</span>
                           </div>
                         </div>
-
-                        <!-- Tags and Performers - REMOVED -->
-
-                        <!-- Rating - REMOVED -->
                       </div>
-
                       <div class="lg:ml-6">
-                        <UButton
-                          color="yellow"
-                          variant="solid"
-                          size="lg"
-                          class="w-full lg:w-auto"
-                        >
+                        <UButton color="yellow" variant="solid" size="lg" class="w-full lg:w-auto">
                           View Details
                         </UButton>
                       </div>
@@ -509,77 +362,36 @@
                 </div>
               </UCard>
             </div>
-          </div>          <!-- Pagination -->
-          <div v-if="totalPages > 1" class="flex justify-center mt-12">
-            <UPagination
-              v-model="currentPage"
-              :total="totalPages"
-              :ui="{
-                wrapper: 'flex items-center gap-1',
-                base: 'flex items-center justify-center min-w-[32px] h-8 px-3 rounded text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
-                default: {
-                  active: 'bg-yellow-500 text-white hover:bg-yellow-600',
-                  inactive:
-                    'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700',
-                },
-              }"
-            />
-          </div>
-
-          <!-- Load More Button for Backend Events -->
-          <div v-if="eventPagination.events.page < eventPagination.events.totalPages" class="flex justify-center mt-8">
-            <UButton
-              color="yellow"
-              variant="outline"
-              size="lg"
-              @click="loadMoreEvents"
-              :loading="backendLoading"
-            >
-              Load More Events ({{ eventPagination.events.total - eventPagination.events.page * 50 }} remaining)
-            </UButton>
           </div>
         </div>
-
         <!-- No Results -->
         <div v-else class="text-center py-16">
-          <UIcon
-            name="i-heroicons-calendar-x"
-            class="w-16 h-16 text-gray-400 mx-auto mb-4"
-          />
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            No events found
-          </h3>
+          <UIcon name="i-heroicons-calendar-x" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No events found</h3>
           <p class="text-gray-600 dark:text-gray-300 mb-6">
-            <span v-if="searchQuery || selectedCategory !== 'all'">
-              Try adjusting your search or filters to find more events.
-            </span>
-            <span v-else> Check back soon for upcoming events! </span>
+            <span v-if="searchQuery || selectedCategory !== 'all'">Try adjusting your search or filters to find more events.</span>
+            <span v-else>Check back soon for upcoming events!</span>
           </p>
-          <UButton
-            v-if="searchQuery || selectedCategory !== 'all'"
-            color="yellow"
-            variant="outline"
-            @click="clearFilters"
-          >
-            Clear Filters
-          </UButton>
+          <UButton v-if="searchQuery || selectedCategory !== 'all'" color="yellow" variant="outline" @click="clearFilters">Clear Filters</UButton>
         </div>
       </div>
-    </section>    <!-- Event Details Modal - Portrait -->
-    <EventDetailsModal
-      v-if="modalLayout === 'portrait'"
-      :event="selectedEvent"
-      :is-open="isEventModalOpen"
-      @close="closeEventModal"
-    />
+    </section>
 
-    <!-- Event Details Modal - Landscape -->
-    <EventDetailsModalLandscape
-      v-else
-      :event="selectedEvent"
-      :is-open="isEventModalOpen"
-      @close="closeEventModal"
-    />
+    <!-- Event Details Modal -->
+    <template v-if="isEventModalOpen">
+      <EventDetailsModal
+        v-if="modalLayout === 'portrait'"
+        :event="selectedEvent"
+        :is-open="isEventModalOpen"
+        @close="closeEventModal"
+      ></EventDetailsModal>
+      <EventDetailsModalLandscape
+        v-else
+        :event="selectedEvent"
+        :is-open="isEventModalOpen"
+        @close="closeEventModal"
+      ></EventDetailsModalLandscape>
+    </template>
 
     <!-- Modal Layout Toggle (when modal is open) -->
     <div
@@ -598,11 +410,7 @@
       </UButton>
     </div>    <!-- Weekly Schedule Section -->
     <WeeklyEntertainment />    <!-- Floating Action Button -->
-    <FloatingActionButton
-      :actions="fabActions"
-      main-icon="i-heroicons-calendar-days"
-      @action="handleFABAction"
-    />
+    <!-- Removed Floating Action Button component usage -->
 
   </div>
 </template>
@@ -612,7 +420,6 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { useEvents } from "~/composables/useEvents";
 import { useLandingPageData } from "~/composables/useLandingPageData";
 import { usePerformance } from "~/composables/usePerformance";
-import FloatingActionButton from "~/components/ui/FloatingActionButton.vue";
 import EventDetailsModal from "~/components/events/EventDetailsModal.vue";
 import EventDetailsModalLandscape from "~/components/events/EventDetailsModalLandscape.vue";  // SSR/SSG: useAsyncData for events data
 const { data: eventsData } = await useAsyncData('events-data', async () => {
@@ -634,7 +441,6 @@ const {
 const fetchEvents = fetchEventsData;
 import type { Event } from "~/types/events";
 import type { Category } from "~/types/events-ui";
-import type { FABAction } from "~/components/ui/FloatingActionButton.vue";
 
 // Composables
 const { events: staticEvents } = useEvents(); // Keep for weekly schedule
@@ -670,46 +476,6 @@ const modalLayout = ref<'portrait' | 'landscape'>('portrait');
 // Image rotation for events with multiple images
 const currentImageIndexes = ref<{ [key: string]: number }>({});
 
-// FAB Actions
-const fabActions = ref<FABAction[]>([
-  {
-    id: 'scroll-top',
-    label: 'Scroll to Top',
-    icon: 'i-heroicons-arrow-up',
-    action: () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  },
-  {
-    id: 'view-mode',
-    label: `Switch to ${viewMode.value === 'grid' ? 'List' : 'Grid'} View`,
-    icon: viewMode.value === 'grid' ? 'i-heroicons-list-bullet' : 'i-heroicons-squares-2x2',
-    action: () => {
-      viewMode.value = viewMode.value === 'grid' ? 'list' : 'grid';
-    }
-  },
-  {
-    id: 'filter-music',
-    label: 'Show Music Events',
-    icon: 'i-heroicons-musical-note',
-    action: () => {
-      selectedCategory.value = selectedCategory.value === 'music' ? 'all' : 'music';
-    }
-  },
-  {
-    id: 'search',
-    label: 'Focus Search',
-    icon: 'i-heroicons-magnifying-glass',
-    action: () => {
-      const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
-      if (searchInput) {
-        searchInput.focus();
-        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
-  }
-]);
-
 // Categories with proper typing
 const categories = ref<Category[]>([
   { id: "all", name: "All Events" },
@@ -743,8 +509,22 @@ const allEvents = computed(() => {
     }
   };
 
+  // Log the raw backend events data
+  console.log('Backend dynamic events:', dynamic);
+  console.log('Current date for comparison:', new Date());
+
   // Transform backend events to match frontend interface
   const transformedDynamic = dynamic.map((event: any) => {
+    // Log each event's dates and status from the backend
+    console.log('Event from backend:', {
+      name: event.name,
+      start_date: event.start_date,
+      end_date: event.end_date,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      status: event.status
+    });
+
     // Use the formatted dates from backend
     const startDateFormatted = event.startDate || ''; // "Jul 10, 2025"
     const endDateFormatted = event.endDate || '';     // "Jul 18, 2025"
@@ -756,12 +536,10 @@ const allEvents = computed(() => {
     // If we have both start and end dates and they're different, show as time range
     if (startDateFormatted && endDateFormatted && startDateFormatted !== endDateFormatted) {
       timeDisplay = `Until ${endDateFormatted}`;
-    }
-    
-    // Calculate real-time status using ISO date strings for accurate comparison
-    const realTimeStatus = event.start_date && event.end_date 
-      ? calculateRealTimeStatus(event.start_date, event.end_date)
-      : (event.status || 'upcoming');
+    }    
+
+    // Use the status from backend (already calculated correctly)
+    const eventStatus = event.status;
 
     return {
       id: event.id,
@@ -773,12 +551,15 @@ const allEvents = computed(() => {
       images: event.images || [],
       featured: event.featured || false,
       category: (event.category || 'event') as 'music' | 'quiz' | 'food' | 'special' | 'entertainment' | 'event',
-      status: realTimeStatus as 'upcoming' | 'ongoing' | 'completed' | 'cancelled' | 'ended',
+      status: eventStatus as 'upcoming' | 'ongoing' | 'current' | 'completed' | 'cancelled' | 'ended',
       ctaText: "View Details",
       ctaLink: "#"
     };
   });
   
+  // Log the transformed events
+  console.log('Transformed events:', transformedDynamic);
+
   // Sort by date (newest first) - handle both formatted dates and ISO strings
   return transformedDynamic.sort((a, b) => {
     // Try to parse the date from various formats
@@ -838,23 +619,45 @@ const filteredEvents = computed(() => {
   }
 });
 
-const totalPages = computed(() =>
-  Math.ceil(filteredEvents.value.length / itemsPerPage)
-);
+// Separate upcoming and past events
+const upcomingEvents = computed(() => {
+  return filteredEvents.value.filter(event => 
+    event.status === 'upcoming' || event.status === 'ongoing' || event.status === 'current'
+  ).sort((a, b) => {
+    // Sort upcoming events by date (earliest first)
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateA.getTime() - dateB.getTime();
+  });
+});
+
+const pastEvents = computed(() => {
+  return filteredEvents.value.filter(event => 
+    event.status === 'ended' || event.status === 'completed'
+  ).sort((a, b) => {
+    // Sort past events by date (most recent first)
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateB.getTime() - dateA.getTime();
+  });
+});
+
+const totalPages = computed(() => 1); // No pagination needed since we show all events
 
 const paginatedEvents = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return filteredEvents.value.slice(start, end);
+  // This is kept for backward compatibility but not used
+  return filteredEvents.value;
 });
 
 // Helper functions with proper error handling
 const getStatusColor = (status: string) => {
   const statusColors = {
     upcoming: "green",
-    ongoing: "blue", 
+    ongoing: "blue",
+    current: "blue", 
     completed: "gray",
-    cancelled: "red"
+    cancelled: "red",
+    ended: "gray"
   } as const;
   return statusColors[status as keyof typeof statusColors] || "gray";
 };
@@ -894,23 +697,6 @@ const showEventDetails = (event: any, layout: 'portrait' | 'landscape' = 'portra
   selectedEvent.value = event as Event;
   modalLayout.value = layout;
   isEventModalOpen.value = true;
-};
-
-const handleFABAction = (actionId: string) => {
-  console.log(`FAB action triggered: ${actionId}`);
-  
-  // Update view mode label dynamically
-  const viewModeAction = fabActions.value.find(action => action.id === 'view-mode');
-  if (viewModeAction) {
-    viewModeAction.label = `Switch to ${viewMode.value === 'grid' ? 'List' : 'Grid'} View`;
-    viewModeAction.icon = viewMode.value === 'grid' ? 'i-heroicons-list-bullet' : 'i-heroicons-squares-2x2';
-  }
-  
-  // Update filter action label dynamically
-  const filterAction = fabActions.value.find(action => action.id === 'filter-music');
-  if (filterAction) {
-    filterAction.label = selectedCategory.value === 'music' ? 'Show All Events' : 'Show Music Events';
-  }
 };
 
 const closeEventModal = () => {

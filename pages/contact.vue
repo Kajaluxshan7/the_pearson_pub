@@ -116,29 +116,40 @@
               
               <form @submit.prevent="submitForm" novalidate class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <UFormGroup label="Name" required :error="formErrors.name">
+                  <UFormGroup label="First Name" required :error="formErrors.firstName">
                     <UInput
-                      v-model="form.name"
-                      placeholder="Your name"
-                      :error="!!formErrors.name"
-                      autocomplete="name"
+                      v-model="form.firstName"
+                      placeholder="First name"
+                      :error="!!formErrors.firstName"
+                      autocomplete="given-name"
                       size="lg"
                     />
-                    <p v-if="formErrors.name" class="text-red-600 text-sm mt-1">{{ formErrors.name }}</p>
+                    <p v-if="formErrors.firstName" class="text-red-600 text-sm mt-1">{{ formErrors.firstName }}</p>
                   </UFormGroup>
 
-                  <UFormGroup label="Email" required :error="formErrors.email">
+                  <UFormGroup label="Last Name" required :error="formErrors.lastName">
                     <UInput
-                      v-model="form.email"
-                      type="email"
-                      placeholder="Your email"
-                      :error="!!formErrors.email"
-                      autocomplete="email"
+                      v-model="form.lastName"
+                      placeholder="Last name"
+                      :error="!!formErrors.lastName"
+                      autocomplete="family-name"
                       size="lg"
                     />
-                    <p v-if="formErrors.email" class="text-red-600 text-sm mt-1">{{ formErrors.email }}</p>
+                    <p v-if="formErrors.lastName" class="text-red-600 text-sm mt-1">{{ formErrors.lastName }}</p>
                   </UFormGroup>
                 </div>
+                <UFormGroup label="Email" required :error="formErrors.email" class="mt-6">
+                  <UInput
+                    v-model="form.email"
+                    type="email"
+                    placeholder="Your email"
+                    :error="!!formErrors.email"
+                    autocomplete="email"
+                    size="lg"
+                    class="w-full"
+                  />
+                  <p v-if="formErrors.email" class="text-red-600 text-sm mt-1">{{ formErrors.email }}</p>
+                </UFormGroup>
 
                 <UFormGroup label="Subject" required :error="formErrors.subject">
                   <UInput
@@ -229,7 +240,8 @@ interface ContactInfo {
 }
 
 interface FormData {
-  name: string
+  firstName: string
+  lastName: string
   email: string
   subject: string
   message: string
@@ -250,7 +262,8 @@ const {
 } = useLandingPageData();
 
 const form = ref<FormData>({
-  name: "",
+  firstName: "",
+  lastName: "",
   email: "",
   subject: "",
   message: "",
@@ -354,24 +367,23 @@ const contactInfo = computed(() => {
 const validateForm = (data: FormData) => {
   const errors: Record<string, string> = {}
 
-  if (!data.name.trim()) {
-    errors.name = "Name is required"
+  if (!data.firstName.trim()) {
+    errors.firstName = "First name is required"
   }
-
+  if (!data.lastName.trim()) {
+    errors.lastName = "Last name is required"
+  }
   if (!data.email.trim()) {
     errors.email = "Email is required"
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
     errors.email = "Invalid email format"
   }
-
   if (!data.subject.trim()) {
     errors.subject = "Subject is required"
   }
-
   if (!data.message.trim()) {
     errors.message = "Message is required"
   }
-
   return {
     isValid: Object.keys(errors).length === 0,
     errors,
@@ -392,8 +404,8 @@ const submitForm = async () => {
   try {
     // Map form fields to match the API expected format
     const contactData = {
-      firstName: form.value.name.split(' ')[0] || form.value.name,
-      lastName: form.value.name.split(' ').slice(1).join(' ') || '',
+      firstName: form.value.firstName,
+      lastName: form.value.lastName,
       email: form.value.email,
       message: `Subject: ${form.value.subject}\n\nMessage: ${form.value.message}`
     }
@@ -405,7 +417,8 @@ const submitForm = async () => {
 
     // Success
     form.value = {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       subject: "",
       message: "",

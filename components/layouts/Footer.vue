@@ -184,9 +184,8 @@ const formattedBusinessHours = computed(() => {
   if (!operationHours.value?.length) {
     // Fallback to static hours if backend data not available
     return [
-      { days: "Monday - Tuesday", hours: "11:00 AM - 12:00 AM" },
-      { days: "Wednesday - Saturday", hours: "11:00 AM - 2:00 AM" },
-      { days: "Sunday", hours: "11:00 AM - 12:00 AM" },
+      { days: "Monday - Wednesday", hours: "11:00 AM - 12:00 AM" },
+      { days: "Wednesday - Sunday", hours: "11:00 AM - 2:00 AM" },
     ];
   }
 
@@ -227,10 +226,23 @@ const formattedBusinessHours = computed(() => {
 });
 
 const socialLinks = [
-  { name: "Facebook", icon: "i-simple-icons-facebook", url: "https://facebook.com" },
-  { name: "Instagram", icon: "i-simple-icons-instagram", url: "https://instagram.com" },
-  { name: "Twitter", icon: "i-simple-icons-x", url: "https://twitter.com" },
+  {
+    name: "Facebook",
+    icon: "i-simple-icons-facebook",
+    url: "https://www.facebook.com/thepearsonpubwhitby/",
+  },
+  {
+    name: "Instagram",
+    icon: "i-simple-icons-instagram",
+    url: "https://www.instagram.com/the_pearson_pub?igsh=eWcycDhyN2wxN3Zz&utm_source=qr",
+  },
+  {
+    name: "TikTok",
+    icon: "i-simple-icons-tiktok",
+    url: "https://www.tiktok.com/@the.pearson.pub6?_t=ZS-8yYnQOZpxEf&_r=1",
+  },
 ];
+
 
 const quickLinks = [
   { name: "Home", path: "/" },

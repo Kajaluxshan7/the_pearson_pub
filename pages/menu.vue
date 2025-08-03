@@ -63,11 +63,11 @@
           </div>
 
           <!-- Category Navigation -->
-          <div class="flex items-center justify-between gap-4">
-            <!-- Categories -->
-            <div class="flex items-center space-x-2 overflow-x-auto pb-2 flex-1">
+          <div class="flex flex-col gap-4">
+            <!-- Categories - Now displays all categories in a responsive grid -->
+            <div class="flex flex-wrap items-center gap-2 lg:gap-3">
               <button v-for="category in primaryCategories" :key="category.id" :class="[
-                'whitespace-nowrap px-4 lg:px-6 py-2 rounded-full font-semibold text-sm lg:text-base transition-all duration-300',
+                'flex-shrink-0 px-3 lg:px-4 py-2 rounded-full font-semibold text-sm lg:text-base transition-all duration-300 min-w-fit',
                 activeCategory === category.id
                   ? 'bg-yellow-500 text-white shadow-lg scale-105'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-yellow-100 dark:hover:bg-yellow-900 hover:shadow-lg',
@@ -75,35 +75,12 @@
                   () => {
                     activeCategory = category.id;
                     showDropdown = false;
-                    currentPage = 1;
+                    // Reset pagination for the new category
+                    categoryPages.value[category.id] = 1;
                   }
                 ">
                 {{ category.name }}
               </button>
-
-              <!-- More Dropdown -->
-              <div v-if="secondaryCategories.length > 0" class="relative">
-                <button ref="moreButton" @click="showDropdown = !showDropdown"
-                  class="whitespace-nowrap px-4 lg:px-6 py-2 rounded-full font-semibold text-sm lg:text-base bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-yellow-100 dark:hover:bg-yellow-900 hover:shadow-lg"
-                  aria-haspopup="true" :aria-expanded="showDropdown">
-                  More
-                  <UIcon name="i-heroicons-chevron-down" class="w-4 h-4 ml-1" />
-                </button>
-                <div v-if="showDropdown" ref="moreDropdown"
-                  class="absolute left-0 mt-2 w-48 min-w-max bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50 more-dropdown"
-                  style="top: 100%;">
-                  <button v-for="category in secondaryCategories" :key="category.id"
-                    class="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm" @click="
-                      () => {
-                        activeCategory = category.id;
-                        showDropdown = false;
-                        currentPage = 1;
-                      }
-                    ">
-                    {{ category.name }}
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -170,7 +147,8 @@
                 :style="{ animationDelay: `${index * 100}ms` }" @click="() => showItemDetails(item)">
                 <!-- Square Menu Item Card -->
                 <UCard
-                  class="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0 h-full flex flex-col">
+                  class="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0 h-full flex flex-col"
+                  :class="{ 'opacity-50 pointer-events-none': !item.isAvailable }">
                   <template #header>
                     <div class="relative overflow-hidden aspect-square">
                       <NuxtImg :src="getImageUrl(item)"
@@ -191,17 +169,23 @@
                       </div>
                       <!-- Dietary Icons -->
                       <div class="absolute bottom-3 left-3 flex gap-1">
-                        <UBadge :color="item.dietaryInfo?.isVegetarian ? 'green' : 'gray'" variant="subtle"
+                        <UBadge v-if="item.dietaryInfo?.isVegetarian" color="green" variant="subtle"
                           class="text-xs flex items-center">
                           <UIcon name="i-heroicons-sparkles" class="w-3 h-3 mr-1" />
-                          <!-- You can replace 'i-heroicons-sparkles' with a leaf icon if available in your icon set -->
-                          {{ item.dietaryInfo?.isVegetarian ? 'V' : 'Not V' }}
+                          V
                         </UBadge>
                         <UBadge v-if="item.dietaryInfo?.isVegan" color="emerald" variant="subtle" class="text-xs">
                           VG
                         </UBadge>
                         <UBadge v-if="item.dietaryInfo?.isGlutenFree" color="blue" variant="subtle" class="text-xs">
                           GF
+                        </UBadge>
+                      </div>
+
+                      <!-- Availability Status -->
+                      <div class="absolute top-3 right-3">
+                        <UBadge :color="item.isAvailable ? 'green' : 'red'" variant="solid" class="text-xs">
+                          {{ item.isAvailable ? 'Available' : 'Not Available' }}
                         </UBadge>
                       </div>
 
@@ -233,7 +217,8 @@
               <div v-for="(item, index) in paginatedItems(category).items" :key="item.id"
                 class="menu-card menu-card-3d transition-all duration-500 cursor-pointer"
                 :style="{ animationDelay: `${index * 100}ms` }" @click="() => showItemDetails(item)">
-                <UCard class="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0">
+                <UCard class="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0"
+                  :class="{ 'opacity-50 pointer-events-none': !item.isAvailable }">
                   <div class="flex flex-col sm:flex-row">
                     <!-- Image -->
                     <div class="sm:w-48 relative overflow-hidden">
@@ -265,17 +250,23 @@
 
                           <!-- Dietary Info -->
                           <div class="flex flex-wrap gap-2 mb-4">
-                            <UBadge :color="item.dietaryInfo?.isVegetarian ? 'green' : 'gray'" variant="subtle"
+                            <UBadge v-if="item.dietaryInfo?.isVegetarian" color="green" variant="subtle"
                               class="text-xs flex items-center">
                               <UIcon name="i-heroicons-sparkles" class="w-3 h-3 mr-1" />
-                              <!-- You can replace 'i-heroicons-sparkles' with a leaf icon if available in your icon set -->
-                              {{ item.dietaryInfo?.isVegetarian ? 'Vegetarian' : 'Not Vegetarian' }}
+                              Vegetarian
                             </UBadge>
                             <UBadge v-if="item.dietaryInfo?.isVegan" color="emerald" variant="subtle" class="text-xs">
                               Vegan
                             </UBadge>
                             <UBadge v-if="item.dietaryInfo?.isGlutenFree" color="blue" variant="subtle" class="text-xs">
                               Gluten Free
+                            </UBadge>
+                          </div>
+
+                          <!-- Availability Status -->
+                          <div class="mb-4">
+                            <UBadge :color="item.isAvailable ? 'green' : 'red'" variant="solid" class="text-sm">
+                              {{ item.isAvailable ? 'Available' : 'Not Available' }}
                             </UBadge>
                           </div>
                         </div>
@@ -296,24 +287,31 @@
               </div>
             </div>
             <!-- Pagination -->
-            <div v-if="paginatedItems(category).totalPages > 1" class="flex justify-center mt-8">
-              <UPagination v-model="currentPage" :total="paginatedItems(category).totalPages" :ui="{
-                wrapper: 'flex items-center gap-1',
-                base: 'flex items-center justify-center min-w-[32px] h-8 px-3 rounded text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
-                default: {
-                  active: 'bg-yellow-500 text-white hover:bg-yellow-600',
-                  inactive:
-                    'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700',
-                },
-              }" />
+            <div v-if="category.items?.length > itemsPerPage" class="flex flex-col items-center mt-8">
+              
+
+              
+              <!-- Fallback Manual Pagination Controls -->
+              <div class="flex items-center justify-center mt-4 space-x-2">
+                <button 
+                  @click="updateCategoryPage(category.id, paginatedItems(category).currentPage - 1)"
+                  :disabled="!paginatedItems(category).hasPrevPage"
+                  class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                  Previous
+                </button>
+                <span class="text-gray-800 dark:text-gray-200">
+                  Page {{ paginatedItems(category).currentPage }} of {{ paginatedItems(category).totalPages }}
+                </span>
+                <button 
+                  @click="updateCategoryPage(category.id, paginatedItems(category).currentPage + 1)"
+                  :disabled="!paginatedItems(category).hasNextPage"
+                  class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                  Next
+                </button>
+              </div>
             </div>
 
-            <!-- Load More Button for Backend Pagination -->
-            <div v-if="pagination.items.page < pagination.items.totalPages" class="flex justify-center mt-8">
-              <UButton color="yellow" variant="outline" size="lg" @click="loadMoreItems" :loading="backendLoading">
-                Load More Items ({{ pagination.items.total - pagination.items.page * 50 }} remaining)
-              </UButton>
-            </div>
+            <!-- Pagination navigation now handles this instead of Load More button -->
           </div>
         </div>
 
@@ -407,14 +405,14 @@
                 </div>
               </div>
 
-              <!-- Price and Order -->
+              <!-- Price and View Details -->
               <div class="lg:text-right">
                 <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mb-4">
                   ${{ selectedItem.price }}
                 </div>
                 <UButton color="yellow" variant="solid" size="lg" :disabled="!selectedItem.isAvailable"
-                  class="w-full lg:w-auto">
-                  Add to Order
+                  class="w-full lg:w-auto" @click="navigateToItemDetails">
+                  View Full Details
                 </UButton>
               </div>
             </div>
@@ -432,8 +430,8 @@
               <UButton color="gray" variant="outline" @click="closeModal">
                 Close
               </UButton>
-              <UButton color="yellow" variant="solid" :disabled="!selectedItem.isAvailable">
-                Add to Order
+              <UButton color="yellow" variant="solid" :disabled="!selectedItem.isAvailable" @click="navigateToItemDetails">
+                View Full Details
               </UButton>
             </div>
           </template>
@@ -506,7 +504,8 @@ const searchQuery = ref("");
 const sortBy = ref("name");
 const showDropdown = ref(false);
 const selectedPriceRange = ref("all");
-const currentPage = ref(1);
+// Initialize category pages with default page 1
+const categoryPages = ref<Record<string, number>>({});
 const viewMode = ref<"grid" | "list">("grid");
 const dietaryFilters = ref({
   vegetarian: false,
@@ -514,15 +513,11 @@ const dietaryFilters = ref({
   glutenFree: false,
 });
 
-// Pagination for backend items
-const pagination = ref({
-  items: {
-    page: 1,
-    totalPages: 1,
-    total: 0
-  }
-});
+// Pagination settings
+const itemsPerPage = 8; // Set fixed items per page to 8
 
+
+// Modal
 // Modal
 const isModalOpen = ref(false);
 const selectedItem = ref<MenuItem | null>(null);
@@ -534,14 +529,22 @@ const categories = computed<MenuCategory[]>(() =>
   Array.isArray(menuCategories.value) ? menuCategories.value : []
 );
 
+// Debug watch for categories
+watch(categories, (newCategories) => {
+  console.log('📊 Categories data changed:', newCategories.length);
+  newCategories.forEach((cat, index) => {
+    console.log(`  Category ${index}: ${cat.name}, Items: ${cat.items?.length || 0}`);
+  });
+}, { immediate: true });
+
 const primaryCategories = computed(() => {
-  // Show first 4 categories as primary
-  return categories.value.slice(0, 4);
+  // Show all categories as primary, remove the arbitrary 4-category limit
+  return categories.value;
 });
 
 const secondaryCategories = computed(() => {
-  // Show remaining categories as secondary
-  return categories.value.slice(4);
+  // No secondary categories needed since we show all categories directly
+  return [];
 });
 
 const activeDietaryFilters = computed(() => {
@@ -568,14 +571,18 @@ const filteredCategories = computed(() => {
 
   let items = category.items;
 
+  // Only filter by visibility - show all items regardless of availability
+  // Availability will be shown as a status indicator in the UI
+  items = items.filter((item) => item.isVisible === true);
+
   // Apply search filter (name only)
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase();
     items = items.filter(
-      (item) =>
-        item.name.toLowerCase().includes(query)
+      (item) => item.name.toLowerCase().includes(query)
     );
   }
+
   // Apply price filter
   if (selectedPriceRange.value !== "all") {
     items = items.filter((item) => {
@@ -663,6 +670,12 @@ const showItemDetails = (item: MenuItem) => {
   carouselIndex.value = 0;
 };
 
+const navigateToItemDetails = () => {
+  if (selectedItem.value) {
+    navigateTo(`/menu/${selectedItem.value.id}`);
+  }
+};
+
 const closeModal = () => {
   isModalOpen.value = false;
   selectedItem.value = null;
@@ -689,19 +702,77 @@ const previousImage = () => {
 };
 
 const paginatedItems = (category: MenuCategory) => {
-  const itemsPerPage = 8;
-  const totalItems = category.items.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const startIndex = (currentPage.value - 1) * itemsPerPage;
+  // The category passed here is already the filtered category from filteredCategories
+  // So we can directly use its items without searching for it again
+  const filteredItems = category.items;
+  
+  const totalItems = filteredItems.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage)); // Ensure at least 1 page
+  
+  // Get current page for this specific category, default to 1
+  const currentPage = categoryPages.value[category.id] || 1;
+  
+  // Ensure current page is within valid range
+  const validCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+  if (validCurrentPage !== currentPage) {
+    // Correct the current page if needed
+    categoryPages.value[category.id] = validCurrentPage;
+  }
+  
+  const startIndex = (validCurrentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const items = category.items.slice(startIndex, endIndex);
+  const items = filteredItems.slice(startIndex, endIndex);
+
+  // Debug logging for pagination issues
+  console.log(`Pagination Debug - ${category.name}:`, {
+    categoryId: category.id,
+    totalItems,
+    itemsPerPage,
+    totalPages,
+    currentPage: validCurrentPage,
+    shouldShowPagination: totalPages > 1,
+    startIndex,
+    endIndex,
+    itemsOnThisPage: items.length,
+    hasNextPage: validCurrentPage < totalPages,
+    hasPrevPage: validCurrentPage > 1
+  });
 
   return {
     items,
     totalItems,
     totalPages,
-    currentPage: currentPage.value,
+    currentPage: validCurrentPage,
+    hasNextPage: validCurrentPage < totalPages,
+    hasPrevPage: validCurrentPage > 1
   };
+};
+
+// Function to handle page change for a specific category
+const updateCategoryPage = (categoryId: string, page: number) => {
+  console.log(`Updating page for category ${categoryId} to page ${page}`);
+  console.log('Before update:', JSON.stringify(categoryPages.value));
+  
+  // Find the category to determine max pages
+  const category = categories.value.find(cat => cat.id === categoryId);
+  let maxPage = 1;
+  
+  if (category) {
+    const totalItems = category.items.length;
+    maxPage = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  }
+  
+  // Ensure page is within valid range
+  const validPage = Math.min(Math.max(1, page), maxPage);
+  
+  // Update the page
+  categoryPages.value = {
+    ...categoryPages.value,
+    [categoryId]: validPage
+  };
+  
+  console.log('After update:', JSON.stringify(categoryPages.value));
+  console.log(`Page set to ${validPage} (requested: ${page}, max: ${maxPage})`);
 };
 
 const gridClasses = computed(() => {
@@ -731,22 +802,13 @@ const clearAllFilters = () => {
   };
 };
 
-// Load more items function for pagination
-const loadMoreItems = async () => {
-  try {
-    pagination.value.items.page += 1;
-    // Since we're using static pagination, just update the counter
-    // In a real implementation, this would fetch more data from the backend
-  } catch (error) {
-    console.error('Error loading more items:', error);
-  }
-};
+// No longer needed as pagination is handled by the UPagination component
 
 // Dietary info
 const dietaryInfo = [
-  { icon: "i-heroicons-leaf", label: "Vegetarian Options" },
+  { icon: "i-heroicons-check-badge", label: "Vegetarian Options" },
   { icon: "i-heroicons-shield-check", label: "Gluten-Free Options" },
-  { icon: "i-heroicons-heart", label: "Vegan Options" },
+  { icon: "i-heroicons-sparkles", label: "Vegan Options" },
   {
     icon: "i-heroicons-information-circle",
     label: "Allergen Information Available",
@@ -775,6 +837,12 @@ watch(isModalOpen, (isOpen) => {
   }
 });
 
+// Reset pagination when category, search, or filters change
+watch([activeCategory, searchQuery, selectedPriceRange, dietaryFilters], () => {
+  // Reset all category pages to 1 when filters change
+  categoryPages.value = {};
+}, { deep: true });
+
 onMounted(async () => {
   // Initialize menu data
   try {
@@ -789,13 +857,11 @@ onMounted(async () => {
   const firstCategory = categories.value[0];
   if (firstCategory) {
     activeCategory.value = firstCategory.id;
-  }
-
-  // Initialize pagination based on menu data
-  const allItems = categories.value.flatMap(cat => cat.items || []);
-  if (allItems.length > 0) {
-    pagination.value.items.total = allItems.length;
-    pagination.value.items.totalPages = Math.ceil(allItems.length / 50);
+    
+    // Initialize pagination for all categories
+    categories.value.forEach(category => {
+      categoryPages.value[category.id] = 1;
+    });
   }
 
   // Add click outside listener
@@ -804,6 +870,8 @@ onMounted(async () => {
 
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
+  window.removeEventListener('scroll', updateDropdownPosition);
+  window.removeEventListener('resize', updateDropdownPosition);
   if (carouselInterval) {
     clearInterval(carouselInterval);
   }
@@ -825,26 +893,55 @@ const moreButton = ref<HTMLElement | null>(null);
 const moreDropdown = ref<HTMLElement | null>(null);
 const moreDropdownStyle = ref({});
 
+// Update dropdown position when dropdown visibility changes or on scroll
+const updateDropdownPosition = () => {
+  if (showDropdown.value && moreButton.value) {
+    const rect = moreButton.value.getBoundingClientRect();
+    const dropdownWidth = 192; // w-48 = 12rem = 192px
+    const minWidth = rect.width;
+    let left = rect.left;
+    
+    // Prevent overflow on the right
+    if (left + dropdownWidth > window.innerWidth) {
+      left = window.innerWidth - dropdownWidth - 8; // 8px margin
+    }
+    
+    moreDropdownStyle.value = {
+      top: `${rect.bottom + 4}px`, // 4px offset from the bottom of the button
+      left: `${left}px`,
+      minWidth: `${minWidth}px`,
+      maxHeight: '300px',
+      overflowY: 'auto'
+    };
+  }
+};
+
+// Update position when dropdown visibility changes
 watch(showDropdown, (val) => {
   if (val) {
     nextTick(() => {
-      if (moreButton.value) {
-        const rect = moreButton.value.getBoundingClientRect();
-        const dropdownWidth = 192; // w-48 = 12rem = 192px
-        const minWidth = rect.width;
-        let left = rect.left + window.scrollX;
-        // Prevent overflow on the right
-        if (left + dropdownWidth > window.innerWidth) {
-          left = window.innerWidth - dropdownWidth - 8; // 8px margin
-        }
-        moreDropdownStyle.value = {
-          top: `${rect.bottom + window.scrollY + 4}px`, // 4px offset
-          left: `${left}px`,
-          minWidth: `${minWidth}px`,
-        };
-      }
+      updateDropdownPosition();
     });
   }
+});
+
+// Update position on scroll to follow the More button
+onMounted(() => {
+  window.addEventListener('scroll', () => {
+    if (showDropdown.value) {
+      updateDropdownPosition();
+    }
+  });
+  window.addEventListener('resize', () => {
+    if (showDropdown.value) {
+      updateDropdownPosition();
+    }
+  });
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateDropdownPosition);
+  window.removeEventListener('resize', updateDropdownPosition);
 });
 </script>
 
