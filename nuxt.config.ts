@@ -1,7 +1,7 @@
 export default defineNuxtConfig({
-  devtools: { enabled: true },
+  devtools: { enabled: false }, // Disable in production
 
-  // Runtime configuration for environment variables
+  // Your existing runtime config is perfect
   runtimeConfig: {
     // Private keys (only available on server-side)
     smtpHost: process.env.SMTP_HOST,
@@ -20,42 +20,20 @@ export default defineNuxtConfig({
     },
   },
 
-  app: {
-    head: {
-      title: "The Pearson Pub",
-      meta: [
-        { charset: "utf-8" },
-        { name: "viewport", content: "width=device-width, initial-scale=1" },
-        {
-          name: "description",
-          content:
-            "A traditional pub atmosphere with modern amenities in Whitby",
-        },
-      ],
-      link: [
-        { rel: "icon", type: "image/png", href: "/images/pub/logo.png" },
-        {
-          rel: "stylesheet",
-          href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
-        },
-      ],
-    },
-    pageTransition: { name: "page", mode: "out-in" },
+  // Production optimizations
+  nitro: {
+    preset: "node-server", // Changed from "node" for production
+    minify: true,
+    compressPublicAssets: true,
+    compatibilityDate: "2025-07-19",
   },
 
-  modules: [
-    "@nuxt/ui",
-    "@nuxt/image",
-    "@vite-pwa/nuxt",
-    "@nuxtjs/color-mode", // Added color mode module
-  ],
-  ui: {
-    global: true,
-  },
-  css: ["~/assets/styles/index.css"],
+  // Your existing modules - all good for production
+  modules: ["@nuxt/ui", "@nuxt/image", "@vite-pwa/nuxt", "@nuxtjs/color-mode"],
 
   image: {
     provider: "ipx",
+    quality: 80,
     screens: {
       xs: 320,
       sm: 640,
@@ -68,6 +46,7 @@ export default defineNuxtConfig({
       default: {
         modifiers: {
           format: "webp",
+          quality: 80,
         },
       },
     },
@@ -84,11 +63,6 @@ export default defineNuxtConfig({
     shim: false,
   },
 
-  nitro: {
-    preset: "vercel",
-    compatibilityDate: "2025-07-19",
-  },
-
   compatibilityDate: "2025-07-19",
 
   build: {
@@ -100,6 +74,19 @@ export default defineNuxtConfig({
       "tailwindcss/nesting": {},
       tailwindcss: {},
       autoprefixer: {},
+    },
+  },
+
+  // App head configuration
+  app: {
+    head: {
+      link: [
+        {
+          rel: "icon",
+          type: "image/png",
+          href: "/pearson-pub-logo.png",
+        },
+      ],
     },
   },
 
@@ -117,17 +104,17 @@ export default defineNuxtConfig({
       lang: "en",
       icons: [
         {
-          src: "/icons/icon-192x192.png",
+          src: "/pearson-pub-logo.png",
           sizes: "192x192",
           type: "image/png",
         },
         {
-          src: "/icons/icon-512x512.png",
+          src: "/pearson-pub-logo.png",
           sizes: "512x512",
           type: "image/png",
         },
         {
-          src: "/icons/icon-512x512.png",
+          src: "/pearson-pub-logo.png",
           sizes: "512x512",
           type: "image/png",
           purpose: "any maskable",
@@ -136,7 +123,7 @@ export default defineNuxtConfig({
     },
     workbox: {
       navigateFallback: "/offline.html",
-      globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
+      globPatterns: ["/*.{js,css,html,ico,png,svg,webp,woff2}"],
       runtimeCaching: [
         {
           urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*$/,

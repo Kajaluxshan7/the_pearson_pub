@@ -1,21 +1,18 @@
 <template>
   <div>
-    <!-- <LoadingScreen3D
-  v-if="loadingState.isLoading"
-  :progress="loadingState.progress"
-  :texts="loadingTexts"
-  title="The Pearson Pub"
-  subtitle=""
-  icon-name="i-heroicons-building-storefront"
-  :error="loadingState.error"
-  @retry="startLoading"
-/> -->
+    <!-- Loading Screen - Shows until all backend data is fetched -->
+    <LoadingScreen3D
+      v-if="loadingState.isLoading"
+      :progress="loadingState.progress"
+      :texts="loadingTexts"
+      title="The Pearson Pub"
+      subtitle="Loading your pub experience..."
+      icon-name="i-heroicons-building-storefront"
+      :error="loadingState.error"
+      @retry="initializeData"
+    />
 
-    <!-- <USkeleton v-if="loadingState.isLoading" class="h-16 w-16 rounded-full">
-      <div class="w-16 h-16 border-4 border-yellow-500 rounded-full animate-spin border-t-transparent"></div>
-    </USkeleton> -->
-
-    <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div v-else class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <!-- Header -->
       <LayoutsHeader />
 
@@ -45,19 +42,27 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useColorMode } from '#imports'
+import { useLandingPageData } from '~/composables/useLandingPageData'
 
 const colorMode = useColorMode()
 if (colorMode) colorMode.preference = 'light'
+
+// Initialize landing page data composable
+const { initializeAllData, isLoading: dataLoading, error: dataError } = useLandingPageData()
 
 // Loading state
 const loadingState = ref({
   isLoading: true,
   progress: 0,
-  error: null
+  error: null as string | null
 })
 
 const loadingTexts = [
-''
+  'Loading menu items...',
+  'Fetching upcoming events...',
+  'Getting contact information...',
+  'Loading specials...',
+  'Almost ready!'
 ]
 
 // Scroll position
@@ -77,49 +82,52 @@ const scrollToTop = () => {
   }
 }
 
-// Simulate loading
-let progressTimer: ReturnType<typeof setInterval> | null = null;
-const startLoading = () => {
-  loadingState.value.isLoading = true;
-  loadingState.value.progress = 0;
-  loadingState.value.error = null;
-  if (progressTimer) clearInterval(progressTimer);
-  if (typeof window !== 'undefined') {
-    progressTimer = setInterval(() => {
+// Initialize data and handle loading
+const initializeData = async () => {
+  try {
+    loadingState.value.isLoading = true
+    loadingState.value.progress = 0
+    loadingState.value.error = null
+
+    // Start progress animation
+    const progressInterval = setInterval(() => {
       if (loadingState.value.progress < 90) {
-        loadingState.value.progress += Math.random() * 3 + 1; // Fast at first
-      } else if (loadingState.value.progress < 99) {
-        loadingState.value.progress += 0.2; // Slow near the end
+        loadingState.value.progress += Math.random() * 10 + 5
       }
-      if (loadingState.value.progress >= 99) {
-        loadingState.value.progress = 99;
-        clearInterval(progressTimer!);
-        // Simulate real load complete after a short delay
-        setTimeout(() => {
-          loadingState.value.progress = 100;
-          setTimeout(() => {
-            loadingState.value.isLoading = false;
-          }, 400); // Let bar reach 100% before hiding
-        }, 400);
-      }
-    }, 60);
+    }, 100)
+
+    // Fetch all backend data
+    await initializeAllData()
+
+    // Complete progress
+    clearInterval(progressInterval)
+    loadingState.value.progress = 100
+
+    // Small delay to show completion
+    setTimeout(() => {
+      loadingState.value.isLoading = false
+    }, 500)
+
+  } catch (error) {
+    console.error('Failed to initialize data:', error)
+    loadingState.value.error = 'Failed to load data. Please try again.'
+    loadingState.value.progress = 0
   }
-};
+}
 
 onMounted(() => {
-  startLoading();
+  initializeData()
   if (typeof window !== 'undefined') {
-    window.addEventListener('scroll', updateScroll);
-    updateScroll();
+    window.addEventListener('scroll', updateScroll)
+    updateScroll()
   }
-});
+})
 
 onUnmounted(() => {
   if (typeof window !== 'undefined') {
-    window.removeEventListener('scroll', updateScroll);
+    window.removeEventListener('scroll', updateScroll)
   }
-  if (progressTimer) clearInterval(progressTimer);
-});
+})
 </script>
 
 <style>
