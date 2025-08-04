@@ -189,20 +189,23 @@ const typewriterEffect = (text: string) => {
   let typing: ReturnType<typeof setInterval> | null = null;
   if (textFadeTimeout.value) clearTimeout(textFadeTimeout.value);
 
-  typing = setInterval(() => {
-    if (i < text.length) {
-      currentText.value += text.charAt(i);
-      i++;
-    } else {
-      if (typing) clearInterval(typing);
-      textFadeTimeout.value = Number(
-        setTimeout(() => {
-          currentTextIndex.value =
-            (currentTextIndex.value + 1) % props.texts.length;
-        }, 2000)
-      );
-    }
-  }, 50);
+  // Only run setInterval on client-side
+  if (typeof window !== 'undefined') {
+    typing = setInterval(() => {
+      if (i < text.length) {
+        currentText.value += text.charAt(i);
+        i++;
+      } else {
+        if (typing) clearInterval(typing);
+        textFadeTimeout.value = Number(
+          setTimeout(() => {
+            currentTextIndex.value =
+              (currentTextIndex.value + 1) % props.texts.length;
+          }, 2000)
+        );
+      }
+    }, 50);
+  }
 
   onUnmounted(() => {
     if (typing) clearInterval(typing);
