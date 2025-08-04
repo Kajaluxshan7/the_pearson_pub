@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Loading Screen - Shows until all backend data is fetched -->
     <LoadingScreen3D
       v-if="loadingState.isLoading"
       :progress="loadingState.progress"
@@ -9,7 +8,7 @@
       subtitle="Loading your pub experience..."
       icon-name="i-heroicons-building-storefront"
       :error="loadingState.error"
-      @retry="initializeData"
+      @retry="startLoading"
     />
 
     <div v-else class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -48,7 +47,7 @@ const colorMode = useColorMode()
 if (colorMode) colorMode.preference = 'light'
 
 // Initialize landing page data composable
-const { initializeAllData, isLoading: dataLoading, error: dataError } = useLandingPageData()
+const { initializeAllData } = useLandingPageData()
 
 // Loading state
 const loadingState = ref({
@@ -82,52 +81,62 @@ const scrollToTop = () => {
   }
 }
 
-// Initialize data and handle loading
-const initializeData = async () => {
-  try {
-    loadingState.value.isLoading = true
-    loadingState.value.progress = 0
-    loadingState.value.error = null
-
+// Loading with backend data fetch
+let progressTimer: ReturnType<typeof setInterval> | null = null;
+const startLoading = async () => {
+  loadingState.value.isLoading = true;
+  loadingState.value.progress = 0;
+  loadingState.value.error = null;
+  
+  if (progressTimer) clearInterval(progressTimer);
+  
+  if (typeof window !== 'undefined') {
     // Start progress animation
-    const progressInterval = setInterval(() => {
+    progressTimer = setInterval(() => {
       if (loadingState.value.progress < 90) {
-        loadingState.value.progress += Math.random() * 10 + 5
+        loadingState.value.progress += Math.random() * 3 + 1; // Fast at first
+      } else if (loadingState.value.progress < 99) {
+        loadingState.value.progress += 0.2; // Slow near the end
       }
-    }, 100)
+      if (loadingState.value.progress >= 99) {
+        loadingState.value.progress = 99;
+        clearInterval(progressTimer!);
+      }
+    }, 60);
 
-    // Fetch all backend data
-    await initializeAllData()
-
-    // Complete progress
-    clearInterval(progressInterval)
-    loadingState.value.progress = 100
-
-    // Small delay to show completion
-    setTimeout(() => {
-      loadingState.value.isLoading = false
-    }, 500)
-
-  } catch (error) {
-    console.error('Failed to initialize data:', error)
-    loadingState.value.error = 'Failed to load data. Please try again.'
-    loadingState.value.progress = 0
+    // Fetch backend data
+    try {
+      await initializeAllData();
+      
+      // Complete the progress
+      loadingState.value.progress = 100;
+      setTimeout(() => {
+        loadingState.value.isLoading = false;
+      }, 400); // Let bar reach 100% before hiding
+      
+    } catch (error) {
+      console.error('Failed to load backend data:', error);
+      loadingState.value.error = 'Failed to load data. Please try again.';
+      loadingState.value.progress = 0;
+      if (progressTimer) clearInterval(progressTimer);
+    }
   }
-}
+};
 
 onMounted(() => {
-  initializeData()
+  startLoading();
   if (typeof window !== 'undefined') {
-    window.addEventListener('scroll', updateScroll)
-    updateScroll()
+    window.addEventListener('scroll', updateScroll);
+    updateScroll();
   }
-})
+});
 
 onUnmounted(() => {
   if (typeof window !== 'undefined') {
-    window.removeEventListener('scroll', updateScroll)
+    window.removeEventListener('scroll', updateScroll);
   }
-})
+  if (progressTimer) clearInterval(progressTimer);
+});
 </script>
 
 <style>
