@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- Advanced 3D Loading Screen -->
     <!-- Menu Hero Section -->
     <section
       class="hero-section relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
@@ -71,14 +70,7 @@
                 activeCategory === category.id
                   ? 'bg-yellow-500 text-white shadow-lg scale-105'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-yellow-100 dark:hover:bg-yellow-900 hover:shadow-lg',
-              ]" @click="
-                  () => {
-                    activeCategory = category.id;
-                    showDropdown = false;
-                    // Reset pagination for the new category
-                    categoryPages.value[category.id] = 1;
-                  }
-                ">
+              ]" @click="selectCategory(category.id)">
                 {{ category.name }}
               </button>
             </div>
@@ -143,7 +135,7 @@
             <!-- Grid View -->
             <div v-if="viewMode === 'grid'" :class="gridClasses">
               <div v-for="(item, index) in paginatedItems(category).items" :key="item.id"
-                class="menu-card menu-card-3d transition-all duration-500 transform hover:scale-105 cursor-pointer"
+                class="menu-card transition-all duration-500 transform hover:scale-105 cursor-pointer"
                 :style="{ animationDelay: `${index * 100}ms` }" @click="() => showItemDetails(item)">
                 <!-- Square Menu Item Card -->
                 <UCard
@@ -215,7 +207,7 @@
             <!-- List View -->
             <div v-else class="space-y-4">
               <div v-for="(item, index) in paginatedItems(category).items" :key="item.id"
-                class="menu-card menu-card-3d transition-all duration-500 cursor-pointer"
+                class="menu-card transition-all duration-500 cursor-pointer"
                 :style="{ animationDelay: `${index * 100}ms` }" @click="() => showItemDetails(item)">
                 <UCard class="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0"
                   :class="{ 'opacity-50 pointer-events-none': !item.isAvailable }">
@@ -748,6 +740,16 @@ const paginatedItems = (category: MenuCategory) => {
   };
 };
 
+// Function to select a category and reset pagination
+const selectCategory = (categoryId: string) => {
+  activeCategory.value = categoryId;
+  showDropdown.value = false;
+  // Reset pagination for the new category
+  if (categoryPages.value) {
+    categoryPages.value[categoryId] = 1;
+  }
+};
+
 // Function to handle page change for a specific category
 const updateCategoryPage = (categoryId: string, page: number) => {
   console.log(`Updating page for category ${categoryId} to page ${page}`);
@@ -954,61 +956,32 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-/* Enhanced 3D Card Effects */
-.menu-card-3d {
-  perspective: 1000px;
-  transform-style: preserve-3d;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+/* Card Effects */
+.menu-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.menu-card-3d:hover {
-  transform: translateY(-10px) rotateX(5deg) rotateY(5deg) scale(1.02);
-  box-shadow:
-    0 25px 50px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.menu-card-3d::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg,
-      rgba(255, 215, 0, 0.1) 0%,
-      transparent 50%,
-      rgba(255, 215, 0, 0.05) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  border-radius: inherit;
-}
-
-.menu-card-3d:hover::before {
-  opacity: 1;
+.menu-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 /* Floating animation for cards */
 @keyframes cardFloat {
-
-  0%,
-  100% {
+  0%, 100% {
     transform: translateY(0px);
   }
-
   50% {
     transform: translateY(-5px);
   }
 }
 
-.menu-card-3d.floating {
+.menu-card.floating {
   animation: cardFloat 3s ease-in-out infinite;
 }
 
 /* Loading state animation */
-.menu-card-3d.loading {
+.menu-card.loading {
   opacity: 0;
   transform: translateY(30px) scale(0.9);
   animation: cardAppear 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;

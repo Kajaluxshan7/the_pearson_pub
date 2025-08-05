@@ -817,10 +817,10 @@ onMounted(async () => {
   window.addEventListener("resize", checkViewMode);
   document.addEventListener("keydown", handleKeyNavigation);
   
-  // Initialize enhanced interactions without heavy 3D animations
+  // Initialize enhanced interactions
   if (process.client) {
     nextTick(async () => {
-      // Enhanced GSAP animations with 3D effects
+      // Enhanced GSAP animations
       const nuxtApp = useNuxtApp();
       const $gsap = (nuxtApp as any)?.$gsap;
       

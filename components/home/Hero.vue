@@ -2,9 +2,10 @@
   <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
     <div class="absolute inset-0 z-0">
       <img
-        src="../../public/images/pub/hero-background.jpg "
+        src="/images/pub/hero-background.webp" 
         alt="The Pearson Pub Interior"
         class="w-full h-full object-cover"
+        loading="lazy"
       />
       <div class="absolute inset-0 bg-black/60"></div>
     </div>

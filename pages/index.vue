@@ -9,16 +9,7 @@
       </div>
     </div>
 
-    <!-- Error State -->
-    <div v-else-if="backendError" class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900">
-      <div class="text-center p-8">
-        <h2 class="text-2xl font-bold text-red-600 mb-4">Failed to Load Content</h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">{{ backendError }}</p>
-        <UButton @click="retryLoading" color="yellow">
-          Try Again
-        </UButton>
-      </div>
-    </div>
+
 
     <!-- Main Content -->
     <div v-else>
@@ -804,7 +795,7 @@ onMounted(async () => {
   startSpecialRotation()
   startImageRotation()
 
-  // Initialize 3D animations with more performance checks
+  // Initialize animations with performance checks
   if (process.client && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
     const runAnimations = () => {
       // Only run animations if user has not disabled them
@@ -812,7 +803,7 @@ onMounted(async () => {
         const animatedElements = document.querySelectorAll('[data-aos], .feature-card, .special-card')
         animatedElements.forEach((el, i) => {
           if (el instanceof HTMLElement) {
-            // Simple fade in animation without heavy 3D effects
+            // Simple fade in animation
             el.style.opacity = '0'
             el.style.transform = 'translateY(20px)'
             setTimeout(() => {

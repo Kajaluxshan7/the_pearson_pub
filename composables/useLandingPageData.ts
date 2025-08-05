@@ -1,8 +1,11 @@
 import { ref, computed } from "vue";
-import { publicApi, specialsApi } from "./useApi";
+import { useApi } from "./useApi";
 import type { MenuItem, MenuCategory } from "~/types/menu";
 import type { Event } from "~/types/events";
 import type { ApiSpecial } from "./useApi";
+
+// Access publicApi and specialsApi from useApi
+const { publicApi, specialsApi } = useApi();
 
 // Landing page content interface
 export interface LandingPageContent {
@@ -50,7 +53,7 @@ export const useLandingPageData = () => {
   const menuData = ref<any>(null);
   const eventsData = ref<any>(null);
   const contactInfo = ref<ContactInfo | null>(null);
-  
+
   // New specials state
   const dailySpecials = ref<any>(null);
   const seasonalSpecials = ref<any>(null);
@@ -235,26 +238,34 @@ export const useLandingPageData = () => {
     try {
       isLoading.value = true;
       error.value = null;
-      
+
       // Fetch all three types of specials in parallel
-      const [dailyResponse, seasonalResponse, lateNightResponse] = await Promise.all([
-        publicApi.getDailySpecials(),
-        publicApi.getSeasonalSpecials(),
-        publicApi.getLateNightSpecials(),
-      ]);
+      const [dailyResponse, seasonalResponse, lateNightResponse] =
+        await Promise.all([
+          specialsApi.getDailySpecials(),
+          specialsApi.getSeasonalSpecials(),
+          specialsApi.getLateNightSpecials(),
+        ]);
 
       dailySpecials.value = dailyResponse;
       seasonalSpecials.value = seasonalResponse;
       lateNightSpecials.value = lateNightResponse;
-      
     } catch (err) {
       error.value = "Failed to fetch specials data";
       console.error("Error fetching specials data:", err);
-      
+
       // Set fallback data
-      dailySpecials.value = { specials: [], heading: "Daily Special", total: 0 };
+      dailySpecials.value = {
+        specials: [],
+        heading: "Daily Special",
+        total: 0,
+      };
       seasonalSpecials.value = { specials: [], total: 0 };
-      lateNightSpecials.value = { specials: [], heading: "Latenight Special", total: 0 };
+      lateNightSpecials.value = {
+        specials: [],
+        heading: "Latenight Special",
+        total: 0,
+      };
     } finally {
       isLoading.value = false;
     }

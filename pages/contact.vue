@@ -178,10 +178,10 @@
                   variant="solid"
                   size="xl"
                   :loading="isSubmitting"
-                  class="w-auto mx-auto block"
+                  class="flex items-center justify-center w-auto mx-auto"
                   :disabled="isSubmitting"
                 >
-                  <UIcon name="i-heroicons-paper-airplane" class="w-5 h-5 mr-2" />
+                  <UIcon name="i-heroicons-paper-airplane" class="w-5 h-5 mr-0" />
                   {{ isSubmitting ? 'Sending...' : 'Send Message' }}
                 </UButton>
               </form>
@@ -318,8 +318,8 @@ const contactInfo = computed(() => {
       {
         icon: "i-heroicons-map-pin",
         title: "Address",
-        value: "5179 Dundas Street W",
-        extra: "Etobicoke, ON M9A 1C2",
+        value: "101 Mary St, Whitby, ON, L1N 2R4",
+        extra: "Visit us in the heart of Whitby",
       },
       {
         icon: "i-heroicons-phone",
@@ -330,7 +330,7 @@ const contactInfo = computed(() => {
       {
         icon: "i-heroicons-envelope",
         title: "Email",
-        value: "info@thepearsonpub.com",
+        value: "thepearsonpub@rogers.com",
         extra: "We'll get back to you soon",
       },
     ];

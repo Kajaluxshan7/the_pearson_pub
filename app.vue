@@ -1,6 +1,6 @@
 <template>
   <div>
-    <LoadingScreen3D
+    <SimpleLoading
       v-if="loadingState.isLoading"
       :progress="loadingState.progress"
       :texts="loadingTexts"
