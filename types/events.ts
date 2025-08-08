@@ -5,7 +5,10 @@ export interface Event {
   fullDescription?: string;
   date: string;
   time: string;
+  startDate?: string;
   endDate?: string;
+  startDateTime?: string;
+  endDateTime?: string;
   endTime?: string;
   image?: string;
   images?: readonly string[];
@@ -26,7 +29,13 @@ export interface Event {
     student?: number;
   };
   ticketsAvailable?: number;
-  status: "upcoming" | "ongoing" | "completed" | "cancelled";
+  status:
+    | "upcoming"
+    | "ongoing"
+    | "completed"
+    | "cancelled"
+    | "current"
+    | "ended";
   category: "music" | "quiz" | "food" | "special" | "entertainment";
   ageRestriction?: string;
   dresscode?: string;

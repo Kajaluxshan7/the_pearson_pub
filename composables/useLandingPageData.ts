@@ -1,8 +1,11 @@
 import { ref, computed } from "vue";
-import { publicApi, specialsApi } from "./useApi";
+import { useApi } from "./useApi";
 import type { MenuItem, MenuCategory } from "~/types/menu";
 import type { Event } from "~/types/events";
 import type { ApiSpecial } from "./useApi";
+
+// Access publicApi and specialsApi from useApi
+const { publicApi, specialsApi } = useApi();
 
 // Landing page content interface
 export interface LandingPageContent {
@@ -50,7 +53,7 @@ export const useLandingPageData = () => {
   const menuData = ref<any>(null);
   const eventsData = ref<any>(null);
   const contactInfo = ref<ContactInfo | null>(null);
-  
+
   // New specials state
   const dailySpecials = ref<any>(null);
   const seasonalSpecials = ref<any>(null);
@@ -82,50 +85,84 @@ export const useLandingPageData = () => {
     },
   });
 
-  const transformEventToFrontend = (apiEvent: any): Event => ({
-    id: apiEvent.id,
-    title: apiEvent.name,
-    description: apiEvent.description || "",
-    fullDescription: apiEvent.description || "",
-    date: new Date(apiEvent.start_date).toLocaleDateString("en-US", {
+  const transformEventToFrontend = (apiEvent: any): Event => {
+    // Use TimezoneUtil for proper Toronto timezone handling
+    const startDateUtc = new Date(apiEvent.start_date);
+    const endDateUtc = new Date(apiEvent.end_date);
+
+    // Format in Toronto timezone for display
+    const startDateFormatted = new Intl.DateTimeFormat("en-US", {
       year: "numeric",
-      month: "long",
-      day: "numeric",
-    }),
-    time: `${new Date(apiEvent.start_date).toLocaleTimeString()} - ${new Date(
-      apiEvent.end_date
-    ).toLocaleTimeString()}`,
-    image: apiEvent.images?.[0] || "/images/events/default.jpg",
-    images:
-      apiEvent.images?.length > 0
-        ? apiEvent.images
-        : ["/images/events/default.jpg"],
-    location: "The Pearson Pub",
-    venue: {
-      name: "The Pearson Pub",
-      capacity: 100,
-      layout: "Standard seating",
-    },
-    tags: ["Event"],
-    performers: [],
-    featured: true,
-    ctaText: "Learn More",
-    ctaLink: "/contact",
-    price: { general: 0 },
-    ticketsAvailable: 100,
-    status: apiEvent.status || "upcoming", // Use the status from the API
-    category: "entertainment",
-    ageRestriction: "19+",
-    specialRequirements: [],
-    contactInfo: {
-      phone: "905-430-5699",
-      email: "events@thepearsonpub.com",
-    },
-    organizer: {
-      name: "The Pearson Pub",
-      description: "Your local neighborhood pub",
-    },
-  });
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "America/Toronto",
+    }).format(startDateUtc);
+
+    const endDateFormatted = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "America/Toronto",
+    }).format(endDateUtc);
+
+    // Format times in Toronto timezone
+    const startTimeFormatted = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: "America/Toronto",
+    }).format(startDateUtc);
+
+    const endTimeFormatted = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: "America/Toronto",
+    }).format(endDateUtc);
+
+    return {
+      id: apiEvent.id,
+      title: apiEvent.name,
+      description: apiEvent.description || "",
+      fullDescription: apiEvent.description || "",
+      date: startDateFormatted, // Use formatted Toronto timezone date
+      time: `${startTimeFormatted} - ${endTimeFormatted} EST/EDT`,
+      endDate: endDateFormatted, // Use formatted Toronto timezone end date
+      startDate: apiEvent.start_date, // Keep original UTC for other processing
+      startDateTime: apiEvent.start_date,
+      endDateTime: apiEvent.end_date,
+      image: apiEvent.images?.[0] || "/images/events/default.jpg",
+      images:
+        apiEvent.images?.length > 0
+          ? apiEvent.images
+          : ["/images/events/default.jpg"],
+      location: "The Pearson Pub",
+      venue: {
+        name: "The Pearson Pub",
+        capacity: 100,
+        layout: "Standard seating",
+      },
+      tags: ["Event"],
+      performers: [],
+      featured: true,
+      ctaText: "Learn More",
+      ctaLink: "/contact",
+      price: { general: 0 },
+      ticketsAvailable: 100,
+      status: apiEvent.status || "upcoming",
+      category: "entertainment",
+      ageRestriction: "19+",
+      specialRequirements: [],
+      contactInfo: {
+        phone: "905-430-5699",
+        email: "events@thepearsonpub.com",
+      },
+      organizer: {
+        name: "The Pearson Pub",
+        description: "Your local neighborhood pub",
+      },
+    };
+  };
 
   // Computed values
   const featuredMenuItems = computed<MenuItem[]>(() => {
@@ -164,8 +201,8 @@ export const useLandingPageData = () => {
       contactInfo.value || {
         name: "The Pearson Pub",
         phone: "905-430-5699",
-        email: "info@thepearsonpub.com",
-        address: "5179 Dundas Street W, Etobicoke, ON M9A 1C2",
+        email: "thepearsonpub@rogers.com",
+        address: "101 MARY ST WHITBY, ON, L1N 2R4",
         description:
           "A cozy neighborhood pub offering great food, drinks, and entertainment.",
         socialMedia: {},
@@ -235,26 +272,34 @@ export const useLandingPageData = () => {
     try {
       isLoading.value = true;
       error.value = null;
-      
+
       // Fetch all three types of specials in parallel
-      const [dailyResponse, seasonalResponse, lateNightResponse] = await Promise.all([
-        publicApi.getDailySpecials(),
-        publicApi.getSeasonalSpecials(),
-        publicApi.getLateNightSpecials(),
-      ]);
+      const [dailyResponse, seasonalResponse, lateNightResponse] =
+        await Promise.all([
+          specialsApi.getDailySpecials(),
+          specialsApi.getSeasonalSpecials(),
+          specialsApi.getLateNightSpecials(),
+        ]);
 
       dailySpecials.value = dailyResponse;
       seasonalSpecials.value = seasonalResponse;
       lateNightSpecials.value = lateNightResponse;
-      
     } catch (err) {
       error.value = "Failed to fetch specials data";
       console.error("Error fetching specials data:", err);
-      
+
       // Set fallback data
-      dailySpecials.value = { specials: [], heading: "Daily Special", total: 0 };
+      dailySpecials.value = {
+        specials: [],
+        heading: "Daily Special",
+        total: 0,
+      };
       seasonalSpecials.value = { specials: [], total: 0 };
-      lateNightSpecials.value = { specials: [], heading: "Latenight Special", total: 0 };
+      lateNightSpecials.value = {
+        specials: [],
+        heading: "Latenight Special",
+        total: 0,
+      };
     } finally {
       isLoading.value = false;
     }

@@ -44,7 +44,7 @@
       </div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div class="space-y-8 history-card">
+          <div class="space-y-8">
             <div class="inline-block">
               <span class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase">Established Heritage</span>
               <div class="w-16 h-1 bg-yellow-500 mt-2"></div>
@@ -68,15 +68,15 @@
 
             <div class="flex items-center space-x-8 pt-6">
               <div class="text-center">
-                <div class="text-4xl font-bold text-yellow-600 dark:text-yellow-400">25+</div>
+                <div class="text-4xl font-bold text-yellow-600 dark:text-yellow-400">10+</div>
                 <div class="text-sm text-gray-600 dark:text-gray-300 font-medium">Years Serving</div>
               </div>
               <div class="text-center">
-                <div class="text-4xl font-bold text-yellow-600 dark:text-yellow-400">1000+</div>
+                <div class="text-4xl font-bold text-yellow-600 dark:text-yellow-400">2000+</div>
                 <div class="text-sm text-gray-600 dark:text-gray-300 font-medium">Happy Customers</div>
               </div>
               <div class="text-center">
-                <div class="text-4xl font-bold text-yellow-600 dark:text-yellow-400">50+</div>
+                <div class="text-4xl font-bold text-yellow-600 dark:text-yellow-400">100+</div>
                 <div class="text-sm text-gray-600 dark:text-gray-300 font-medium">Menu Items</div>
               </div>
             </div>

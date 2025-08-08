@@ -1,27 +1,25 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- Loading State -->
-    <div v-if="backendLoading && !landingContent"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900">
-      <div class="text-center">
-        <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-500 mx-auto mb-4"></div>
-        <p class="text-xl text-gray-600 dark:text-gray-300"></p>
-      </div>
-    </div>
+  <!-- Full Screen Loading -->
+  <FullScreenLoading
+    v-if="showMainLoading"
+    :title="loadingConfig.title"
+    :subtitle="loadingConfig.subtitle"
+    :progress="loadingProgress"
+    :current-step="currentLoadingStep"
+    :texts="loadingConfig.texts"
+    :steps="loadingConfig.steps"
+    :sub-text="loadingConfig.subText"
+    :error="loadingError"
+    :retrying="retryingConnection"
+    @retry="handleRetry"
+    @fallback="showFallbackMode"
+  />
 
-    <!-- Error State -->
-    <div v-else-if="backendError" class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900">
-      <div class="text-center p-8">
-        <h2 class="text-2xl font-bold text-red-600 mb-4">Failed to Load Content</h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">{{ backendError }}</p>
-        <UButton @click="retryLoading" color="yellow">
-          Try Again
-        </UButton>
-      </div>
-    </div>
+  <!-- Static Fallback (Offline Mode) -->
+  <StaticFallback v-else-if="showFallback" />
 
-    <!-- Main Content -->
-    <div v-else>
+  <!-- Main Content -->
+  <div v-else class="min-h-screen bg-gray-50 dark:bg-gray-900">
       <!-- Lazy loaded Hero -->
       <component :is="Hero" v-if="Hero" />
 
@@ -35,8 +33,13 @@
             </div>
             <div class="text-white text-sm md:text-base" v-if="currentDayHours">
               <div class="flex items-center gap-3">
-                <!-- <span class="font-medium">{{ currentDayHours.day }}</span> -->
                 <span>{{ currentDayHours.openTime }} - {{ currentDayHours.closeTime }}</span>
+                <span v-if="currentDayHours.isOpen" class="px-2 py-1 rounded-full text-xs font-semibold bg-green-500 text-white">
+                  OPEN NOW
+                </span>
+                <span v-else class="px-2 py-1 rounded-full text-xs font-semibold bg-red-500 text-white">
+                  CLOSED
+                </span>
               </div>
             </div>
             <div v-else class="text-white text-sm md:text-base">
@@ -160,10 +163,10 @@
                     </div>
 
                     <!-- Day Name for Daily Specials -->
-                    <div v-if="selectedTab.specialType === 'daily' && selectedTab.dayName"
+                    <div v-if="selectedTab.specialType === 'daily' && (selectedTab as any).dayName"
                          class="flex items-center space-x-2 text-blue-600 dark:text-blue-400">
                       <UIcon name="i-heroicons-calendar" class="w-5 h-5" />
-                      <span class="font-medium">Available on {{ selectedTab.dayName }}s</span>
+                      <span class="font-medium">Available on {{ (selectedTab as any).dayName }}s</span>
                     </div>
 
                     <!-- Price -->
@@ -174,7 +177,7 @@
 
                     <!-- Call to Action -->
                     <div class="pt-4">
-                      <UButton to="/menu" color="yellow" size="lg" class="w-full sm:w-auto">
+                      <UButton @click="goToMenuCategory" color="yellow" size="lg" class="w-full sm:w-auto">
                         <UIcon name="i-heroicons-eye" class="w-5 h-5 mr-2" />
                         View Full Menu
                       </UButton>
@@ -394,13 +397,16 @@
           </div>
         </div>
       </section>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, computed, shallowRef, watch, nextTick } from 'vue'
 import { useLandingPageData } from "~/composables/useLandingPageData";
+import { useConnectivity } from "~/composables/useConnectivity";
+import FullScreenLoading from "~/components/loading/FullScreenLoading.vue";
+import StaticFallback from "~/components/StaticFallback.vue";
+import { TimezoneUtil } from '~/utils/timezone';
 
 // Lazy load Hero for better LCP
 const Hero = shallowRef<any>(null)
@@ -412,7 +418,8 @@ definePageMeta({
   title: 'The Pearson Pub | Whitby',
   description: 'Live menu, events, and more. Experience The Pearson Pub in Whitby.',
   layout: 'default',
-  prerender: true
+  prerender: true,
+  middleware: 'connectivity-client'
 })
 
 // SSR/SSG: useAsyncData for consolidated backend data
@@ -441,6 +448,119 @@ const {
   error: backendError,
   initializeAllData,
 } = useLandingPageData();
+
+// Connectivity and Loading Management
+const {
+  status: connectivityStatus,
+  canUseBackend,
+  shouldShowFallback,
+  connectionQuality,
+  checkConnectivity,
+  setupEventListeners,
+  cleanup: cleanupConnectivity,
+} = useConnectivity();
+
+// Loading states
+const initialLoading = ref(true);
+const retryingConnection = ref(false);
+const forceFallback = ref(false);
+
+// Loading configuration
+const loadingConfig = ref({
+  title: "The Pearson Pub",
+  subtitle: "A traditional pub atmosphere with modern amenities in Whitby",
+  texts: [
+  ],
+  steps: ["Connect", "Menu", "Events", "Hours", "Specials"],
+  subText: "",
+});
+
+// Loading progress and step tracking
+const loadingProgress = ref(0);
+const currentLoadingStep = ref(0);
+const loadingError = ref<string | null>(null);
+
+// Computed states
+const showMainLoading = computed(() => {
+  return initialLoading.value || (backendLoading.value && canUseBackend.value);
+});
+
+const showFallback = computed(() => {
+  return !initialLoading.value && (forceFallback.value || shouldShowFallback.value);
+});
+
+// Handle retry functionality
+const handleRetry = async () => {
+  retryingConnection.value = true;
+  loadingError.value = null;
+  
+  try {
+    const isConnected = await checkConnectivity(true);
+    if (isConnected) {
+      initialLoading.value = true;
+      await initializeDataWithProgress();
+    } else {
+      loadingError.value = "Unable to connect to server. Please check your internet connection.";
+    }
+  } catch (error) {
+    loadingError.value = "Connection failed. Please try again.";
+  } finally {
+    retryingConnection.value = false;
+  }
+};
+
+// Show fallback mode
+const showFallbackMode = () => {
+  forceFallback.value = true;
+  initialLoading.value = false;
+};
+
+// Initialize data with progress tracking
+const initializeDataWithProgress = async () => {
+  try {
+    loadingProgress.value = 0;
+    currentLoadingStep.value = 0;
+    loadingConfig.value.subText = "";
+
+    // Step 1: Check connectivity
+    loadingProgress.value = 10;
+    currentLoadingStep.value = 0;
+    const isConnected = await checkConnectivity();
+    
+    if (!isConnected) {
+      throw new Error("Unable to connect to server");
+    }
+
+    // Step 2: Initialize all data
+    loadingProgress.value = 20;
+    currentLoadingStep.value = 1;
+    loadingConfig.value.subText = "Loading restaurant data...";
+    
+    await initializeAllData();
+
+    // Simulate progress for better UX
+    const progressSteps = [40, 60, 80, 95];
+    const stepNames = ["Menu loaded", "Events loaded", "Hours loaded", "Specials loaded"];
+    
+    for (let i = 0; i < progressSteps.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      loadingProgress.value = progressSteps[i];
+      currentLoadingStep.value = i + 2;
+      loadingConfig.value.subText = stepNames[i];
+    }
+
+    // Final step
+    loadingProgress.value = 100;
+    loadingConfig.value.subText = "Ready!";
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    initialLoading.value = false;
+
+  } catch (error: any) {
+    console.error("Failed to initialize data:", error);
+    loadingError.value = error.message || "Failed to load content. Please try again.";
+  }
+};
 
 // Statistics computed from backend data
 const statistics = computed(() => [
@@ -684,6 +804,57 @@ const nextSpecialImage = () => {
   currentImageIndex.value = (currentImageIndex.value + 1) % images.length
 }
 
+// Navigation function to menu with category - enhanced to detect current day's category
+const goToMenuCategory = () => {
+  const selectedSpecial = selectedTab.value;
+  
+  // First check if the selected special has a category
+  if (selectedSpecial && 'specials' in selectedSpecial && selectedSpecial.specials?.[0]?.category_id) {
+    navigateTo(`/menu?category=${selectedSpecial.specials[0].category_id}`);
+    return;
+  }
+  
+  // If no specific category from special, try to find current day's category
+  try {
+    // Get current day name in Toronto timezone
+    const currentDay = TimezoneUtil.nowToronto().toJSDate().toLocaleDateString('en-US', { 
+  weekday: 'long',
+  timeZone: 'America/Toronto'
+})
+    
+    // Look for categories that contain the current day name
+    const dayKeywords = [currentDay, currentDay.substring(0, 3)]; // e.g., ["wednesday", "wed"]
+    let matchedCategory = null;
+    
+    // Search through menu categories for day-specific ones
+    if (menuCategories.value && Array.isArray(menuCategories.value)) {
+      for (const category of menuCategories.value) {
+        const categoryName = category.name.toLowerCase();
+        
+        // Check if category name contains the current day
+        for (const keyword of dayKeywords) {
+          if (categoryName.includes(keyword)) {
+            matchedCategory = category.id;
+            break;
+          }
+        }
+        if (matchedCategory) break;
+      }
+    }
+    
+    // Navigate to the matched category or general menu
+    if (matchedCategory) {
+      navigateTo(`/menu?category=${matchedCategory}`);
+    } else {
+      navigateTo('/menu');
+    }
+  } catch (error) {
+    console.log('Error detecting current day category:', error);
+    // Fallback to general menu page
+    navigateTo('/menu');
+  }
+}
+
 // Watch for changes in active tab to manage rotations
 watch(activeSpecialTab, (newTab) => {
   // Reset image index when switching categories
@@ -706,54 +877,84 @@ watch(specialsTabs, () => {
   })
 }, { deep: true })
 
+
+console.log(operationHours.value, 'Operation Hours Data');
+console.log(menuCategories.value, 'Menu Categories Data');
+console.log(upcomingEvents.value, 'Upcoming Events Data');
+console.log(landingContent.value, 'Landing Content Data');
+
+
 // Get current day's operation hours with open/close status
 const currentDayHours = computed(() => {
   if (!operationHours.value?.length) return null;
 
-  const currentDay = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-  const todayHours = operationHours.value.find((hour) => hour.day === currentDay);
+  // Use Toronto timezone to get current day
+  const currentDay = TimezoneUtil.nowToronto()
+    .toJSDate()
+    .toLocaleDateString('en-US', { 
+      weekday: 'long',
+      timeZone: 'America/Toronto'
+    })
+    .toLowerCase();
+  
+  // First try to find hours for the current day
+  let todayHours = operationHours.value.find((hour) => hour.day.toLowerCase() === currentDay);
+
+  // If not found for current day, check if we're in an overnight period from the previous day
+  if (!todayHours) {
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const currentDayIndex = dayNames.indexOf(currentDay);
+    const previousDayIndex = currentDayIndex === 0 ? 6 : currentDayIndex - 1;
+    const previousDay = dayNames[previousDayIndex];
+
+    const previousDayHours = operationHours.value.find((hour) => hour.day.toLowerCase() === previousDay);
+
+    // Check if previous day has overnight hours that extend to current day
+    if (previousDayHours) {
+      const openTime = previousDayHours.open_time;
+      const closeTime = previousDayHours.close_time;
+
+      // Check if it's overnight hours and we're in the overnight period
+      if (TimezoneUtil.isOvernightHours(openTime, closeTime)) {
+        const now = TimezoneUtil.nowToronto();
+        const currentMinutes = now.hour * 60 + now.minute;
+        
+        // Parse close time to minutes
+        const [closeHour, closeMin] = closeTime.split(':').map(Number);
+        const closeMinutes = closeHour * 60 + closeMin;
+
+        // If we're currently in the early hours before closing time
+        if (currentMinutes <= closeMinutes) {
+          todayHours = previousDayHours;
+        }
+      }
+    }
+  }
 
   if (!todayHours) return null;
 
-  // Format time from HH:MM:SS to HH:MM AM/PM
-  const formatTime = (timeString) => {
-    const [hours, minutes] = timeString.split(':');
-    const hour = parseInt(hours, 10);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
-  };
+  // Use timezone utility for proper status determination
+  const isOpen = TimezoneUtil.isWithinBusinessHours(
+    todayHours.open_time, 
+    todayHours.close_time
+  );
 
-  // Determine if currently open
-  const now = new Date();
-  const currentTime = now.getHours() * 100 + now.getMinutes();
-  const openTime = parseInt(todayHours.open_time.replace(':', ''));
-  const closeTime = parseInt(todayHours.close_time.replace(':', ''));
-
-  let isOpen = false;
-  if (closeTime < openTime) {
-    // Spans midnight (e.g., 11 PM to 2 AM)
-    isOpen = currentTime >= openTime || currentTime <= closeTime;
-  } else {
-    // Same day (e.g., 11 AM to 11 PM)
-    isOpen = currentTime >= openTime && currentTime <= closeTime;
-  }
-
-  // Handle display for hours spanning past midnight
-  const nextDay = new Date(now);
-  nextDay.setDate(now.getDate() + 1);
-  const nextDayName = nextDay.toLocaleDateString('en-US', { weekday: 'long' });
-
-  const displayCloseTime = closeTime < openTime
-    ? `${nextDayName} ${formatTime(todayHours.close_time)}`
-    : formatTime(todayHours.close_time);
+  // Get operation status with proper timezone handling
+  const operationStatus = TimezoneUtil.getOperationStatus(
+    todayHours.open_time,
+    todayHours.close_time,
+    todayHours.status
+  );
 
   return {
     day: currentDay.charAt(0).toUpperCase() + currentDay.slice(1),
-    openTime: formatTime(todayHours.open_time),
-    closeTime: displayCloseTime,
+    openTime: TimezoneUtil.formatTime(todayHours.open_time),
+    closeTime: TimezoneUtil.formatTime(todayHours.close_time),
     isOpen: isOpen && todayHours.status,
-    status: todayHours.status
+    status: todayHours.status,
+    statusText: operationStatus,
+    formattedHours: TimezoneUtil.formatOperationHours(todayHours.open_time, todayHours.close_time),
+    isOvernight: TimezoneUtil.isOvernightHours(todayHours.open_time, todayHours.close_time)
   };
 });
 
@@ -786,9 +987,12 @@ const retryLoading = async () => {
 }
 
 onMounted(async () => {
-  // Initialize landing page data if not already loaded
-  if (!landingContent.value) {
-    await initializeAllData();
+  // Setup connectivity monitoring
+  setupEventListeners();
+
+  // Initialize loading process
+  if (process.client) {
+    await initializeDataWithProgress();
   }
 
   // Initialize intersection observer
@@ -804,7 +1008,7 @@ onMounted(async () => {
   startSpecialRotation()
   startImageRotation()
 
-  // Initialize 3D animations with more performance checks
+  // Initialize animations with performance checks
   if (process.client && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
     const runAnimations = () => {
       // Only run animations if user has not disabled them
@@ -812,7 +1016,7 @@ onMounted(async () => {
         const animatedElements = document.querySelectorAll('[data-aos], .feature-card, .special-card')
         animatedElements.forEach((el, i) => {
           if (el instanceof HTMLElement) {
-            // Simple fade in animation without heavy 3D effects
+            // Simple fade in animation
             el.style.opacity = '0'
             el.style.transform = 'translateY(20px)'
             setTimeout(() => {
@@ -837,6 +1041,8 @@ onUnmounted(() => {
   // Clean up intervals
   stopSpecialRotation()
   stopImageRotation()
+  // Clean up connectivity listeners
+  cleanupConnectivity()
 })
 </script>
 

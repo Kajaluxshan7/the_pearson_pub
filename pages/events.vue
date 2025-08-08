@@ -4,7 +4,6 @@
     <section
       class="hero-section relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
     >
-      
       <div class="absolute inset-0">
         <NuxtImg
           src="/images/entertainment/music.jpg"
@@ -13,19 +12,14 @@
           format="webp"
           quality="80"
         />
-        <div
-          class="absolute inset-0 bg-gradient-to-r from-black/85 to-black/65"
-        ></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/85 to-black/65"></div>
       </div>
       
-      <div
-        class="hero-content relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10"
-      >
+      <div class="hero-content relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
         <div class="inline-block mb-4">
-          <span
-            class="text-yellow-400 font-semibold text-sm lg:text-lg tracking-wide uppercase"
-            >Live Entertainment</span
-          >
+          <span class="text-yellow-400 font-semibold text-sm lg:text-lg tracking-wide uppercase">
+            Live Entertainment
+          </span>
           <div class="w-12 lg:w-16 h-1 bg-yellow-500 mx-auto mt-2"></div>
         </div>
         <h1
@@ -34,93 +28,109 @@
         >
           Events &amp; <span class="text-yellow-400">Entertainment</span>
         </h1>
-        <p
-          class="text-lg sm:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed"
-        >
+        <p class="text-lg sm:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed">
           Join us for <span class="text-yellow-300">live music</span>,
           <span class="text-yellow-300">pub quizzes</span>, and
           <span class="text-yellow-300">special events</span>
         </p>
       </div>
-    </section>    <!-- Filters and Search Section -->
-    <section
-      class="filter-section py-6 lg:py-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50"
-    >
+    </section>
+
+    <!-- Search and Filter Section -->
+    <section class="py-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div
-          class="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between"
-        >
-          <!-- Search Bar -->
-          <div class="flex-1 max-w-md">
+        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <!-- Search -->
+          <div class="flex-1 max-w-md w-full">
             <div class="relative">
-              <UIcon
-                name="i-heroicons-magnifying-glass"
-                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
+              <input 
+                v-model="searchQuery" 
+                type="text" 
+                placeholder="Search events..." 
+                class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm"
               />
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search events..."
-                class="w-full pl-10 pr-4 py-3 rounded-full border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-              />
-              <button
-                v-if="searchQuery"
-                @click="searchQuery = ''"
-                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                <UIcon name="i-heroicons-x-mark" class="w-5 h-5" />
-              </button>
+              <UIcon name="i-heroicons-magnifying-glass" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
           </div>
 
-          <!-- Category Filters -->
-          <div class="flex flex-wrap gap-2 lg:gap-3">            <button
-              v-for="category in categories"
-              :key="category.id"
-              :class="[
-                'category-btn px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 whitespace-nowrap',
-                selectedCategory === category.id
-                  ? 'bg-yellow-500 text-white shadow-lg scale-105'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-yellow-100 dark:hover:bg-yellow-900 hover:shadow-lg',
-              ]"
-              @click="
-                selectedCategory =
-                  selectedCategory === category.id ? 'all' : category.id
-              "
-            >
-              {{ category.name }}
-            </button>
+          <!-- Filters -->
+          <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center w-full sm:w-auto">
+            <!-- Status Filter -->
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</label>
+              <USelectMenu 
+                v-model="selectedStatus" 
+                :options="statusOptions" 
+                value-attribute="value" 
+                option-attribute="label" 
+                class="w-full sm:min-w-[140px]"
+              />
+            </div>
+
+            <!-- View Mode Toggle -->
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                @click="viewMode = 'grid'"
+                :class="[
+                  'px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-2',
+                  viewMode === 'grid'
+                    ? 'bg-yellow-500 text-white shadow-md'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                ]"
+              >
+                <UIcon name="i-heroicons-squares-2x2" class="w-4 h-4" />
+                <span class="hidden sm:inline text-sm">Grid</span>
+              </button>
+              <button
+                @click="viewMode = 'list'"
+                :class="[
+                  'px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-2',
+                  viewMode === 'list'
+                    ? 'bg-yellow-500 text-white shadow-md'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                ]"
+              >
+                <UIcon name="i-heroicons-list-bullet" class="w-4 h-4" />
+                <span class="hidden sm:inline text-sm">List</span>
+              </button>
+            </div>
           </div>
         </div>
-
-        <!-- Active Filters Display -->
-        <div
-          v-if="selectedCategory !== 'all' || searchQuery"
-          class="flex flex-wrap gap-2 mt-4"
-        >
-          <span class="text-sm text-gray-600 dark:text-gray-300 mr-2"
-            >Active filters:</span
-          >
-          <UBadge
-            v-if="selectedCategory !== 'all'"
-            color="yellow"
-            variant="subtle"
-            class="cursor-pointer"
-            @click="selectedCategory = 'all'"
-          >
-            {{ categories.find((c: Category) => c.id === selectedCategory)?.name }}
-            <UIcon name="i-heroicons-x-mark" class="w-3 h-3 ml-1" />
-          </UBadge>
-          <UBadge
-            v-if="searchQuery"
-            color="blue"
-            variant="subtle"
-            class="cursor-pointer"
+        
+        <!-- Active Filters -->
+        <div v-if="hasActiveFilters" class="mt-4 flex flex-wrap gap-2">
+          <UBadge 
+            v-if="searchQuery" 
+            color="yellow" 
+            variant="soft" 
+            class="cursor-pointer hover:bg-yellow-200 dark:hover:bg-yellow-800 transition-colors" 
             @click="searchQuery = ''"
           >
+            <UIcon name="i-heroicons-magnifying-glass" class="w-3 h-3 mr-1" />
             "{{ searchQuery }}"
             <UIcon name="i-heroicons-x-mark" class="w-3 h-3 ml-1" />
           </UBadge>
+
+          <UBadge 
+            v-if="selectedStatus !== 'all'" 
+            color="yellow" 
+            variant="soft" 
+            class="cursor-pointer hover:bg-yellow-200 dark:hover:bg-yellow-800 transition-colors" 
+            @click="selectedStatus = 'all'"
+          >
+            Status: {{ statusOptions.find(s => s.value === selectedStatus)?.label }}
+            <UIcon name="i-heroicons-x-mark" class="w-3 h-3 ml-1" />
+          </UBadge>
+
+          <UButton 
+            v-if="hasActiveFilters" 
+            size="xs" 
+            color="gray" 
+            variant="ghost" 
+            @click="clearAllFilters"
+          >
+            Clear All
+          </UButton>
         </div>
       </div>
     </section>
@@ -128,70 +138,58 @@
     <!-- Events Section -->
     <section class="py-12 lg:py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Unified Events & Parties Heading -->
-        <div class="flex justify-between items-center mb-8">
+        <!-- Results Header -->
+        <div class="text-center mb-12">
           <div>
             <h2
-              class="text-2xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2"
+              class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3"
               style="font-family: 'Cinzel', 'Georgia', serif"
             >
-              Events & Parties
+              {{ getResultsTitle() }}
             </h2>
-            <p class="text-gray-600 dark:text-gray-300">
-              {{ filteredEvents.length }} event{{ filteredEvents.length !== 1 ? "s" : "" }} found
-            </p>
-          </div>
-          <div class="hidden sm:flex items-center gap-2">
-            <span class="text-sm text-gray-500 dark:text-gray-400">Layout:</span>
-            <UBadge 
-              :color="viewMode === 'grid' ? 'yellow' : 'gray'" 
-              variant="subtle"
-              class="cursor-pointer"
-              @click="viewMode = 'grid'"
-            >
-              Grid
-            </UBadge>
-            <UBadge 
-              :color="viewMode === 'list' ? 'yellow' : 'gray'" 
-              variant="subtle"
-              class="cursor-pointer"
-              @click="viewMode = 'list'"
-            >
-              List
-            </UBadge>
+            <div class="flex items-center justify-center gap-2">
+              <div class="w-12 h-1 bg-yellow-500"></div>
+              <p class="text-lg text-gray-600 dark:text-gray-300 font-medium">
+                {{ filteredEvents.length }} event{{ filteredEvents.length !== 1 ? "s" : "" }} found
+              </p>
+            </div>
           </div>
         </div>
+
+        <!-- Loading State -->
+        <div v-if="isLoading || backendLoading" class="text-center py-20">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 dark:bg-yellow-900/20 rounded-full mb-6">
+            <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 text-yellow-600 dark:text-yellow-400 animate-spin" />
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Loading Events</h3>
+          <p class="text-gray-600 dark:text-gray-400">Fetching the latest entertainment lineup...</p>
+        </div>
+
         <!-- Error State -->
-        <div v-if="error || backendError" class="text-center py-16">
-          <UIcon
-            name="i-heroicons-exclamation-triangle"
-            class="w-16 h-16 text-red-400 mx-auto mb-4"
-          />
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Something went wrong
+        <div v-else-if="error || backendError" class="text-center py-20">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full mb-6">
+            <UIcon name="i-heroicons-exclamation-triangle" class="w-8 h-8 text-red-500" />
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+            Unable to Load Events
           </h3>
-          <p class="text-gray-600 dark:text-gray-300 mb-6">
+          <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
             {{ error || backendError }}
           </p>
-          <UButton
-            color="red"
-            variant="outline"
-            @click="error = null; fetchEvents()"
-          >
+          <UButton color="yellow" size="lg" @click="refreshEvents">
+            <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 mr-2" />
             Try Again
           </UButton>
         </div>
 
-        <!-- Simple Loading State -->
-
-        <!-- Unified Events Section -->
-        <div v-if="filteredEvents.length > 0">
-          <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+        <!-- Events Grid/List -->
+        <div v-else-if="filteredEvents.length > 0">
+          <!-- Grid View -->
+          <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             <div
               v-for="(event, index) in filteredEvents"
               :key="event.id"
-              class="event-card group transform transition-all duration-500 hover:scale-105 cursor-pointer"
-              :style="{ animationDelay: `${index * 100}ms` }"
+              class="event-card group transform transition-all duration-500 hover:scale-[1.02] cursor-pointer"
               @click="showEventDetails(event)"
               @keydown.enter="showEventDetails(event)"
               @keydown.space.prevent="showEventDetails(event)"
@@ -199,84 +197,86 @@
               role="button"
               :aria-label="`View details for ${event.title}`"
             >
-              <UCard
-                class="overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 bg-white dark:bg-gray-800 border-0 h-full"
-              >
-                <template #header>
-                  <div class="relative overflow-hidden">
-                    <NuxtImg
-                      :key="`event-${event.id}-${index}-${currentImageIndexes[`${event.id}-${index}`] || 0}`"
-                      :src="getCurrentImage(event, index)"
-                      :alt="event.title"
-                      class="w-full h-48 lg:h-56 object-cover group-hover:scale-110 transition-transform duration-500"
-                      format="webp"
-                      quality="75"
-                      loading="lazy"
-                      :placeholder="[400, 240, 75]"
-                      @error="(e: any) => e.target.src = '/images/entertainment/music.jpg'"
-                    />
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    <!-- Image Indicators for Multiple Images -->
-                    <div v-if="event.images && event.images.length > 1" class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                      <div
-                        v-for="(img, imgIndex) in event.images"
-                        :key="imgIndex"
-                        :class="[
-                          'w-2 h-2 rounded-full transition-all duration-300',
-                          (currentImageIndexes[`${event.id}-${index}`] || 0) === imgIndex
-                            ? 'bg-yellow-400'
-                            : 'bg-white/50'
-                        ]"
-                      ></div>
-                    </div>
-                    <!-- Image Counter -->
-                    <div v-if="event.images && event.images.length > 1" class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs">
-                      {{ (currentImageIndexes[`${event.id}-${index}`] || 0) + 1 }}/{{ event.images.length }}
-                    </div>
-                    <!-- Badges -->
-                    <div class="absolute top-4 left-4 flex flex-col gap-2">
-                      <UBadge v-if="event.featured" color="yellow" variant="solid" class="font-semibold text-xs">Featured</UBadge>
-                      <UBadge :color="getStatusColor(event.status)" variant="solid" class="font-semibold text-xs">
-                        {{ event.status.charAt(0).toUpperCase() + event.status.slice(1) }}
-                      </UBadge>
-                    </div>
-                    <div class="absolute top-4 right-4">
-                      <UBadge :color="getCategoryColor(event.category)" variant="subtle" class="font-semibold text-xs">
-                        {{ event.category.charAt(0).toUpperCase() + event.category.slice(1) }}
-                      </UBadge>
+              <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200 dark:border-gray-700 h-full">
+                <!-- Image Container -->
+                <div class="relative overflow-hidden h-56">
+                  <NuxtImg
+                    :src="getCurrentEventImage(event)"
+                    :alt="event.title"
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    format="webp"
+                    quality="85"
+                    loading="lazy"
+                    @error="handleImageError"
+                  />                  
+                  <!-- Status Badge -->
+                  <div class="absolute top-4 right-4">
+                    <div :class="[
+                      'px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md',
+                      getStatusColor(event.status) === 'green' ? 'bg-green-500/90 text-white' :
+                      getStatusColor(event.status) === 'blue' ? 'bg-blue-500/90 text-white' :
+                      'bg-gray-500/90 text-white'
+                    ]">
+                      {{ getStatusLabel(event.status) }}
                     </div>
                   </div>
-                </template>
-                <div class="p-4 lg:p-6 flex flex-col h-full">
-                  <h3 class="text-xl lg:text-2xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors line-clamp-2">
+                </div>
+                
+                <!-- Content -->
+                <div class="p-6">
+                  <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors line-clamp-2 leading-tight">
                     {{ event.title }}
                   </h3>
-                  <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed line-clamp-3 flex-grow">
+                  <p class="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed line-clamp-3 text-sm">
                     {{ event.description }}
                   </p>
-                  <div class="space-y-2 mb-4">
-                    <div v-if="event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                      <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400" />
-                      <span class="font-medium">{{ event.date }}</span>
+                  <!-- Event Info -->
+                  <div class="space-y-3">
+                    <!-- Event Date Range -->
+                    <div v-if="event.startDate && event.endDate" class="flex items-start text-sm text-gray-500 dark:text-gray-400">
+                      <div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mr-3 mt-0.5">
+                        <UIcon name="i-heroicons-calendar" class="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                      </div>
+                      <div class="flex-1">
+                        <div class="font-medium text-gray-900 dark:text-white">{{ formatDateTimeToFriendly(event.startDateTime) }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          to {{ formatDateTimeToFriendly(event.endDateTime) }}
+                        </div>
+                      </div>
                     </div>
-                    <div v-if="event.time && event.time !== event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                      <UIcon name="i-heroicons-clock" class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400" />
-                      <span class="font-medium">{{ event.time }}</span>
+                    <!-- Single Date (fallback) -->
+                    <div v-else-if="event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mr-3">
+                        <UIcon name="i-heroicons-calendar" class="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                      </div>
+                      <span class="font-medium">{{ formatEventDateShort(event.date) }}</span>
+                    </div>
+                    <div v-if="event.time" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mr-3">
+                        <UIcon name="i-heroicons-clock" class="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                      </div>
+                      <span class="font-medium">{{ event.time.replace(/\s*\/?\s*\b(EST|EDT)\b\s*/g, '').trim() }}</span>
                     </div>
                   </div>
-                  <UButton color="yellow" variant="solid" class="w-full transform transition-all hover:scale-105 mt-auto" size="md">
-                    View Details
-                  </UButton>
+
+                  <!-- CTA -->
+                  <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm font-medium text-yellow-600 dark:text-yellow-400">Learn More</span>
+                      <UIcon name="i-heroicons-arrow-right" class="w-4 h-4 text-yellow-600 dark:text-yellow-400 group-hover:translate-x-1 transition-transform duration-300" />
+                    </div>
+                  </div>
                 </div>
-              </UCard>
+              </div>
             </div>
           </div>
-          <div v-else class="space-y-6">
+
+          <!-- List View -->
+          <div v-else class="space-y-8">
             <div
               v-for="(event, index) in filteredEvents"
               :key="event.id"
               class="event-card group cursor-pointer"
-              :style="{ animationDelay: `${index * 100}ms` }"
               @click="showEventDetails(event)"
               @keydown.enter="showEventDetails(event)"
               @keydown.space.prevent="showEventDetails(event)"
@@ -284,144 +284,158 @@
               role="button"
               :aria-label="`View details for ${event.title}`"
             >
-              <UCard class="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white dark:bg-gray-800 border-0">
+              <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200 dark:border-gray-700">
                 <div class="flex flex-col lg:flex-row">
                   <!-- Image -->
-                  <div class="lg:w-80 relative overflow-hidden">
+                  <div class="lg:w-96 relative overflow-hidden">
                     <NuxtImg
-                      :key="`event-list-${event.id}-${index}-${currentImageIndexes[`${event.id}-${index}`] || 0}`"
-                      :src="getCurrentImage(event, index)"
+                      :src="getCurrentEventImage(event)"
                       :alt="event.title"
-                      class="w-full h-48 lg:h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      class="w-full h-64 lg:h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       format="webp"
-                      quality="75"
+                      quality="85"
                       loading="lazy"
-                      :placeholder="[400, 240, 75]"
-                      @error="(e: any) => e.target.src = '/images/entertainment/music.jpg'"
+                      @error="handleImageError"
                     />
-                    <!-- Image Indicators for Multiple Images -->
-                    <div v-if="event.images && event.images.length > 1" class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                      <div
-                        v-for="(img, imgIndex) in event.images"
-                        :key="imgIndex"
-                        :class="[
-                          'w-2 h-2 rounded-full transition-all duration-300',
-                          (currentImageIndexes[`${event.id}-${index}`] || 0) === imgIndex
-                            ? 'bg-yellow-400'
-                            : 'bg-white/50'
-                        ]"
-                      ></div>
-                    </div>
-                    <!-- Image Counter -->
-                    <div v-if="event.images && event.images.length > 1" class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs">
-                      {{ (currentImageIndexes[`${event.id}-${index}`] || 0) + 1 }}/{{ event.images.length }}
-                    </div>
-                    <!-- Badges -->
-                    <div class="absolute top-4 left-4 flex flex-col gap-2">
-                      <UBadge v-if="event.featured" color="yellow" variant="solid" class="font-semibold text-xs">Featured</UBadge>
-                      <UBadge :color="getStatusColor(event.status)" variant="solid" class="font-semibold text-xs">
-                        {{ event.status.charAt(0).toUpperCase() + event.status.slice(1) }}
-                      </UBadge>
+                    
+                    <!-- Status Badge -->
+                    <div class="absolute top-6 left-6">
+                      <div :class="[
+                        'px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide backdrop-blur-md',
+                        getStatusColor(event.status) === 'green' ? 'bg-green-500/90 text-white' :
+                        getStatusColor(event.status) === 'blue' ? 'bg-blue-500/90 text-white' :
+                        'bg-gray-500/90 text-white'
+                      ]">
+                        {{ getStatusLabel(event.status) }}
+                      </div>
                     </div>
                   </div>
+                  
                   <!-- Content -->
-                  <div class="flex-1 p-6 lg:p-8">
-                    <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-                      <div class="flex-1">
-                        <div class="flex items-start justify-between mb-4">
-                          <div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors mb-2">
-                              {{ event.title }}
-                            </h3>
-                            <UBadge :color="getCategoryColor(event.category)" variant="subtle" class="font-semibold text-sm">
-                              {{ event.category.charAt(0).toUpperCase() + event.category.slice(1) }}
-                            </UBadge>
-                          </div>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                  <div class="flex-1 p-8">
+                    <div class="flex flex-col justify-between h-full">
+                      <div>
+                        <h3 class="text-3xl font-bold text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors mb-4 leading-tight">
+                          {{ event.title }}
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed text-lg">
                           {{ event.description }}
                         </p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                          <div v-if="event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                            <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400" />
-                            <span class="font-medium">{{ event.date }}</span>
+                        
+                        <!-- Event Details -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                          <div v-if="event.date" class="flex items-center">
+                            <div class="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mr-4">
+                              <UIcon name="i-heroicons-calendar" class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                            </div>
+                            <div>
+                              <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">Date</div>
+                              <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ formatEventDate(event.date) }}</div>
+                            </div>
                           </div>
-                          <div v-if="event.time && event.time !== event.date" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                            <UIcon name="i-heroicons-clock" class="w-4 h-4 mr-2 text-yellow-600 dark:text-yellow-400" />
-                            <span class="font-medium">{{ event.time }}</span>
+                          <div v-if="event.time" class="flex items-center">
+                            <div class="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mr-4">
+                              <UIcon name="i-heroicons-clock" class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                            </div>
+                            <div>
+                              <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">Time</div>
+                              <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ event.time }}</div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <div class="lg:ml-6">
-                        <UButton color="yellow" variant="solid" size="lg" class="w-full lg:w-auto">
+                      
+                      <div class="flex justify-end">
+                        <UButton color="yellow" variant="solid" size="lg" class="px-8">
                           View Details
+                          <UIcon name="i-heroicons-arrow-right" class="w-5 h-5 ml-2" />
                         </UButton>
                       </div>
                     </div>
                   </div>
                 </div>
-              </UCard>
+              </div>
             </div>
           </div>
         </div>
-        <!-- No Results -->
-        <div v-else class="text-center py-16">
-          <UIcon name="i-heroicons-calendar-x" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No events found</h3>
-          <p class="text-gray-600 dark:text-gray-300 mb-6">
-            <span v-if="searchQuery || selectedCategory !== 'all'">Try adjusting your search or filters to find more events.</span>
-            <span v-else>Check back soon for upcoming events!</span>
+
+        <!-- Empty State -->
+        <div v-else class="text-center py-20">
+          <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full mb-6">
+            <UIcon name="i-heroicons-calendar-x" class="w-10 h-10 text-gray-400" />
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+            {{ hasActiveFilters ? 'No Matching Events Found' : 'No Events Available' }}
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto text-lg">
+            <span v-if="hasActiveFilters">
+              Try adjusting your search criteria or filters to discover more exciting events.
+            </span>
+            <span v-else>
+              Stay tuned for upcoming entertainment and special events at The Pearson Pub!
+            </span>
           </p>
-          <UButton v-if="searchQuery || selectedCategory !== 'all'" color="yellow" variant="outline" @click="clearFilters">Clear Filters</UButton>
+          <UButton 
+            v-if="hasActiveFilters" 
+            color="yellow" 
+            variant="solid"
+            size="lg"
+            @click="clearAllFilters"
+          >
+            <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 mr-2" />
+            Clear All Filters
+          </UButton>
         </div>
       </div>
     </section>
-
-    <!-- Event Details Modal -->
-    <template v-if="isEventModalOpen">
-      <EventDetailsModal
-        v-if="modalLayout === 'portrait'"
-        :event="selectedEvent"
-        :is-open="isEventModalOpen"
-        @close="closeEventModal"
-      ></EventDetailsModal>
-      <EventDetailsModalLandscape
-        v-else
-        :event="selectedEvent"
-        :is-open="isEventModalOpen"
-        @close="closeEventModal"
-      ></EventDetailsModalLandscape>
-    </template>
-
-    <!-- Modal Layout Toggle (when modal is open) -->
-    <div
-      v-if="isEventModalOpen"
-      class="fixed bottom-6 right-6 z-[60] flex gap-2"
-    >
-      <UButton
-        @click="toggleModalLayout"
-        color="gray"
-        variant="solid"
-        size="sm"
-        class="shadow-lg backdrop-blur-sm"
-      >
-        <UIcon :name="modalLayout === 'portrait' ? 'i-heroicons-arrows-pointing-out' : 'i-heroicons-arrows-pointing-in'" class="w-4 h-4 mr-1" />
-        {{ modalLayout === 'portrait' ? 'Landscape' : 'Portrait' }}
-      </UButton>
-    </div>    <!-- Weekly Schedule Section -->
-    <WeeklyEntertainment />    <!-- Floating Action Button -->
-    <!-- Removed Floating Action Button component usage -->
-
+    <!-- Weekly Schedule Section -->
+    <WeeklyEntertainment />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
-import { useEvents } from "~/composables/useEvents";
 import { useLandingPageData } from "~/composables/useLandingPageData";
-import { usePerformance } from "~/composables/usePerformance";
-import EventDetailsModal from "~/components/events/EventDetailsModal.vue";
-import EventDetailsModalLandscape from "~/components/events/EventDetailsModalLandscape.vue";  // SSR/SSG: useAsyncData for events data
+import { TimezoneUtil } from '~/utils/timezone';
+import { DateTime } from 'luxon';
+
+// Types
+interface Event {
+  id: string | number;
+  title: string;
+  description: string;
+  fullDescription?: string;
+  date: string;
+  startDate?: string;
+  endDate?: string;
+  startDateTime?: string;
+  endDateTime?: string;
+  time?: string;
+  image?: string;
+  images?: string[];
+  location?: string;
+  status: 'upcoming' | 'current' | 'ended';
+  featured?: boolean;
+  venue?: {
+    name: string;
+    capacity?: number;
+    layout?: string;
+  };
+  price?: {
+    general?: number;
+    vip?: number;
+    student?: number;
+  };
+  tags?: string[];
+  contactInfo?: {
+    phone?: string;
+    email?: string;
+  };
+  ctaLink?: string;
+  ctaText?: string;
+}
+
+// SSR/SSG: useAsyncData for events data
 const { data: eventsData } = await useAsyncData('events-data', async () => {
   const { fetchEventsData } = useLandingPageData();
   await fetchEventsData();
@@ -430,272 +444,208 @@ const { data: eventsData } = await useAsyncData('events-data', async () => {
 
 // Backend events data
 const {
-  eventsData: backendEventsData,
   allEvents: dynamicEvents,
   isLoading: backendLoading,
   error: backendError,
   fetchEventsData,
 } = useLandingPageData();
 
-// Alias for compatibility
-const fetchEvents = fetchEventsData;
-import type { Event } from "~/types/events";
-import type { Category } from "~/types/events-ui";
-
-// Composables
-const { events: staticEvents } = useEvents(); // Keep for weekly schedule
-
-// Performance monitoring
-const { 
-  preloadImage,
-  isVisible,
-  metrics
-} = usePerformance();
-
 // Reactive data
 const searchQuery = ref("");
-const selectedCategory = ref("all");
+const selectedStatus = ref("all");
 const viewMode = ref<"grid" | "list">("grid");
-const currentPage = ref(1);
-const itemsPerPage = 8; // Changed to 8 as requested
-
-// Pagination for backend events
-const eventPagination = ref({
-  events: {
-    page: 1,
-    totalPages: 1,
-    total: 0
-  }
-});
+const isLoading = ref(false);
+const error = ref<string | null>(null);
 
 // Modal state
 const selectedEvent = ref<Event | null>(null);
 const isEventModalOpen = ref(false);
-const modalLayout = ref<'portrait' | 'landscape'>('portrait');
 
-// Image rotation for events with multiple images
-const currentImageIndexes = ref<{ [key: string]: number }>({});
+// Image rotation state
+const currentImageIndexes = ref<Record<string, number>>({});
 
-// Categories with proper typing
-const categories = ref<Category[]>([
-  { id: "all", name: "All Events" },
-  { id: "music", name: "Music" },
-  { id: "quiz", name: "Quiz Night" },
-  { id: "food", name: "Food & Drink" },
-  { id: "special", name: "Special Events" },
-  { id: "entertainment", name: "Entertainment" },
-]);
+// Status options for filter
+const statusOptions = [
+  { label: "All Events", value: "all" },
+  { label: "Current", value: "current" },
+  { label: "Upcoming", value: "upcoming" },
+  { label: "Past", value: "ended" }
+];
 
-// Error handling
-const error = ref<string | null>(null);
-const isLoading = ref(false);
-
-// Combine static events with backend events for display
+// Transform backend events to match frontend interface
 const allEvents = computed(() => {
   const dynamic = dynamicEvents.value || [];
   
-  // Helper function to calculate real-time event status
-  const calculateRealTimeStatus = (startDate: string, endDate: string) => {
-    const now = new Date();
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+  return dynamic.map((event: any) => ({
+    id: event.id,
+    title: event.title || event.name,
+    description: event.description || '',
+    fullDescription: event.fullDescription || event.description || '',
+    date: event.startDate || event.date || '',
+    startDate: event.startDate,
+    endDate: event.endDate,
+    startDateTime: event.startDateTime,
+    endDateTime: event.endDateTime,
+    time: event.time || (event.endDate && event.endDate !== event.startDate ? `Until ${event.endDate}` : ''),
+    image: (event.images && event.images.length > 0) ? event.images[0] : '/images/entertainment/music.jpg',
+    images: event.images || [],
+    location: event.location || 'The Pearson Pub',
+    status: event.status as 'upcoming' | 'current' | 'ended',
+    featured: event.featured || false,
+    venue: event.venue || null,
+    price: event.price || null,
+    tags: event.tags || [],
+    contactInfo: event.contactInfo || null,
+    ctaLink: event.ctaLink || null,
+    ctaText: event.ctaText || 'Book Now'
+  })).sort((a, b) => {
+    // Sort by status priority (current > upcoming > ended), then by date
+    const statusPriority = { current: 0, upcoming: 1, ended: 2 };
+    const aPriority = statusPriority[a.status];
+    const bPriority = statusPriority[b.status];
     
-    if (now < start) {
-      return 'upcoming';
-    } else if (now >= start && now <= end) {
-      return 'ongoing';
-    } else {
-      return 'ended';
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority;
     }
-  };
-
-  // Log the raw backend events data
-  console.log('Backend dynamic events:', dynamic);
-  console.log('Current date for comparison:', new Date());
-
-  // Transform backend events to match frontend interface
-  const transformedDynamic = dynamic.map((event: any) => {
-    // Log each event's dates and status from the backend
-    console.log('Event from backend:', {
-      name: event.name,
-      start_date: event.start_date,
-      end_date: event.end_date,
-      startDate: event.startDate,
-      endDate: event.endDate,
-      status: event.status
-    });
-
-    // Use the formatted dates from backend
-    const startDateFormatted = event.startDate || ''; // "Jul 10, 2025"
-    const endDateFormatted = event.endDate || '';     // "Jul 18, 2025"
     
-    // Create date and time display
-    let dateDisplay = startDateFormatted;
-    let timeDisplay = '';
-    
-    // If we have both start and end dates and they're different, show as time range
-    if (startDateFormatted && endDateFormatted && startDateFormatted !== endDateFormatted) {
-      timeDisplay = `Until ${endDateFormatted}`;
-    }    
-
-    // Use the status from backend (already calculated correctly)
-    const eventStatus = event.status;
-
-    return {
-      id: event.id,
-      title: event.title || event.name,
-      description: event.description || '',
-      date: dateDisplay,
-      time: timeDisplay,
-      image: (event.images && event.images.length > 0) ? event.images[0] : '/images/entertainment/music.jpg',
-      images: event.images || [],
-      featured: event.featured || false,
-      category: (event.category || 'event') as 'music' | 'quiz' | 'food' | 'special' | 'entertainment' | 'event',
-      status: eventStatus as 'upcoming' | 'ongoing' | 'current' | 'completed' | 'cancelled' | 'ended',
-      ctaText: "View Details",
-      ctaLink: "#"
-    };
-  });
-  
-  // Log the transformed events
-  console.log('Transformed events:', transformedDynamic);
-
-  // Sort by date (newest first) - handle both formatted dates and ISO strings
-  return transformedDynamic.sort((a, b) => {
-    // Try to parse the date from various formats
-    const parseDate = (dateStr: string) => {
-      if (!dateStr) return new Date('1970-01-01');
-      
-      // If it's already a valid date format, use it
-      const parsed = new Date(dateStr);
-      if (!isNaN(parsed.getTime())) return parsed;
-      
-      // Try parsing formatted date like "Jul 10, 2025"
-      try {
-        return new Date(dateStr);
-      } catch {
-        return new Date('1970-01-01');
-      }
-    };
-    
-    const dateA = parseDate(a.date);
-    const dateB = parseDate(b.date);
-    return dateB.getTime() - dateA.getTime();
+    // If same status, sort by date
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return a.status === 'ended' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
   });
 });
 
-// Computed properties with error handling
+// Filtered events based on search and status
 const filteredEvents = computed(() => {
-  try {
-    let filtered = allEvents.value || [];
+  let filtered = allEvents.value || [];
 
-    // Filter by category
-    if (selectedCategory.value !== "all") {
-      filtered = filtered.filter(
-        (event: any) => event.category === selectedCategory.value
-      );
-    }
-
-    // Filter by search query
-    if (searchQuery.value) {
-      const query = searchQuery.value.toLowerCase();
-      filtered = filtered.filter(
-        (event: any) =>
-          event.title.toLowerCase().includes(query) ||
-          event.description.toLowerCase().includes(query) ||
-          event.tags?.some((tag: string) => tag.toLowerCase().includes(query)) ||
-          event.performers?.some((performer: string) =>
-            performer.toLowerCase().includes(query)
-          ) ||
-          event.location?.toLowerCase().includes(query)
-      );
-    }
-
-    return filtered;
-  } catch (err) {
-    console.error('Error filtering events:', err);
-    error.value = 'Failed to filter events';
-    return [];
+  // Filter by status
+  if (selectedStatus.value !== "all") {
+    filtered = filtered.filter(event => event.status === selectedStatus.value);
   }
-});
 
-// Separate upcoming and past events
-const upcomingEvents = computed(() => {
-  return filteredEvents.value.filter(event => 
-    event.status === 'upcoming' || event.status === 'ongoing' || event.status === 'current'
-  ).sort((a, b) => {
-    // Sort upcoming events by date (earliest first)
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    return dateA.getTime() - dateB.getTime();
-  });
-});
-
-const pastEvents = computed(() => {
-  return filteredEvents.value.filter(event => 
-    event.status === 'ended' || event.status === 'completed'
-  ).sort((a, b) => {
-    // Sort past events by date (most recent first)
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    return dateB.getTime() - dateA.getTime();
-  });
-});
-
-const totalPages = computed(() => 1); // No pagination needed since we show all events
-
-const paginatedEvents = computed(() => {
-  // This is kept for backward compatibility but not used
-  return filteredEvents.value;
-});
-
-// Helper functions with proper error handling
-const getStatusColor = (status: string) => {
-  const statusColors = {
-    upcoming: "green",
-    ongoing: "blue",
-    current: "blue", 
-    completed: "gray",
-    cancelled: "red",
-    ended: "gray"
-  } as const;
-  return statusColors[status as keyof typeof statusColors] || "gray";
-};
-
-const getCategoryColor = (category: string) => {
-  const categoryColors = {
-    music: "purple",
-    quiz: "blue",
-    food: "orange",
-    special: "pink",
-    entertainment: "indigo"
-  } as const;
-  return categoryColors[category as keyof typeof categoryColors] || "gray";
-};
-
-// Safe price calculation
-const minPrice = (priceObj: Record<string, number | undefined | null>): string => {
-  try {
-    const prices = Object.values(priceObj).filter((p): p is number => 
-      typeof p === 'number' && !isNaN(p) && p > 0
+  // Filter by search query
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(event =>
+      event.title.toLowerCase().includes(query) ||
+      event.description.toLowerCase().includes(query)
     );
-    return prices.length > 0 ? Math.min(...prices).toFixed(2) : '0';
-  } catch (err) {
-    console.error('Error calculating minimum price:', err);
-    return '0';
+  }
+
+  return filtered;
+});
+
+// Computed properties for UI state
+const hasActiveFilters = computed(() => {
+  return searchQuery.value !== "" || selectedStatus.value !== "all";
+});
+
+// Helper functions
+const getStatusColor = (status: string) => {
+  const colors = {
+    upcoming: "green",
+    current: "blue",
+    ended: "gray"
+  };
+  return colors[status as keyof typeof colors] || "gray";
+};
+
+const getStatusLabel = (status: string) => {
+  const labels = {
+    upcoming: "Upcoming",
+    current: "Now Live",
+    ended: "Past Event"
+  };
+  return labels[status as keyof typeof labels] || status;
+};
+
+const getResultsTitle = () => {
+  if (selectedStatus.value === "current") return "Current Events";
+  if (selectedStatus.value === "upcoming") return "Upcoming Events";
+  if (selectedStatus.value === "ended") return "Past Events";
+  return "All Events";
+};
+
+const formatEventDate = (dateString: string) => {
+  if (!dateString) return '';
+  return TimezoneUtil.formatTorontoTime(dateString);
+};
+
+const formatEventDateShort = (dateString: string) => {
+  if (!dateString) return '';
+  return TimezoneUtil.formatTorontoDateShort(dateString);
+};
+
+const formatEventMonth = (dateString: string) => {
+  if (!dateString) return '';
+  try {
+    const date = TimezoneUtil.parseTorontoDate(dateString);
+    return TimezoneUtil.formatTorontoTime(date, { month: 'short' }).toUpperCase();
+  } catch {
+    return '';
   }
 };
 
-const clearFilters = () => {
-  searchQuery.value = "";
-  selectedCategory.value = "all";
-  currentPage.value = 1;
+const formatEventDay = (dateString: string) => {
+  if (!dateString) return '';
+  try {
+    const date = TimezoneUtil.parseTorontoDate(dateString);
+    return date.getDate().toString();
+  } catch {
+    return '';
+  }
 };
 
-// Event modal functions with proper typing
-const showEventDetails = (event: any, layout: 'portrait' | 'landscape' = 'portrait') => {
-  selectedEvent.value = event as Event;
-  modalLayout.value = layout;
+// const formatEventDateRange = (startDate: string, endDate: string) => {
+//   if (!startDate || !endDate) return '';
+//   return TimezoneUtil.formatEventDateRange(startDate, endDate);
+// };
+
+const getCurrentEventImage = (event: Event | null) => {
+  if (!event) return '/images/entertainment/eventDefault.jpg';
+  
+  // Always return a valid image, fallback to /images/entertainment/eventDefault.jpg
+  if (!event.images || event.images.length === 0) {
+    return event.image && event.image !== '' ? event.image : '/images/entertainment/eventDefault.jpg';
+  }
+  if (event.images.length === 1) {
+    return event.images[0] || '/images/entertainment/eventDefault.jpg';
+  }
+  const currentIndex = currentImageIndexes.value[event.id] || 0;
+  return event.images[currentIndex] || '/images/entertainment/eventDefault.jpg';
+};
+
+const getCurrentImageIndex = (eventId: string | number) => {
+  return currentImageIndexes.value[eventId] || 0;
+};
+
+const setCurrentImage = (eventId: string | number, index: number) => {
+  currentImageIndexes.value[eventId] = index;
+};
+
+const handleImageError = (event: any) => {
+  // Prevent infinite loop by only setting fallback if not already set
+  if (event.target && event.target.src.indexOf('/images/entertainment/eventDefault.jpg') === -1) {
+    event.target.src = '/images/entertainment/eventDefault.jpg'; // Fallback image
+  }
+};
+
+// Function to convert UTC datetime to "Aug 9, 11 A.M" format in Toronto timezone
+function formatDateTimeToFriendly(datetime: string) {
+  return DateTime.fromISO(datetime, { zone: 'utc' })
+    .setZone('America/Toronto')
+    .toFormat("MMM d, h a");
+}
+
+// Action functions
+const clearAllFilters = () => {
+  searchQuery.value = "";
+  selectedStatus.value = "all";
+};
+
+const showEventDetails = (event: Event) => {
+  selectedEvent.value = event;
   isEventModalOpen.value = true;
 };
 
@@ -704,153 +654,84 @@ const closeEventModal = () => {
   selectedEvent.value = null;
 };
 
-// Layout toggle for modal
-const toggleModalLayout = () => {
-  modalLayout.value = modalLayout.value === 'portrait' ? 'landscape' : 'portrait';
+const refreshEvents = async () => {
+  error.value = null;
+  await fetchEventsData();
 };
 
-// Watch for filter changes to reset pagination
-watch([searchQuery, selectedCategory], () => {
-  currentPage.value = 1;
-});
+const shareEvent = async () => {
+  if (!selectedEvent.value) return;
+  
+  const shareData = {
+    title: `${selectedEvent.value.title} - The Pearson Pub`,
+    text: selectedEvent.value.description,
+    url: window.location.origin + '/events'
+  };
 
-// Responsive view mode with performance optimization
-const checkViewMode = () => {
-  if (typeof window !== "undefined") {
-    if (window.innerWidth < 768) {
-      viewMode.value = "grid";
+  try {
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      await navigator.share(shareData);
+    } else {
+      // Fallback to clipboard
+      await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`);
+      // You could add a toast notification here
+    }
+  } catch (err) {
+    console.log('Error sharing:', err);
+    // Fallback to clipboard
+    try {
+      await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`);
+    } catch (clipboardErr) {
+      console.log('Clipboard fallback failed:', clipboardErr);
     }
   }
 };
 
-// Keyboard navigation support
-const handleKeyNavigation = (event: KeyboardEvent) => {
-  switch (event.key) {
-    case 'ArrowLeft':
-      if (currentPage.value > 1) {
-        currentPage.value--;
-      }
-      break;
-    case 'ArrowRight':
-      if (currentPage.value < totalPages.value) {
-        currentPage.value++;
-      }
-      break;
-    case 'Home':
-      currentPage.value = 1;
-      break;
-    case 'End':
-      currentPage.value = totalPages.value;
-      break;
-  }
-};
-
-// Load more events function for pagination
-const loadMoreEvents = async () => {
-  try {
-    eventPagination.value.events.page += 1;
-    // Since we're using static pagination, just update the counter
-    // In a real implementation, this would fetch more data from the backend
-  } catch (error) {
-    console.error('Error loading more events:', error);
-  }
-};
-
-// Image rotation functions for events with multiple images
-const getCurrentImage = (event: any, index: number) => {
-  if (!event.images || event.images.length === 0) {
-    return event.image || '/images/entertainment/music.jpg';
-  }
-  if (event.images.length === 1) {
-    return event.images[0] || '/images/entertainment/music.jpg';
-  }
-  
-  const eventKey = `${event.id}-${index}`;
-  const currentIndex = currentImageIndexes.value[eventKey] || 0;
-  const imageUrl = event.images[currentIndex] || event.images[0] || '/images/entertainment/music.jpg';
-  
-  // Fallback for corrupted or invalid URLs
-  try {
-    new URL(imageUrl);
-    return imageUrl;
-  } catch {
-    return '/images/entertainment/music.jpg';
-  }
-};
-
+// Image rotation for events with multiple images
 const initializeImageRotation = () => {
-  // Initialize rotation for all events with multiple images
-  if (allEvents.value) {
-    allEvents.value.forEach((event, index) => {
-      if (event.images && event.images.length > 1) {
-        const eventKey = `${event.id}-${index}`;
-        if (!(eventKey in currentImageIndexes.value)) {
-          currentImageIndexes.value[eventKey] = 0;
-        }
-        
-        // Start rotation
-        setInterval(() => {
-          const currentIndex = currentImageIndexes.value[eventKey] || 0;
-          const nextIndex = (currentIndex + 1) % event.images.length;
-          currentImageIndexes.value[eventKey] = nextIndex;
-        }, 3000); // Change image every 3 seconds
+  allEvents.value.forEach((event) => {
+    if (event.images && event.images.length > 1) {
+      // Initialize index
+      if (!(event.id in currentImageIndexes.value)) {
+        currentImageIndexes.value[event.id] = 0;
       }
-    });
-  }
+      
+      // Start rotation
+      setInterval(() => {
+        const currentIndex = currentImageIndexes.value[event.id] || 0;
+        const nextIndex = (currentIndex + 1) % event.images.length;
+        currentImageIndexes.value[event.id] = nextIndex;
+      }, 4000); // Change image every 4 seconds
+    }
+  });
 };
 
+// Responsive view mode
+const checkViewMode = () => {
+  if (typeof window !== "undefined" && window.innerWidth < 768) {
+    viewMode.value = "grid";
+  }
+};
 onMounted(async () => {
   // Fetch backend data
-  await fetchEvents();
+  await fetchEventsData();
   
-  // Update pagination based on events data
-  if (dynamicEvents.value) {
-    eventPagination.value.events.total = dynamicEvents.value.length;
-    eventPagination.value.events.totalPages = Math.ceil(dynamicEvents.value.length / 50);
-  }
-  
-  // Initialize image rotation for events with multiple images
+  // Initialize image rotation
   await nextTick();
   initializeImageRotation();
   
+  // Setup responsive behavior
   checkViewMode();
   window.addEventListener("resize", checkViewMode);
-  document.addEventListener("keydown", handleKeyNavigation);
   
-  // Initialize enhanced interactions without heavy 3D animations
+  // Initialize animations if GSAP is available
   if (process.client) {
-    nextTick(async () => {
-      // Enhanced GSAP animations with 3D effects
+    nextTick(() => {
       const nuxtApp = useNuxtApp();
       const $gsap = (nuxtApp as any)?.$gsap;
       
-      if ($gsap && $gsap.utils && typeof $gsap.from === "function") {
-        // Simple event card animations
-        $gsap.utils.toArray(".event-card").forEach((el: any, i: number) => {
-          $gsap.from(el, {
-            opacity: 0,
-            y: 30,
-            duration: 0.6,
-            delay: i * 0.1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: el,
-              start: "top 90%",
-              toggleActions: "play none none reverse"
-            }
-          });
-        });
-        
-        // Simple filter section animation
-        $gsap.from(".filter-section", {
-          opacity: 0,
-          y: -20,
-          duration: 0.8,
-          ease: "power2.out",
-          delay: 0.2
-        });
-        
-        // Simple hero content animation
+      if ($gsap && typeof $gsap.from === "function") {
+        // Animate hero content
         $gsap.timeline()
           .from(".hero-content h1", {
             opacity: 0,
@@ -864,45 +745,137 @@ onMounted(async () => {
             duration: 0.6,
             ease: "power2.out"
           }, "-=0.4");
+        
+        // Animate event cards - removed opacity animation to ensure all cards are fully visible
+        $gsap.utils.toArray(".event-card").forEach((el: any, i: number) => {
+          $gsap.from(el, {
+            y: 20,
+            duration: 0.6,
+            ease: "power2.out",
+            delay: i * 0.1
+          });
+        });
       }
     });
   }
 });
 
 onUnmounted(() => {
-  if (typeof window !== "undefined") {
-    window.removeEventListener("resize", checkViewMode);
-    document.removeEventListener("keydown", handleKeyNavigation);
-  }
-});
-
-// Page meta
-useHead({
-  title: "Events & Entertainment - The Pearson Pub",
-  meta: [
-    {
-      name: "description",
-      content:
-        "Join us for live music, pub quizzes, and special events at The Pearson Pub. Discover upcoming entertainment and book your table today.",
-    },
-  ],
+  window.removeEventListener("resize", checkViewMode);
 });
 </script>
 
 <style scoped>
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* Modern Event Modal Styles */
+:deep(.event-modal-overlay) {
+  backdrop-filter: blur(8px);
 }
 
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+:deep(.event-modal-overlay .fixed) {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Custom scrollbar for modal content */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #fbbf24 #f3f4f6;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #fbbf24;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #f59e0b;
+}
+
+/* Responsive modal sizing */
+@media (max-width: 1024px) {
+  :deep(.event-modal-overlay) .grid-cols-5 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  :deep(.event-modal-overlay) .lg\\:col-span-3,
+  :deep(.event-modal-overlay) .lg\\:col-span-2 {
+    grid-column: span 1 !important;
+  }
+  
+  :deep(.event-modal-overlay) [style*="aspect-ratio"] {
+    aspect-ratio: 4/3 !important;
+    max-width: 95vw !important;
+    max-height: 85vh !important;
+  }
+}
+
+@media (max-width: 640px) {
+  :deep(.event-modal-overlay) [style*="aspect-ratio"] {
+    aspect-ratio: 1/1 !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+  }
+}
+
+/* Animation for modal entrance */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+:deep(.event-modal-overlay) > div {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+/* Enhanced status badge styles */
+.status-badge-glow {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+.status-badge-glow.green {
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+}
+
+.status-badge-glow.yellow {
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+}
+
+/* Legacy styles for backward compatibility */
+:deep(.modal-full-width) {
+  max-width: none !important;
+}
+
+:deep(.modal-full-width .fixed) {
+  max-width: none !important;
+}
+
+:deep(.modal-full-width [class*="max-w"]) {
+  max-width: none !important;
+}
+
+:deep(.modal-full-width > div) {
+  max-width: 80vw !important;
+  width: 80vw !important;
+  margin: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  position: absolute;
 }
 </style>

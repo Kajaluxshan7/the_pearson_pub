@@ -4,15 +4,16 @@ export default defineNuxtConfig({
   // Your existing runtime config is perfect
   runtimeConfig: {
     // Private keys (only available on server-side)
-    smtpHost: process.env.SMTP_HOST,
-    smtpPort: process.env.SMTP_PORT,
-    smtpUser: process.env.SMTP_USER,
-    smtpPass: process.env.SMTP_PASS,
-    contactEmail: process.env.CONTACT_EMAIL,
+    smtpHost: process.env.NUXT_SMTP_HOST,
+    smtpPort: process.env.NUXT_SMTP_PORT,
+    smtpUser: process.env.NUXT_SMTP_USER,
+    smtpPass: process.env.NUXT_SMTP_PASS,
+    contactEmail: process.env.NUXT_CONTACT_EMAIL,
 
     // Public keys (exposed to client-side)
     public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
+      apiBaseUrl:
+        process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:5000",
       appName: process.env.NUXT_PUBLIC_APP_NAME || "The Pearson Pub",
       appDescription:
         process.env.NUXT_PUBLIC_APP_DESCRIPTION ||

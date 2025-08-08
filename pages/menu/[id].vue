@@ -55,50 +55,6 @@ const nextImage = () => {
     (currentImageIndex.value + 1) % menuItem.value.images.length;
 };
 
-// Utility functions
-const getMenuItemImage = (item: any) => {
-  // If item has images array, use the first one
-  if (item.images && item.images.length > 0) {
-    return item.images[0];
-  }
-  // If item has a single image, use it
-  if (item.image) {
-    return item.image;
-  }
-  // Category-based fallback images
-  const fallbackImages = {
-    "daily-specials": "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=600&q=80",
-    "all-day-menu": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80",
-    "starters": "https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=600&q=80",
-    "salads": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80",
-    "burgers": "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80",
-    "mains": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80",
-    "desserts": "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=80",
-    "beverages": "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=600&q=80",
-    "default": "/images/food/foods.jpg"
-  };
-  return fallbackImages[item.category as keyof typeof fallbackImages] || fallbackImages.default;
-};
-
-const navigateToItem = (itemId: string | number) => {
-  router.push(`/menu/${itemId}`);
-};
-
-const shareItem = async () => {
-  if (navigator.share && menuItem.value) {
-    try {
-      await navigator.share({
-        title: menuItem.value.name,
-        text: menuItem.value.description,
-        url: window.location.href,
-      });
-    } catch (err) {
-      await navigator.clipboard.writeText(window.location.href);
-    }
-  } else {
-    await navigator.clipboard.writeText(window.location.href);
-  }
-};
 
 // SEO
 useHead({
