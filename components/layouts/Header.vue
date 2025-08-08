@@ -88,7 +88,7 @@ const callLink = "tel:+19054305699";
         <div class="flex items-center space-x-2">
           <NuxtLink to="/" class="flex items-center space-x-2 group">
             <span
-              class="text-2xl lg:text-3xl font-extrabold text-yellow-600 dark:text-yellow-400 tracking-widest transition-all duration-300 group-hover:scale-105"
+class="text-base sm:text-lg md:text-xl lg:text-xl xl:text-3xl font-extrabold text-yellow-600 dark:text-yellow-400 tracking-widest transition-all duration-300 group-hover:scale-105"
               style="font-family: 'Cinzel', 'Georgia', serif; letter-spacing: 0.08em;">The Pearson Pub</span>
           </NuxtLink>
         </div> <!-- Desktop Navigation Center -->
@@ -145,10 +145,22 @@ const callLink = "tel:+19054305699";
         leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100 translate-y-0 scale-100"
         leave-to-class="opacity-0 -translate-y-8 scale-95">
         <div v-if="isOpen"
-          class="md:hidden absolute top-20 inset-x-0 bg-white/98 dark:bg-gray-900/98 backdrop-blur-xl shadow-2xl rounded-b-2xl border-t border-gray-200/50 dark:border-gray-700/50">
+          class="md:hidden fixed top-20 left-1/2 transform -translate-x-1/2 w-[75%] bg-white dark:bg-gray-900 shadow-2xl rounded-2xl border border-gray-200 dark:border-gray-700 z-50">
+          <!-- Mobile Menu Logo -->
+          <div class="flex items-center justify-center py-4 border-b border-gray-200 dark:border-gray-700">
+            <NuxtLink to="/" class="flex items-center space-x-2 group" @click="toggleMenu">
+              <span
+                class="text-lg font-extrabold text-yellow-600 dark:text-yellow-400 tracking-widest transition-all duration-300 group-hover:scale-105"
+                style="font-family: 'Cinzel', 'Georgia', serif; letter-spacing: 0.08em;">
+                The Pearson Pub
+              </span>
+            </NuxtLink>
+          </div>
+          
+          <!-- Menu Items -->
           <div class="px-4 pt-4 pb-6 space-y-2">
             <NuxtLink v-for="(item, index) in navigationItems" :key="index" :to="item.path"
-              class="block px-4 py-3 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-105"
+              class="block px-4 py-3 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-105 text-center"
               :class="[
                 index === activeIndex
                   ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 shadow-md'

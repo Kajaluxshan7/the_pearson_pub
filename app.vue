@@ -1,40 +1,33 @@
 <template>
   <div>
-    <SimpleLoading
-      v-if="loadingState.isLoading"
-      :progress="loadingState.progress"
-      :texts="loadingTexts"
-      title="The Pearson Pub"
-      subtitle="Loading your pub experience..."
-      icon-name="i-heroicons-building-storefront"
-      :error="loadingState.error"
-      @retry="startLoading"
-    />
+    <!-- Connectivity Indicator -->
+    <ConnectivityIndicator>
+      <!-- Remove the blocking loading screen that causes white screen -->
+      <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+        <!-- Header -->
+        <LayoutsHeader />
 
-    <div v-else class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <!-- Header -->
-      <LayoutsHeader />
+        <!-- Main Content -->
+        <main class="flex-grow">
+          <NuxtPage />
+        </main>
+        <!-- Footer -->
+        <LayoutsFooter />
 
-      <!-- Main Content -->
-      <main class="flex-grow">
-        <NuxtPage />
-      </main>
-      <!-- Footer -->
-      <LayoutsFooter />
-
-      <!-- Scroll to Top Button -->
-      <ClientOnly>
-        <UButton
-          v-show="scrollY > 500"
-          icon="i-heroicons-arrow-up"
-          color="yellow"
-          variant="solid"
-          class="fixed bottom-10 left-1/2 transform -translate-x-1/2 rounded-full shadow-lg"
-          size="xs"
-          @click="scrollToTop"
-        />
-      </ClientOnly>
-    </div>
+        <!-- Scroll to Top Button -->
+        <ClientOnly>
+          <UButton
+            v-show="scrollY > 500"
+            icon="i-heroicons-arrow-up"
+            color="yellow"
+            variant="solid"
+            class="fixed bottom-10 left-1/2 transform -translate-x-1/2 rounded-full shadow-lg"
+            size="xs"
+            @click="scrollToTop"
+          />
+        </ClientOnly>
+      </div>
+    </ConnectivityIndicator>
   </div>
 </template>
 
@@ -49,20 +42,12 @@ if (colorMode) colorMode.preference = 'light'
 // Initialize landing page data composable
 const { initializeAllData } = useLandingPageData()
 
-// Loading state
+// Background loading state (non-blocking)
 const loadingState = ref({
-  isLoading: true,
+  isLoading: false,
   progress: 0,
   error: null as string | null
 })
-
-const loadingTexts = [
-  'Loading menu items...',
-  'Fetching upcoming events...',
-  'Getting contact information...',
-  'Loading specials...',
-  'Almost ready!'
-]
 
 // Scroll position
 const scrollY = ref(0)
@@ -81,50 +66,26 @@ const scrollToTop = () => {
   }
 }
 
-// Loading with backend data fetch
-let progressTimer: ReturnType<typeof setInterval> | null = null;
-const startLoading = async () => {
+// Background data loading (non-blocking)
+const loadDataInBackground = async () => {
   loadingState.value.isLoading = true;
-  loadingState.value.progress = 0;
   loadingState.value.error = null;
   
-  if (progressTimer) clearInterval(progressTimer);
-  
-  if (typeof window !== 'undefined') {
-    // Start progress animation
-    progressTimer = setInterval(() => {
-      if (loadingState.value.progress < 90) {
-        loadingState.value.progress += Math.random() * 3 + 1; // Fast at first
-      } else if (loadingState.value.progress < 99) {
-        loadingState.value.progress += 0.2; // Slow near the end
-      }
-      if (loadingState.value.progress >= 99) {
-        loadingState.value.progress = 99;
-        clearInterval(progressTimer!);
-      }
-    }, 60);
-
-    // Fetch backend data
-    try {
-      await initializeAllData();
-      
-      // Complete the progress
-      loadingState.value.progress = 100;
-      setTimeout(() => {
-        loadingState.value.isLoading = false;
-      }, 400); // Let bar reach 100% before hiding
-      
-    } catch (error) {
-      console.error('Failed to load backend data:', error);
-      loadingState.value.error = 'Failed to load data. Please try again.';
-      loadingState.value.progress = 0;
-      if (progressTimer) clearInterval(progressTimer);
-    }
+  try {
+    // Load data in background without blocking UI
+    await initializeAllData();
+  } catch (error) {
+    console.error('Failed to load background data:', error);
+    loadingState.value.error = 'Failed to load some data. Website will still work.';
+  } finally {
+    loadingState.value.isLoading = false;
   }
 };
 
 onMounted(() => {
-  startLoading();
+  // Load data in background without blocking the UI
+  loadDataInBackground();
+  
   if (typeof window !== 'undefined') {
     window.addEventListener('scroll', updateScroll);
     updateScroll();
@@ -135,7 +96,6 @@ onUnmounted(() => {
   if (typeof window !== 'undefined') {
     window.removeEventListener('scroll', updateScroll);
   }
-  if (progressTimer) clearInterval(progressTimer);
 });
 </script>
 

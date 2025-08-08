@@ -319,7 +319,6 @@ export const usePerformance = () => {
     new PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
       const lastEntry = entries[entries.length - 1];
-      console.log("LCP:", lastEntry.startTime);
     }).observe({ type: "largest-contentful-paint", buffered: true });
 
     // First Input Delay (FID)
@@ -339,7 +338,6 @@ export const usePerformance = () => {
           clsValue += entry.value;
         }
       });
-      console.log("CLS:", clsValue);
     }).observe({ type: "layout-shift", buffered: true });
   };
 

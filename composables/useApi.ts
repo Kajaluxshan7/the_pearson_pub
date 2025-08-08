@@ -5,8 +5,14 @@ import { publicApi, type ApiStory } from "./usePublicApi";
 const getApiBaseUrl = () => {
   try {
     const config = useRuntimeConfig();
-    return (config.public.apiBaseUrl as string) || "http://localhost:5000";
-  } catch {
+    const apiBaseUrl = config.public.apiBaseUrl as string;
+    if (!apiBaseUrl) {
+      console.warn("NUXT_PUBLIC_API_BASE_URL is not set in runtime config. Falling back to default.");
+      return "http://localhost:5000";
+    }
+    return apiBaseUrl;
+  } catch (error) {
+    console.error("Error accessing runtime config:", error);
     // Fallback for SSR or when runtime config is not available
     return "http://localhost:5000";
   }
@@ -15,7 +21,6 @@ const getApiBaseUrl = () => {
 // Create fetch instance with base configuration and error handling
 const createApiClient = () => {
   const API_BASE_URL = getApiBaseUrl();
-
   return $fetch.create({
     baseURL: API_BASE_URL,
     credentials: "include", // Include cookies
@@ -33,8 +38,8 @@ const createApiClient = () => {
   });
 };
 
-// Create the API client
-const api = createApiClient();
+// Lazy getter for API client
+const getApi = () => createApiClient();
 
 // Helper function to handle API calls with fallback
 const safeApiCall = async <T>(
@@ -137,15 +142,18 @@ export const categoriesApi = {
     limit = 50,
     search?: string
   ): Promise<PaginatedResponse<ApiCategory>> =>
-    safeApiCall(() => api("/categories", { query: { page, limit, search } }), {
-      data: [],
-      total: 0,
-      page: 1,
-      totalPages: 0,
-    }),
+    safeApiCall(
+      () => getApi()("/categories", { query: { page, limit, search } }),
+      {
+        data: [],
+        total: 0,
+        page: 1,
+        totalPages: 0,
+      }
+    ),
 
   getById: (id: string): Promise<ApiCategory | null> =>
-    safeApiCall(() => api(`/categories/${id}`), null),
+    safeApiCall(() => getApi()(`/categories/${id}`), null),
 };
 
 // Items API with fallbacks
@@ -161,7 +169,7 @@ export const itemsApi = {
   ): Promise<PaginatedResponse<ApiItem>> =>
     safeApiCall(
       () =>
-        api("/items", {
+        getApi()("/items", {
           query: {
             page,
             limit,
@@ -176,7 +184,7 @@ export const itemsApi = {
     ),
 
   getById: (id: string): Promise<ApiItem | null> =>
-    safeApiCall(() => api(`/items/${id}`), null),
+    safeApiCall(() => getApi()(`/items/${id}`), null),
 };
 
 // Events API with fallbacks
@@ -190,14 +198,14 @@ export const eventsApi = {
   ): Promise<PaginatedResponse<ApiEvent>> =>
     safeApiCall(
       () =>
-        api("/events", {
+        getApi()("/events", {
           query: { page, limit, search, startDate, endDate },
         }),
       { data: [], total: 0, page: 1, totalPages: 0 }
     ),
 
   getById: (id: string): Promise<ApiEvent | null> =>
-    safeApiCall(() => api(`/events/${id}`), null),
+    safeApiCall(() => getApi()(`/events/${id}`), null),
 };
 
 // Operation Hours API with fallbacks
@@ -209,14 +217,14 @@ export const operationHoursApi = {
   ): Promise<PaginatedResponse<ApiOperationHour>> =>
     safeApiCall(
       () =>
-        api("/operation-hours", {
+        getApi()("/api/public/operation-hours", {
           query: { page, limit, day },
         }),
       { data: [], total: 0, page: 1, totalPages: 0 }
     ),
 
   getById: (id: string): Promise<ApiOperationHour | null> =>
-    safeApiCall(() => api(`/operation-hours/${id}`), null),
+    safeApiCall(() => getApi()(`/api/public/operation-hours/${id}`), null),
 };
 
 // Specials API for public use with fallbacks
@@ -229,7 +237,7 @@ export const specialsApi = {
   ): Promise<PaginatedResponse<ApiSpecial>> =>
     safeApiCall(
       () =>
-        api("/api/public/specials", {
+        getApi()("/api/public/specials", {
           query: { page, limit, search, specialType },
         }),
       { data: [], total: 0, page: 1, totalPages: 0 }
@@ -244,21 +252,21 @@ export const specialsApi = {
   ): Promise<PaginatedResponse<ApiSpecial>> =>
     safeApiCall(
       () =>
-        api("/specials/public", {
+        getApi()("/specials/public", {
           query: { page, limit, search, specialType },
         }),
       { data: [], total: 0, page: 1, totalPages: 0 }
     ),
 
   getByType: (specialType: "daily" | "seasonal" | "latenight"): Promise<any> =>
-    safeApiCall(() => api(`/api/public/specials/${specialType}`), {
+    safeApiCall(() => getApi()(`/api/public/specials/${specialType}`), {
       specials: [],
       total: 0,
       heading: "",
     }),
 
   getDailySpecials: (): Promise<any> =>
-    safeApiCall(() => api("/api/public/specials/daily"), {
+    safeApiCall(() => getApi()("/api/public/specials/daily"), {
       specials: [],
       total: 0,
       dayName: "",
@@ -266,13 +274,13 @@ export const specialsApi = {
     }),
 
   getSeasonalSpecials: (): Promise<any> =>
-    safeApiCall(() => api("/api/public/specials/seasonal"), {
+    safeApiCall(() => getApi()("/api/public/specials/seasonal"), {
       specials: [],
       total: 0,
     }),
 
   getLateNightSpecials: (): Promise<any> =>
-    safeApiCall(() => api("/api/public/specials/latenight"), {
+    safeApiCall(() => getApi()("/api/public/specials/latenight"), {
       specials: [],
       total: 0,
       heading: "Latenight Special",
@@ -313,7 +321,7 @@ export const specialsApi = {
     ),
 };
 
-export default api;
+export default getApi;
 
 // Main composable function
 export const useApi = () => {
@@ -356,7 +364,7 @@ export const useApi = () => {
     getPublicStoriesData: publicApi.getStoriesData,
 
     // Direct API access
-    api,
+    api: getApi,
     categoriesApi,
     itemsApi,
     eventsApi,

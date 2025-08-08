@@ -231,6 +231,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
 import { useLandingPageData } from "~/composables/useLandingPageData";
+import { TimezoneUtil } from "~/utils/timezone";
 
 interface ContactInfo {
   icon: string
@@ -273,19 +274,10 @@ const formErrors = ref<Record<string, string>>({})
 const isSubmitting = ref(false)
 const formRef = ref<HTMLElement>()
 
-// Enhanced operation hours formatting with categories
+// Enhanced operation hours formatting with categories using TimezoneUtil
 const formatOperationHours = (hours: any[]) => {
   if (!hours || hours.length === 0) return "";
   
-  // Helper function to format time to "11:00 AM" format
-  const formatTime = (timeString: string) => {
-    const [hours, minutes] = timeString.split(':');
-    const hour = parseInt(hours, 10);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
-  };
-
   // Helper function to capitalize day names
   const capitalizeDay = (day: string) => {
     return day.charAt(0).toUpperCase() + day.slice(1);
@@ -304,9 +296,19 @@ const formatOperationHours = (hours: any[]) => {
     .map(([time, days]: [string, any]) => {
       const [open, close] = time.split('-');
       const formattedDays = days.join(', ');
-      const formattedOpen = formatTime(open);
-      const formattedClose = formatTime(close);
-      return `${formattedDays}: ${formattedOpen} - ${formattedClose}`;
+      
+      // Use TimezoneUtil for proper formatting
+      const formattedOpen = TimezoneUtil.formatTime(open);
+      const formattedClose = TimezoneUtil.formatTime(close);
+      
+      // Check if this is overnight hours
+      const isOvernight = TimezoneUtil.isOvernightHours(open, close);
+      
+      if (isOvernight) {
+        return `${formattedDays}: ${formattedOpen} - ${formattedClose} (next day)`;
+      } else {
+        return `${formattedDays}: ${formattedOpen} - ${formattedClose}`;
+      }
     })
     .join('\n');
 }

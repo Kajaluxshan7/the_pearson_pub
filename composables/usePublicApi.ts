@@ -1,23 +1,34 @@
 import { $fetch } from "ofetch";
 
-// Function to get API base URL from runtime config
 const getApiBaseUrl = () => {
   try {
     const config = useRuntimeConfig();
-    return (config.public.apiBaseUrl as string) || "http://localhost:5000";
-  } catch {
+    const apiBaseUrl = config.public.apiBaseUrl as string;
+    if (!apiBaseUrl) {
+      console.warn("NUXT_PUBLIC_API_BASE_URL is not set in runtime config. Falling back to default.");
+      return "http://localhost:5000";
+    }
+    return apiBaseUrl;
+  } catch (error) {
+    console.error("Error accessing runtime config:", error);
     // Fallback for SSR or when runtime config is not available
     return "http://localhost:5000";
   }
 };
 
-// Create fetch instance with base configuration
-const api = $fetch.create({
-  baseURL: getApiBaseUrl(),
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+// Create fetch instance with base configuration (lazy initialization)
+const createApiClient = () => {
+  const baseURL = getApiBaseUrl();  
+  return $fetch.create({
+    baseURL,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Lazy getter for API client
+const getApi = () => createApiClient();
 
 export interface PublicMenuData {
   categories: Array<{
@@ -139,19 +150,19 @@ export interface LandingPageContent {
 export const publicApi = {
   // Landing page content with all data
   getLandingContent: (): Promise<LandingPageContent> =>
-    api("/api/public/landing-content"),
+    getApi()("/api/public/landing-content"),
 
   // Menu data (categories with items)
-  getMenuData: (): Promise<PublicMenuData> => api("/api/public/menu"),
+  getMenuData: (): Promise<PublicMenuData> => getApi()("/api/public/menu"),
 
   // Events data
-  getEventsData: (): Promise<PublicEventsData> => api("/api/public/events"),
+  getEventsData: (): Promise<PublicEventsData> => getApi()("/api/public/events"),
 
   // Contact info with operation hours
-  getContactInfo: (): Promise<PublicContactData> => api("/api/public/contact"),
+  getContactInfo: (): Promise<PublicContactData> => getApi()("/api/public/contact"),
 
   // Stories data
-  getStoriesData: (): Promise<ApiStory[]> => api("/api/public/stories").then(response => {
+  getStoriesData: (): Promise<ApiStory[]> => getApi()("/api/public/stories").then((response: any) => {
     // Handle both direct array response and wrapped response
     if (Array.isArray(response)) {
       return response;
@@ -173,7 +184,7 @@ export const usePublicApi = () => {
     getStoriesData: publicApi.getStoriesData,
 
     // Direct API access
-    api,
+    api: getApi,
     publicApi,
   };
 };
