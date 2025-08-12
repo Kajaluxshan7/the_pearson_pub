@@ -1,8 +1,40 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
-import { useColorMode, useRoute } from "#imports";
+import { useRoute } from "#imports";
 
-const colorMode = useColorMode();
+// Simple dark mode toggle without external dependency
+const isDark = ref(false);
+
+const colorMode = {
+  preference: computed({
+    get: () => isDark.value ? 'dark' : 'light',
+    set: (value: string) => { isDark.value = value === 'dark'; }
+  }),
+  value: computed(() => isDark.value ? 'dark' : 'light')
+};
+
+// Initialize from localStorage if available
+onMounted(() => {
+  if (process.client) {
+    const stored = localStorage.getItem('color-mode');
+    if (stored) {
+      isDark.value = stored === 'dark';
+    } else {
+      // Check system preference
+      isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    // Apply class to document
+    document.documentElement.classList.toggle('dark', isDark.value);
+  }
+});
+
+// Watch for changes and persist
+watch(isDark, (newValue) => {
+  if (process.client) {
+    localStorage.setItem('color-mode', newValue ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark', newValue);
+  }
+});
 const isOpen = ref(false);
 
 const navigationItems = [
@@ -113,22 +145,16 @@ class="text-base sm:text-lg md:text-xl lg:text-xl xl:text-3xl font-extrabold tex
         <div class="hidden md:flex items-center space-x-4">
           <button
             class="p-3 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 transition-all duration-300 hover:shadow-lg"
-            @click="colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'" aria-label="Toggle dark mode">
-            <UIcon :name="(colorMode.value || 'light') === 'dark'
-                ? 'i-heroicons-moon'
-                : 'i-heroicons-sun'
-              " class="w-5 h-5" />
+            @click="isDark = !isDark" aria-label="Toggle dark mode">
+            <UIcon :name="isDark ? 'i-heroicons-moon' : 'i-heroicons-sun'" class="w-5 h-5" />
           </button>
         </div>
         <div class="md:hidden flex items-center space-x-4">
           <!-- Dark Mode Toggle Mobile -->
           <button
             class="p-3 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 transition-all duration-300"
-            @click="colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'" aria-label="Toggle dark mode">
-            <UIcon :name="(colorMode.value || 'light') === 'dark'
-                ? 'i-heroicons-moon'
-                : 'i-heroicons-sun'
-              " class="w-5 h-5" />
+            @click="isDark = !isDark" aria-label="Toggle dark mode">
+            <UIcon :name="isDark ? 'i-heroicons-moon' : 'i-heroicons-sun'" class="w-5 h-5" />
           </button>
 
           <!-- Mobile Menu Button -->

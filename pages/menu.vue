@@ -41,7 +41,7 @@
                   v-model="searchQuery" 
                   type="text" 
                   placeholder="Search delicious menu items..." 
-                  class="w-full pl-12 pr-12 py-4 rounded-2xl border-2 border-gray-200 dark:border-gray-600 focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/20 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 shadow-sm hover:shadow-md focus:shadow-lg"
+                  class="w-full pl-8 pr-8 py-2 rounded-2xl border-2 border-gray-200 dark:border-gray-600 focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/20 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 shadow-sm hover:shadow-md focus:shadow-lg"
                 />
                 <button 
                   v-if="searchQuery" 
@@ -80,7 +80,7 @@
               </div>
 
               <!-- View Mode Toggle -->
-              <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+              <div class="flex flex-row items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
                 <button
                   @click="viewMode = 'grid'"
                   :class="[

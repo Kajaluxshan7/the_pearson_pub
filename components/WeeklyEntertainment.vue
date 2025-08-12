@@ -83,7 +83,7 @@
           <p class="text-gray-600 dark:text-gray-300 mb-4">
             Planning a private event, birthday party, or corporate gathering? We'd love to host you!
           </p>
-          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <div class="flex sm:flex-row gap-3 justify-center">
             <UButton to="/contact" color="yellow" variant="solid" size="md">
               <UIcon name="i-heroicons-phone" class="w-4 h-4 mr-2" />
               Contact Us

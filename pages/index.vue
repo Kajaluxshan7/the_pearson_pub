@@ -23,7 +23,7 @@
       <!-- Lazy loaded Hero -->
       <component :is="Hero" v-if="Hero" />
 
-      <!-- Operation Hours Banner -->
+      <!-- Operation Hours Banner (uses today's status from backend) -->
       <section class="bg-yellow-600 dark:bg-yellow-700 py-4">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex flex-col md:flex-row items-center justify-center text-center md:text-left gap-4">
@@ -31,13 +31,27 @@
               <UIcon name="i-heroicons-clock" class="w-5 h-5 text-white" />
               <span class="font-semibold text-white">Today's Hours:</span>
             </div>
-            <div class="text-white text-sm md:text-base" v-if="currentDayHours">
+            <div class="text-white text-sm md:text-base" v-if="operationHoursLoading">
+              <span>Loading...</span>
+            </div>
+            <div class="text-white text-sm md:text-base" v-else-if="operationHoursError">
+              <span class="px-2 py-1 rounded-full text-xs font-semibold bg-gray-500 text-white">
+                {{ operationHoursError }}
+              </span>
+            </div>
+            <div class="text-white text-sm md:text-base" v-else-if="todayOperationStatus && todayOperationStatus.todayHours">
               <div class="flex items-center gap-3">
-                <span>{{ currentDayHours.openTime }} - {{ currentDayHours.closeTime }}</span>
-                <span v-if="currentDayHours.isOpen" class="px-2 py-1 rounded-full text-xs font-semibold bg-green-500 text-white">
+                <span>{{ formatOperationTime(todayOperationStatus.todayHours.open_time) }} - {{ formatOperationTime(todayOperationStatus.todayHours.close_time) }}</span>
+                <span
+                  v-if="isCurrentlyOpen(todayOperationStatus.todayHours.day, todayOperationStatus.todayHours.open_time, todayOperationStatus.todayHours.close_time)"
+                  class="px-2 py-1 rounded-full text-xs font-semibold bg-green-500 text-white"
+                >
                   OPEN NOW
                 </span>
-                <span v-else class="px-2 py-1 rounded-full text-xs font-semibold bg-red-500 text-white">
+                <span
+                  v-else
+                  class="px-2 py-1 rounded-full text-xs font-semibold bg-red-500 text-white"
+                >
                   CLOSED
                 </span>
               </div>
@@ -50,6 +64,7 @@
           </div>
         </div>
       </section>
+      <!-- END Operation Hours Banner -->
 
       <!-- Specials Section - Enhanced with Instagram Portrait Layout -->
       <section id="specials" class="specials section py-20 bg-gradient-to-br from-gray-50 via-white to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -400,13 +415,19 @@
   </div>
 </template>
 
+<!-- pages/index.vue - Enhanced with SEO -->
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, computed, shallowRef, watch, nextTick } from 'vue'
 import { useLandingPageData } from "~/composables/useLandingPageData";
 import { useConnectivity } from "~/composables/useConnectivity";
+import { useSEO } from "~/composables/useSEO";
 import FullScreenLoading from "~/components/loading/FullScreenLoading.vue";
 import StaticFallback from "~/components/StaticFallback.vue";
 import { TimezoneUtil } from '~/utils/timezone';
+import { operationHoursApi } from '@/composables/useApi';
+
+// SEO Configuration
+const { setSEO, getLocalBusinessSchema } = useSEO()
 
 // Lazy load Hero for better LCP
 const Hero = shallowRef<any>(null)
@@ -415,18 +436,31 @@ if (process.client) {
 }
 
 definePageMeta({
-  title: 'The Pearson Pub | Whitby',
-  description: 'Live menu, events, and more. Experience The Pearson Pub in Whitby.',
+  title: 'The Pearson Pub | Traditional Pub in Whitby, ON',
+  description: 'Experience authentic pub dining in Whitby. Live music, daily specials, craft beverages and traditional fare in a warm, welcoming atmosphere.',
   layout: 'default',
   prerender: true,
   middleware: 'connectivity-client'
 })
 
-// SSR/SSG: useAsyncData for consolidated backend data
+// SEO/SSG: useAsyncData for consolidated backend data
 const { data: landingData } = await useAsyncData('landing-content', async () => {
   const { initializeAllData } = useLandingPageData()
   await initializeAllData()
   return true
+})
+
+// Set comprehensive SEO
+setSEO({
+  title: 'The Pearson Pub | Traditional Pub in Whitby, ON',
+  description: 'Experience authentic pub dining in Whitby. Live music, daily specials, craft beverages and traditional fare in a warm, welcoming atmosphere. Located at 101 Mary St.',
+  ogImage: `${useRuntimeConfig().public.siteUrl}/images/pub/interior-main.jpg`,
+  ogType: 'website',
+  structuredData: {
+    ...getLocalBusinessSchema(),
+    "hasMenu": `${useRuntimeConfig().public.siteUrl}/menu`,
+    "acceptsReservations": true
+  }
 })
 
 // Landing page data integration
@@ -447,7 +481,14 @@ const {
   isLoading: backendLoading,
   error: backendError,
   initializeAllData,
+  todayOperationStatus,
+  operationHoursLoading,
+  operationHoursError,
+  fetchTodayOperationStatus,
 } = useLandingPageData();
+
+
+console.log();
 
 // Connectivity and Loading Management
 const {
@@ -461,7 +502,7 @@ const {
 } = useConnectivity();
 
 // Loading states
-const initialLoading = ref(true);
+const initialLoading = ref(!process.client || !window.sessionStorage.getItem('pearson-pub-visited'));
 const retryingConnection = ref(false);
 const forceFallback = ref(false);
 
@@ -877,86 +918,90 @@ watch(specialsTabs, () => {
   })
 }, { deep: true })
 
-
-console.log(operationHours.value, 'Operation Hours Data');
-console.log(menuCategories.value, 'Menu Categories Data');
-console.log(upcomingEvents.value, 'Upcoming Events Data');
-console.log(landingContent.value, 'Landing Content Data');
-
-
-// Get current day's operation hours with open/close status
-const currentDayHours = computed(() => {
-  if (!operationHours.value?.length) return null;
-
-  // Use Toronto timezone to get current day
-  const currentDay = TimezoneUtil.nowToronto()
-    .toJSDate()
-    .toLocaleDateString('en-US', { 
-      weekday: 'long',
-      timeZone: 'America/Toronto'
-    })
-    .toLowerCase();
+// Helper to check if the pub is currently open based on open/close times (using admin panel logic)
+function isCurrentlyOpen(day: string, openTime: string, closeTime: string): boolean {
+  if (!openTime || !closeTime) return false;
   
-  // First try to find hours for the current day
-  let todayHours = operationHours.value.find((hour) => hour.day.toLowerCase() === currentDay);
+  const now = new Date();
+  // Get current time in Toronto timezone
+  const torontoTime = new Date(
+    now.toLocaleString("en-US", { timeZone: "America/Toronto" })
+  );
+  const currentTime = torontoTime.toTimeString().slice(0, 5); // HH:MM format
 
-  // If not found for current day, check if we're in an overnight period from the previous day
-  if (!todayHours) {
-    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const currentDayIndex = dayNames.indexOf(currentDay);
-    const previousDayIndex = currentDayIndex === 0 ? 6 : currentDayIndex - 1;
-    const previousDay = dayNames[previousDayIndex];
+  // Map JavaScript day to our day format
+  const days = [
+    "sunday",
+    "monday", 
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+  const todayDay = days[torontoTime.getDay()];
 
-    const previousDayHours = operationHours.value.find((hour) => hour.day.toLowerCase() === previousDay);
+  // Convert times to minutes for comparison
+  const timeToMinutes = (time: string) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
 
-    // Check if previous day has overnight hours that extend to current day
-    if (previousDayHours) {
-      const openTime = previousDayHours.open_time;
-      const closeTime = previousDayHours.close_time;
+  const currentMinutes = timeToMinutes(currentTime);
+  const openMinutes = timeToMinutes(openTime);
+  const closeMinutes = timeToMinutes(closeTime);
 
-      // Check if it's overnight hours and we're in the overnight period
-      if (TimezoneUtil.isOvernightHours(openTime, closeTime)) {
-        const now = TimezoneUtil.nowToronto();
-        const currentMinutes = now.hour * 60 + now.minute;
-        
-        // Parse close time to minutes
-        const [closeHour, closeMin] = closeTime.split(':').map(Number);
-        const closeMinutes = closeHour * 60 + closeMin;
-
-        // If we're currently in the early hours before closing time
-        if (currentMinutes <= closeMinutes) {
-          todayHours = previousDayHours;
-        }
-      }
+  // Handle overnight hours (e.g., Saturday 8:30 PM to Sunday 11:30 AM)
+  if (closeMinutes < openMinutes) {
+    // Check if we're on the day that starts the overnight shift
+    if (day.toLowerCase() === todayDay && currentMinutes >= openMinutes) {
+      return true;
     }
+
+    // Check if we're on the next day before closing time
+    const dayNames = [
+      "sunday",
+      "monday",
+      "tuesday", 
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    const dayIndex = dayNames.indexOf(day.toLowerCase());
+    const nextDayIndex = (dayIndex + 1) % 7;
+    const nextDay = dayNames[nextDayIndex];
+
+    if (todayDay === nextDay && currentMinutes <= closeMinutes) {
+      return true;
+    }
+
+    return false;
   }
 
-  if (!todayHours) return null;
+  // Regular hours (same day) - check if it's the correct day
+  if (day.toLowerCase() !== todayDay) {
+    return false;
+  }
 
-  // Use timezone utility for proper status determination
-  const isOpen = TimezoneUtil.isWithinBusinessHours(
-    todayHours.open_time, 
-    todayHours.close_time
-  );
+  return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
+}
 
-  // Get operation status with proper timezone handling
-  const operationStatus = TimezoneUtil.getOperationStatus(
-    todayHours.open_time,
-    todayHours.close_time,
-    todayHours.status
-  );
+// Helper to format operation hours time for display (using admin panel logic)
+function formatOperationTime(time: string): string {
+  if (!time) return "Not set";
+  try {
+    const [hours, minutes] = time.split(":");
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour % 12 || 12;
 
-  return {
-    day: currentDay.charAt(0).toUpperCase() + currentDay.slice(1),
-    openTime: TimezoneUtil.formatTime(todayHours.open_time),
-    closeTime: TimezoneUtil.formatTime(todayHours.close_time),
-    isOpen: isOpen && todayHours.status,
-    status: todayHours.status,
-    statusText: operationStatus,
-    formattedHours: TimezoneUtil.formatOperationHours(todayHours.open_time, todayHours.close_time),
-    isOvernight: TimezoneUtil.isOvernightHours(todayHours.open_time, todayHours.close_time)
-  };
-});
+    return `${displayHour}:${minutes} ${ampm}`;
+  } catch (error) {
+    console.error("Error formatting time:", error);
+    return time;
+  }
+}
 
 // Visibility states
 const isVisible = ref({
@@ -992,7 +1037,10 @@ onMounted(async () => {
 
   // Initialize loading process
   if (process.client) {
+    // Mark that user has visited the site
+    window.sessionStorage.setItem('pearson-pub-visited', 'true');
     await initializeDataWithProgress();
+    await fetchTodayOperationStatus();
   }
 
   // Initialize intersection observer
@@ -1033,6 +1081,16 @@ onMounted(async () => {
     } else {
       setTimeout(runAnimations, 200);
     }
+  }
+
+  // Fetch today's operation status
+  try {
+    const status = await operationHoursApi.getTodayStatus();
+    todayOperationStatus.value = status;
+  } catch (error) {
+    operationHoursError.value = 'Failed to load operation hours';
+  } finally {
+    operationHoursLoading.value = false;
   }
 })
 

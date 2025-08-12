@@ -225,6 +225,14 @@ export const operationHoursApi = {
 
   getById: (id: string): Promise<ApiOperationHour | null> =>
     safeApiCall(() => getApi()(`/api/public/operation-hours/${id}`), null),
+
+  getTodayStatus: (): Promise<{
+    isOpen: boolean;
+    todayHours: { open_time: string; close_time: string } | null;
+    status: string;
+    message: string;
+  } | null> =>
+    safeApiCall(() => getApi()("/api/public/operation-hours/status"), null),
 };
 
 // Specials API for public use with fallbacks
@@ -341,6 +349,7 @@ export const useApi = () => {
     // Operation Hours
     getOperationHours: operationHoursApi.getAll,
     getOperationHourById: operationHoursApi.getById,
+    getTodayOperationStatus: operationHoursApi.getTodayStatus,
 
     // Specials - New improved methods
     getSpecials: specialsApi.getAll,
