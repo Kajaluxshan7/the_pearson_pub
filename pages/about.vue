@@ -198,30 +198,14 @@
             </div>
             
             <!-- Story Content Overlay - Title Only with Clean Layout -->
-            <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <div class="flex items-center mb-3">
-                <UIcon :name="story.icon || 'i-heroicons-heart'" class="w-5 h-5 text-yellow-400 mr-2" />
-                <span class="text-yellow-400 text-sm font-semibold uppercase tracking-wide">{{ story.category || 'Story' }}</span>
-              </div>
-              
+            <div class="absolute bottom-0 left-0 right-0 p-6 text-white">           
               <!-- Main Title - Prominent Display -->
               <h3 class="text-2xl font-bold mb-3 group-hover:text-yellow-300 transition-colors leading-tight">
                 {{ story.title }}
-              </h3>
-              
-              <!-- Subtitle or brief description (optional) -->
-              <p class="text-gray-200 text-sm leading-relaxed line-clamp-2 opacity-90">
-                {{ getStorySubtitle(story) }}
-              </p>
-              
+              </h3>              
               <div class="flex items-center justify-between mt-4">
-                <div class="flex items-center text-xs text-gray-300">
-                  <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-1" />
-                  <span>{{ story.date || 'Recently' }}</span>
-                </div>
-                
                 <!-- Read More Text -->
-                <div class="flex items-center text-yellow-400 text-sm font-medium">
+                <div class="flex items-center justify-end text-yellow-400 text-sm font-medium w-full">
                   <span class="mr-1">Read Story</span>
                   <UIcon name="i-heroicons-arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </div>

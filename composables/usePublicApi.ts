@@ -21,7 +21,6 @@ const getApiBaseUrl = () => {
 // Create fetch instance with base configuration (lazy initialization)
 const createApiClient = () => {
   const baseURL = getApiBaseUrl();
-  console.log("API Base URL:", baseURL); // Debug log for base URL
   return $fetch.create({
     baseURL,
     headers: {

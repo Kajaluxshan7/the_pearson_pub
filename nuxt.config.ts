@@ -72,7 +72,9 @@ export default defineNuxtConfig({
           href: "/images/pub/interior-main.jpg",
           as: "image",
         },
+        { rel: "stylesheet", href: "/fonts/cinzel-v23-latin-regular.woff2" },
       ],
+      script: [{ src: "/sw.js", type: "text/javascript", async: true }],
     },
   },
   // Enhanced image optimization

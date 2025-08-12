@@ -1,5 +1,5 @@
 <template>
-  <UModal v-model="isOpen" :ui="{ width: 'sm:max-w-6xl' }">
+  <UModal v-model="isOpen" :ui="{ width: 'max-w-full sm:max-w-6xl' }">
     <div class="relative">
       <!-- Loading State -->
       <div
@@ -28,99 +28,108 @@
 
       <!-- Story Content -->
       <div v-else-if="story" class="max-h-[80vh] overflow-y-auto">
-        <!-- Hero Section with 16:9 aspect ratio -->
-        <div class="relative aspect-video bg-black">
-          <NuxtImg
-            :src="getCurrentStoryImage(story)"
-            :alt="story.title"
-            class="w-full h-full object-cover"
-            format="webp"
-            quality="90"
-            @error="handleImageError"
-          />
-          <div
-            class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
-          ></div>
+        <!-- Cinematic Hero Section with 16:9 aspect ratio -->
+        <div
+          class="relative aspect-video bg-black overflow-hidden flex items-center justify-center"
+        >
+          <!-- Blurred/Gradient background using current image -->
+          <div class="absolute inset-0 z-0">
+            <NuxtImg
+              :src="getCurrentStoryImage(story)"
+              :alt="story.title"
+              class="w-full h-full object-cover blur-xl scale-110 opacity-60"
+              format="webp"
+              quality="60"
+              @error="handleImageError"
+            />
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"
+            ></div>
+          </div>
 
-          <!-- Story Title Overlay -->
-          <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
-            <div class="flex items-center mb-2">
-              <UIcon
-                :name="story.icon || 'i-heroicons-heart'"
-                class="w-5 h-5 text-yellow-400 mr-2"
-              />
-              <span
-                class="text-yellow-400 text-sm font-semibold uppercase tracking-wide"
-              >
-                {{ story.category || "Story" }}
-              </span>
-            </div>
-            <h1
-              class="text-2xl md:text-3xl lg:text-4xl font-bold mb-2 leading-tight"
-            >
-              {{ story.title }}
-            </h1>
-            <p class="text-base md:text-lg text-gray-200">
-              {{ story.description }}
-            </p>
-            <div class="flex items-center mt-3 text-sm text-gray-300">
-              <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-2" />
-              <span>{{ story.date || "Recently" }}</span>
-            </div>
+          <!-- Centered 4:5 image -->
+          <div
+            class="relative z-10 flex items-center justify-center h-full w-full"
+          >
+            <NuxtImg
+              :src="getCurrentStoryImage(story)"
+              :alt="story.title"
+              class="shadow-2xl rounded-2xl object-cover bg-white/10"
+              :style="{
+                width: 'clamp(180px,60vw,360px)',
+                height: 'clamp(220px,45vh,480px)',
+                aspectRatio: '4/5',
+                maxWidth: '90vw',
+                maxHeight: '90vw',
+              }"
+              format="webp"
+              quality="90"
+              @error="handleImageError"
+            />
           </div>
 
           <!-- Close Button -->
           <button
             @click="closeModal"
-            class="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-300 backdrop-blur-sm z-10"
+            class="absolute top-3 right-3 sm:top-6 sm:right-6 bg-black/60 hover:bg-black/80 text-white p-2 sm:p-3 rounded-full shadow-lg transition-all duration-300 backdrop-blur-md z-30"
           >
-            <UIcon name="i-heroicons-x-mark" class="w-5 h-5" />
+            <UIcon name="i-heroicons-x-mark" class="w-6 h-6" />
           </button>
 
           <!-- Image Navigation for Multiple Images -->
           <div
             v-if="story.images && story.images.length > 1"
-            class="absolute top-1/2 left-4 right-4 flex justify-between items-center transform -translate-y-1/2 z-10"
+            class="absolute top-1/2 left-2 right-2 sm:left-8 sm:right-8 flex justify-between items-center transform -translate-y-1/2 z-20"
           >
             <button
               @click="previousImage"
-              class="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-300 backdrop-blur-sm"
+              class="bg-black/60 hover:bg-yellow-500 text-white p-3 rounded-full shadow-lg transition-all duration-300 backdrop-blur-md"
             >
-              <UIcon name="i-heroicons-chevron-left" class="w-5 h-5" />
+              <UIcon name="i-heroicons-chevron-left" class="w-6 h-6" />
             </button>
             <button
               @click="nextImage"
-              class="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-300 backdrop-blur-sm"
+              class="bg-black/60 hover:bg-yellow-500 text-white p-3 rounded-full shadow-lg transition-all duration-300 backdrop-blur-md"
             >
-              <UIcon name="i-heroicons-chevron-right" class="w-5 h-5" />
+              <UIcon name="i-heroicons-chevron-right" class="w-6 h-6" />
             </button>
           </div>
 
-          <!-- Image Indicators -->
+          <!-- Thumbnails Carousel -->
           <div
             v-if="story.images && story.images.length > 1"
-            class="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex space-x-2"
+            class="absolute bottom-2 sm:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 sm:space-x-3 z-20"
           >
             <button
-              v-for="(_, index) in story.images"
+              v-for="(img, index) in story.images"
               :key="index"
               @click="setCurrentImage(index)"
-              class="w-2 h-2 rounded-full transition-all duration-300"
+              class="w-8 h-10 sm:w-12 sm:h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 shadow-lg"
               :class="
                 index === currentImageIndex
-                  ? 'bg-yellow-400'
-                  : 'bg-white/50 hover:bg-white/70'
+                  ? 'border-yellow-500 scale-105'
+                  : 'border-transparent opacity-70 hover:opacity-100'
               "
-            ></button>
+            >
+              <NuxtImg
+                :src="img"
+                :alt="story.title"
+                class="object-cover w-full h-full"
+                format="webp"
+                quality="60"
+              />
+            </button>
           </div>
         </div>
 
         <!-- Story Content Section -->
-        <div class="p-6 bg-white dark:bg-gray-800">
+        <div
+          class="p-4 sm:p-8 bg-white dark:bg-gray-900 rounded-b-3xl shadow-2xl mt-[-2px]"
+        >
           <!-- Full Description -->
           <div
             v-if="story.fullDescription || story.content"
-            class="prose prose-sm dark:prose-invert max-w-none mb-6"
+            class="prose prose-lg dark:prose-invert max-w-none mb-6 sm:mb-8"
           >
             <div
               v-html="
@@ -132,7 +141,7 @@
           </div>
 
           <!-- Fallback if no full content -->
-          <div v-else class="mb-6">
+          <div v-else class="mb-6 sm:mb-8">
             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
               {{ story.description }}
             </p>
@@ -140,22 +149,22 @@
 
           <!-- Share Options -->
           <div
-            class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700"
+            class="flex flex-col sm:flex-row sm:items-center justify-between pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700 gap-4"
           >
             <div
-              class="flex items-center space-x-3 text-gray-600 dark:text-gray-400 text-sm"
+              class="flex items-center space-x-2 sm:space-x-4 text-gray-600 dark:text-gray-400 text-base"
             >
               <div class="flex items-center">
                 <UIcon
                   name="i-heroicons-calendar"
-                  class="w-4 h-4 mr-1 text-yellow-500"
+                  class="w-5 h-5 mr-2 text-yellow-500"
                 />
                 <span>{{ story.date || "Recently" }}</span>
               </div>
               <div class="flex items-center">
                 <UIcon
                   :name="story.icon || 'i-heroicons-heart'"
-                  class="w-4 h-4 mr-1 text-yellow-500"
+                  class="w-5 h-5 mr-2 text-yellow-500"
                 />
                 <span>{{ story.category || "Story" }}</span>
               </div>
@@ -164,17 +173,17 @@
             <div class="flex space-x-2">
               <button
                 @click="shareStory"
-                class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1 text-sm"
+                class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 sm:p-3 rounded-full shadow-lg transition-colors flex items-center"
+                title="Share"
               >
-                <UIcon name="i-heroicons-share" class="w-4 h-4" />
-                <span>Share</span>
+                <UIcon name="i-heroicons-share" class="w-5 h-5" />
               </button>
               <button
                 @click="copyLink"
-                class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1 text-sm"
+                class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white p-2 sm:p-3 rounded-full shadow-lg transition-colors flex items-center"
+                title="Copy Link"
               >
-                <UIcon name="i-heroicons-link" class="w-4 h-4" />
-                <span>Copy</span>
+                <UIcon name="i-heroicons-link" class="w-5 h-5" />
               </button>
             </div>
           </div>

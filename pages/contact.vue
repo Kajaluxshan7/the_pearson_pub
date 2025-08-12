@@ -429,6 +429,7 @@ const submitForm = async () => {
   }
   
   isSubmitting.value = true
+  formErrors.value = {} // Clear previous errors
   
   try {
     // Map form fields to match the API expected format
@@ -439,10 +440,17 @@ const submitForm = async () => {
       message: `Subject: ${form.value.subject}\n\nMessage: ${form.value.message}`
     }
 
+    console.log('Submitting contact form:', { ...contactData, message: 'Hidden for security' })
+
     const response = await $fetch('/api/contact', {
       method: 'POST',
-      body: contactData
+      body: contactData,
+      headers: {
+        'Content-Type': 'application/json'
+      }
     })
+
+    console.log('Contact form response:', response)
 
     // Success
     form.value = {
@@ -452,7 +460,6 @@ const submitForm = async () => {
       subject: "",
       message: "",
     }
-    formErrors.value = {}
     
     toast.add({
       title: "Success!",
@@ -462,9 +469,17 @@ const submitForm = async () => {
   } catch (error: any) {
     console.error('Contact form error:', error)
     
+    let errorMessage = "Failed to send message. Please try again or contact us directly."
+    
+    if (error.data?.message) {
+      errorMessage = error.data.message
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
     toast.add({
       title: "Error",
-      description: error.data?.message || "Failed to send message. Please try again or contact us directly.",
+      description: errorMessage,
       color: "red",
     })
   } finally {
