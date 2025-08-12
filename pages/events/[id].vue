@@ -30,21 +30,48 @@
         <span class="text-gray-900">{{ event.title }}</span>
       </nav>
 
-      <!-- Event Header -->
+      <!-- Event Header with Gallery -->
       <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
         <div class="flex flex-col lg:flex-row gap-6">
-          <!-- Event Image -->
-          <div class="lg:w-2/3">
+          <!-- Main Image (16:9) -->
+          <div class="lg:w-2/3 flex flex-col gap-4">
             <div class="aspect-video relative rounded-lg overflow-hidden bg-gray-100">
               <img 
                 v-if="event.images && event.images.length > 0"
-                :src="event.images[0]" 
+                :src="event.images[activeImageIndex]"
                 :alt="event.title"
                 class="w-full h-full object-cover"
                 @error="handleImageError"
               />
               <div v-else class="w-full h-full flex items-center justify-center bg-gray-200">
                 <UIcon name="i-heroicons-photo" class="h-16 w-16 text-gray-400" />
+              </div>
+              <!-- Gallery Navigation -->
+              <button v-if="event.images && event.images.length > 1 && activeImageIndex > 0"
+                @click="activeImageIndex = activeImageIndex - 1"
+                class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow hover:bg-yellow-100 transition"
+                aria-label="Previous image"
+              >
+                <UIcon name="i-heroicons-chevron-left" class="h-5 w-5 text-gray-700" />
+              </button>
+              <button v-if="event.images && event.images.length > 1 && activeImageIndex < event.images.length - 1"
+                @click="activeImageIndex = activeImageIndex + 1"
+                class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow hover:bg-yellow-100 transition"
+                aria-label="Next image"
+              >
+                <UIcon name="i-heroicons-chevron-right" class="h-5 w-5 text-gray-700" />
+              </button>
+            </div>
+            <!-- Thumbnails (4:5 ratio, max 5) -->
+            <div v-if="event.images && event.images.length > 1" class="flex gap-2 justify-center mt-2">
+              <div v-for="(img, idx) in event.images.slice(0, 5)" :key="img" class="aspect-[4/5] w-16 rounded-lg overflow-hidden border-2 transition-all duration-200"
+                :class="activeImageIndex === idx ? 'border-yellow-500' : 'border-gray-200'"
+                @click="activeImageIndex = idx"
+                tabindex="0"
+                role="button"
+                aria-label="View image"
+              >
+                <img :src="img" :alt="event.title + ' thumbnail ' + (idx+1)" class="w-full h-full object-cover" />
               </div>
             </div>
           </div>
@@ -125,17 +152,19 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+const activeImageIndex = ref(0);
 import { useRoute, useRouter } from 'vue-router';
 import { useLandingPageData } from '~/composables/useLandingPageData';
 
 const route = useRoute();
 const router = useRouter();
-const { allEvents, pending, error } = useLandingPageData();
+const { allEvents, error } = useLandingPageData();
 
 const event = computed(() => {
   if (!allEvents.value) return null;
-  const id = route.params.id;
-  return allEvents.value.find(e => e.id === id || e.id === parseInt(id) || e.slug === id);
+  let id = route.params.id;
+  if (Array.isArray(id)) id = id[0];
+  return allEvents.value.find(e => String(e.id) === String(id));
 });
 
 const getBadgeClass = (category: string) => {

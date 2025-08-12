@@ -28,8 +28,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex flex-col md:flex-row items-center justify-center text-center md:text-left gap-4">
             <div class="flex items-center gap-2">
-              <UIcon name="i-heroicons-clock" class="w-5 h-5 text-white" />
-              <span class="font-semibold text-white">Today's Hours:</span>
+              <span class="font-semibold text-white">Opening Hours</span>
             </div>
             <div class="text-white text-sm md:text-base" v-if="operationHoursLoading">
               <span>Loading...</span>
@@ -847,51 +846,31 @@ const nextSpecialImage = () => {
 
 // Navigation function to menu with category - enhanced to detect current day's category
 const goToMenuCategory = () => {
-  const selectedSpecial = selectedTab.value;
-  
-  // First check if the selected special has a category
-  if (selectedSpecial && 'specials' in selectedSpecial && selectedSpecial.specials?.[0]?.category_id) {
-    navigateTo(`/menu?category=${selectedSpecial.specials[0].category_id}`);
-    return;
-  }
-  
-  // If no specific category from special, try to find current day's category
+  // Always filter for the current day's specials (e.g., Tuesday specials if today is Tuesday)
   try {
-    // Get current day name in Toronto timezone
-    const currentDay = TimezoneUtil.nowToronto().toJSDate().toLocaleDateString('en-US', { 
-  weekday: 'long',
-  timeZone: 'America/Toronto'
-})
-    
-    // Look for categories that contain the current day name
-    const dayKeywords = [currentDay, currentDay.substring(0, 3)]; // e.g., ["wednesday", "wed"]
+    const currentDay = TimezoneUtil.nowToronto().toJSDate().toLocaleDateString('en-US', {
+      weekday: 'long',
+      timeZone: 'America/Toronto'
+    }).toLowerCase();
+    // Find menu category that matches the current day (e.g., 'Tuesday Specials')
     let matchedCategory = null;
-    
-    // Search through menu categories for day-specific ones
     if (menuCategories.value && Array.isArray(menuCategories.value)) {
       for (const category of menuCategories.value) {
         const categoryName = category.name.toLowerCase();
-        
-        // Check if category name contains the current day
-        for (const keyword of dayKeywords) {
-          if (categoryName.includes(keyword)) {
-            matchedCategory = category.id;
-            break;
-          }
+        if (categoryName.includes(currentDay)) {
+          matchedCategory = category.id;
+          break;
         }
-        if (matchedCategory) break;
       }
     }
-    
-    // Navigate to the matched category or general menu
     if (matchedCategory) {
       navigateTo(`/menu?category=${matchedCategory}`);
     } else {
-      navigateTo('/menu');
+      // fallback: show all specials for today (pass ?day=Tuesday)
+      navigateTo(`/menu?day=${currentDay}`);
     }
   } catch (error) {
-    console.log('Error detecting current day category:', error);
-    // Fallback to general menu page
+    console.log('Error filtering current day specials:', error);
     navigateTo('/menu');
   }
 }
