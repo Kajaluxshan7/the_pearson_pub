@@ -47,14 +47,14 @@
                 v-model="searchQuery" 
                 type="text" 
                 placeholder="Search events..." 
-                class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm"
+                class="w-full pl-8 pr-2 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm"
               />
               <UIcon name="i-heroicons-magnifying-glass" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
           </div>
 
           <!-- Filters -->
-          <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center w-full sm:w-auto">
+          <div class="flex flex-row gap-4 items-center w-full sm:w-auto">
             <!-- Status Filter -->
             <div class="flex items-center gap-2 w-full sm:w-auto">
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</label>
@@ -197,9 +197,9 @@
               role="button"
               :aria-label="`View details for ${event.title}`"
             >
-              <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200 dark:border-gray-700 h-full">
-                <!-- Image Container -->
-                <div class="relative overflow-hidden h-56">
+              <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200 dark:border-gray-700 h-full flex flex-col">
+                <!-- Image Container - Made taller for better visibility -->
+                <div class="relative overflow-hidden h-100">
                   <NuxtImg
                     :src="getCurrentEventImage(event)"
                     :alt="event.title"
@@ -222,26 +222,23 @@
                   </div>
                 </div>
                 
-                <!-- Content -->
-                <div class="p-6">
+                <!-- Content - flexible to take remaining space -->
+                <div class="p-6 flex-1 flex flex-col">
                   <h3 class="text-xl font-bold mb-3 text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors line-clamp-2 leading-tight">
                     {{ event.title }}
                   </h3>
-                  <p class="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed line-clamp-3 text-sm">
+                  <p class="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed line-clamp-3 text-sm flex-1">
                     {{ event.description }}
                   </p>
                   <!-- Event Info -->
                   <div class="space-y-3">
                     <!-- Event Date Range -->
-                    <div v-if="event.startDate && event.endDate" class="flex items-start text-sm text-gray-500 dark:text-gray-400">
+                    <div v-if="event.date && event.endDate" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
                       <div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mr-3 mt-0.5">
                         <UIcon name="i-heroicons-calendar" class="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                       </div>
-                      <div class="flex-1">
-                        <div class="font-medium text-gray-900 dark:text-white">{{ formatDateTimeToFriendly(event.startDateTime) }}</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          to {{ formatDateTimeToFriendly(event.endDateTime) }}
-                        </div>
+                      <div class="flex">
+                        <div class="font-medium text-gray-900 dark:text-white">{{ formatEventDateRange(event.date, event.endDate) }}</div>
                       </div>
                     </div>
                     <!-- Single Date (fallback) -->
@@ -249,7 +246,7 @@
                       <div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mr-3">
                         <UIcon name="i-heroicons-calendar" class="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                       </div>
-                      <span class="font-medium">{{ formatEventDateShort(event.date) }}</span>
+                      <span class="font-medium">{{ formatEventDateRange(event.date, '') }}</span>
                     </div>
                     <div v-if="event.time" class="flex items-center text-sm text-gray-500 dark:text-gray-400">
                       <div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mr-3">
@@ -286,12 +283,12 @@
             >
               <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200 dark:border-gray-700">
                 <div class="flex flex-col lg:flex-row">
-                  <!-- Image -->
+                  <!-- Image - Improved aspect ratio -->
                   <div class="lg:w-96 relative overflow-hidden">
                     <NuxtImg
                       :src="getCurrentEventImage(event)"
                       :alt="event.title"
-                      class="w-full h-64 lg:h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      class="w-full h-80 lg:h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       format="webp"
                       quality="85"
                       loading="lazy"
@@ -330,7 +327,7 @@
                             </div>
                             <div>
                               <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">Date</div>
-                              <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ formatEventDate(event.date) }}</div>
+                              <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ formatEventDateRange(event.date, event.endDate || '') }}</div>
                             </div>
                           </div>
                           <div v-if="event.time" class="flex items-center">
@@ -394,6 +391,34 @@
 </template>
 
 <script setup lang="ts">
+import { useSEO } from '@/composables/useSEO';
+import { onMounted } from 'vue';
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "The Pearson Pub",
+  "url": "https://thepearsonpub.ca/events",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://thepearsonpub.ca/events?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+};
+onMounted(() => {
+  useSEO().setSEO({
+    title: 'Events & Entertainment',
+    description: 'Live music, pub quizzes, and special events at The Pearson Pub.',
+    canonical: 'https://thepearsonpub.ca/events',
+    ogImage: '/images/entertainment/music.jpg',
+    structuredData: [{ type: 'application/ld+json', innerHTML: JSON.stringify(structuredData) }],
+  });
+});
+
+onMounted(() => {
+  console.log('All Events:', allEvents.value);
+  console.log('Filtered Events:', filteredEvents.value);
+});
+
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { useLandingPageData } from "~/composables/useLandingPageData";
 import { TimezoneUtil } from '~/utils/timezone';
@@ -441,7 +466,6 @@ const { data: eventsData } = await useAsyncData('events-data', async () => {
   await fetchEventsData();
   return true;
 });
-
 // Backend events data
 const {
   allEvents: dynamicEvents,
@@ -509,8 +533,8 @@ const allEvents = computed(() => {
     }
     
     // If same status, sort by date
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
+    const dateA = new Date(a.startDateTime || a.date);
+    const dateB = new Date(b.startDateTime || b.date);
     return a.status === 'ended' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
   });
 });
@@ -597,10 +621,28 @@ const formatEventDay = (dateString: string) => {
   }
 };
 
-// const formatEventDateRange = (startDate: string, endDate: string) => {
-//   if (!startDate || !endDate) return '';
-//   return TimezoneUtil.formatEventDateRange(startDate, endDate);
-// };
+const formatEventDateRange = (startDate: string, endDate: string) => {
+  if (!startDate) return '';
+  
+  try {
+    // Parse start date in Toronto timezone
+    const start = DateTime.fromISO(startDate, { zone: 'America/Toronto' });
+    
+    if (!endDate || endDate === startDate) {
+      // Single date: "2025-08-12 (Tuesday)"
+      return start.toFormat('yyyy-MM-dd (cccc)');
+    }
+    
+    // Parse end date in Toronto timezone
+    const end = DateTime.fromISO(endDate, { zone: 'America/Toronto' });
+    
+    // Date range: "2025-08-12 (Tuesday) to 2025-08-13 (Wednesday)"
+    return `${start.toFormat('yyyy-MM-dd (cccc)')} to ${end.toFormat('yyyy-MM-dd (cccc)')}`;
+  } catch (error) {
+    console.error('Date range formatting error:', error);
+    return startDate + (endDate && endDate !== startDate ? ` to ${endDate}` : '');
+  }
+};
 
 const getCurrentEventImage = (event: Event | null) => {
   if (!event) return '/images/entertainment/eventDefault.jpg';
@@ -636,6 +678,69 @@ function formatDateTimeToFriendly(datetime: string) {
   return DateTime.fromISO(datetime, { zone: 'utc' })
     .setZone('America/Toronto')
     .toFormat("MMM d, h a");
+}
+
+// Function to format event date and time
+function formatEventDateTime(date: string, time?: string) {
+  if (!date) return '';
+  
+  try {
+    // Create a proper datetime string
+    let dateTime = date;
+    if (time) {
+      // Remove timezone suffixes and normalize the time
+      const cleanTime = time.replace(/\s*\/?\s*\b(EST|EDT)\b\s*/g, '').trim();
+      dateTime = `${date}T${convertTo24Hour(cleanTime)}`;
+    }
+    
+    return DateTime.fromISO(dateTime, { zone: 'America/Toronto' })
+      .toFormat("MMM d, yyyy 'at' h:mm a");
+  } catch (error) {
+    console.error('Date formatting error:', error);
+    return date;
+  }
+}
+
+// Function to convert time to 24-hour format
+function convertTo24Hour(time: string) {
+  if (!time) return '00:00';
+  
+  const match = time.match(/(\d{1,2}):?(\d{0,2})\s*(am|pm|a\.m\.|p\.m\.)?/i);
+  if (!match) return '00:00';
+  
+  let hours = parseInt(match[1]);
+  const minutes = match[2] ? parseInt(match[2]) : 0;
+  const period = match[3]?.toLowerCase();
+  
+  if (period && (period.includes('p') || period.includes('P')) && hours !== 12) {
+    hours += 12;
+  } else if (period && (period.includes('a') || period.includes('A')) && hours === 12) {
+    hours = 0;
+  }
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+}
+
+// Function to calculate event duration
+function getEventDuration(startDate: string, startTime: string, endDate: string, endTime: string) {
+  if (!startDate || !endDate) return '';
+  
+  try {
+    const startDateTime = DateTime.fromISO(`${startDate}T${convertTo24Hour(startTime)}`, { zone: 'America/Toronto' });
+    const endDateTime = DateTime.fromISO(`${endDate}T${convertTo24Hour(endTime)}`, { zone: 'America/Toronto' });
+    
+    const diff = endDateTime.diff(startDateTime, ['days', 'hours', 'minutes']);
+    
+    const parts = [];
+    if (diff.days > 0) parts.push(`${diff.days} day${diff.days > 1 ? 's' : ''}`);
+    if (diff.hours > 0) parts.push(`${diff.hours} hour${diff.hours > 1 ? 's' : ''}`);
+    if (diff.minutes > 0 && diff.days === 0) parts.push(`${Math.round(diff.minutes)} min${diff.minutes > 1 ? 's' : ''}`);
+    
+    return parts.join(', ');
+  } catch (error) {
+    console.error('Duration calculation error:', error);
+    return '';
+  }
 }
 
 // Action functions

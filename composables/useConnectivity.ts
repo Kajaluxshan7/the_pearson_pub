@@ -42,7 +42,7 @@ export const useConnectivity = () => {
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
       // Try to reach the backend health endpoint
-      const response = await fetch(`${apiBaseUrl}/health`, {
+      const response = await fetch(`${apiBaseUrl}/health/time`, {
         method: "GET",
         signal: controller.signal,
         headers: {
@@ -84,13 +84,16 @@ export const useConnectivity = () => {
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
       // Try to reach the public API endpoint
-      const response = await fetch(`${apiBaseUrl}/public-api/landing-content`, {
-        method: "GET",
-        signal: controller.signal,
-        headers: {
-          Accept: "application/json",
-        },
-      });
+      const response = await fetch(
+        `${apiBaseUrl}api/public/landing-content`,
+        {
+          method: "GET",
+          signal: controller.signal,
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
 
       clearTimeout(timeoutId);
 

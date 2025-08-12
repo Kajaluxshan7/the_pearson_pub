@@ -229,6 +229,39 @@
 </template>
 
 <script setup lang="ts">
+import { useSEO } from '@/composables/useSEO';
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "The Pearson Pub",
+  "image": "https://thepearsonpub.ca/images/pub/interior-main.jpg",
+  "@id": "https://thepearsonpub.ca/contact",
+  "url": "https://thepearsonpub.ca/contact",
+  "telephone": "+1-905-668-2828",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "101 Brock St S",
+    "addressLocality": "Whitby",
+    "addressRegion": "ON",
+    "postalCode": "L1N 4J9",
+    "addressCountry": "CA"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 43.8755,
+    "longitude": -78.9439
+  },
+  "openingHours": "Mo-Su 11:00-02:00"
+};
+onMounted(() => {
+  useSEO().setSEO({
+    title: 'Contact Us',
+    description: 'Contact The Pearson Pub for reservations, inquiries, or feedback.',
+    canonical: 'https://thepearsonpub.ca/contact',
+    ogImage: '/images/pub/interior-main.jpg',
+    structuredData: [{ type: 'application/ld+json', innerHTML: JSON.stringify(structuredData) }],
+  });
+});
 import { ref, computed, onMounted } from "vue"
 import { useLandingPageData } from "~/composables/useLandingPageData";
 import { TimezoneUtil } from "~/utils/timezone";
@@ -301,14 +334,8 @@ const formatOperationHours = (hours: any[]) => {
       const formattedOpen = TimezoneUtil.formatTime(open);
       const formattedClose = TimezoneUtil.formatTime(close);
       
-      // Check if this is overnight hours
-      const isOvernight = TimezoneUtil.isOvernightHours(open, close);
-      
-      if (isOvernight) {
-        return `${formattedDays}: ${formattedOpen} - ${formattedClose} (next day)`;
-      } else {
-        return `${formattedDays}: ${formattedOpen} - ${formattedClose}`;
-      }
+      // Format without "(next day)" text
+      return `${formattedDays}: ${formattedOpen} - ${formattedClose}`;
     })
     .join('\n');
 }

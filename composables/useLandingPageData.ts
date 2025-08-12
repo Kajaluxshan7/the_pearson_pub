@@ -59,6 +59,15 @@ export const useLandingPageData = () => {
   const seasonalSpecials = ref<any>(null);
   const lateNightSpecials = ref<any>(null);
 
+  // Today's operation status state
+  const todayOperationStatus = ref<{
+    isOpen: boolean;
+    todayHours: any;
+    status: string;
+  } | null>(null);
+  const operationHoursLoading = ref(true);
+  const operationHoursError = ref<string | null>(null);
+
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
@@ -90,15 +99,26 @@ export const useLandingPageData = () => {
     const startDateUtc = new Date(apiEvent.start_date);
     const endDateUtc = new Date(apiEvent.end_date);
 
+    // Get current time in Toronto timezone
+    const nowInToronto = new Date();
+
+    // Calculate status based on Canadian time
+    let status: "upcoming" | "current" | "ended" = "upcoming";
+    if (nowInToronto >= startDateUtc && nowInToronto <= endDateUtc) {
+      status = "current";
+    } else if (nowInToronto > endDateUtc) {
+      status = "ended";
+    }
+
     // Format in Toronto timezone for display
-    const startDateFormatted = new Intl.DateTimeFormat("en-US", {
+    const startDateFormatted = new Intl.DateTimeFormat("en-CA", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
       timeZone: "America/Toronto",
     }).format(startDateUtc);
 
-    const endDateFormatted = new Intl.DateTimeFormat("en-US", {
+    const endDateFormatted = new Intl.DateTimeFormat("en-CA", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -128,7 +148,7 @@ export const useLandingPageData = () => {
       date: startDateFormatted, // Use formatted Toronto timezone date
       time: `${startTimeFormatted} - ${endTimeFormatted} EST/EDT`,
       endDate: endDateFormatted, // Use formatted Toronto timezone end date
-      startDate: apiEvent.start_date, // Keep original UTC for other processing
+      startDate: startDateFormatted, // Use formatted date instead of UTC string
       startDateTime: apiEvent.start_date,
       endDateTime: apiEvent.end_date,
       image: apiEvent.images?.[0] || "/images/events/default.jpg",
@@ -149,7 +169,7 @@ export const useLandingPageData = () => {
       ctaLink: "/contact",
       price: { general: 0 },
       ticketsAvailable: 100,
-      status: apiEvent.status || "upcoming",
+      status: status, // Use calculated status
       category: "entertainment",
       ageRestriction: "19+",
       specialRequirements: [],
@@ -219,7 +239,7 @@ export const useLandingPageData = () => {
       landingContent.value = data;
     } catch (err) {
       error.value = "Failed to fetch landing page content";
-      console.error("Error fetching landing content:", err);
+      //console.error("Error fetching landing content:", err);
     } finally {
       isLoading.value = false;
     }
@@ -233,7 +253,7 @@ export const useLandingPageData = () => {
       menuData.value = data;
     } catch (err) {
       error.value = "Failed to fetch menu data";
-      console.error("Error fetching menu data:", err);
+      //console.error("Error fetching menu data:", err);
     } finally {
       isLoading.value = false;
     }
@@ -247,7 +267,7 @@ export const useLandingPageData = () => {
       eventsData.value = data;
     } catch (err) {
       error.value = "Failed to fetch events data";
-      console.error("Error fetching events data:", err);
+      //console.error("Error fetching events data:", err);
     } finally {
       isLoading.value = false;
     }
@@ -261,7 +281,7 @@ export const useLandingPageData = () => {
       contactInfo.value = data;
     } catch (err) {
       error.value = "Failed to fetch contact info";
-      console.error("Error fetching contact info:", err);
+      //console.error("Error fetching contact info:", err);
     } finally {
       isLoading.value = false;
     }
@@ -286,7 +306,7 @@ export const useLandingPageData = () => {
       lateNightSpecials.value = lateNightResponse;
     } catch (err) {
       error.value = "Failed to fetch specials data";
-      console.error("Error fetching specials data:", err);
+      //console.error("Error fetching specials data:", err);
 
       // Set fallback data
       dailySpecials.value = {
@@ -305,6 +325,24 @@ export const useLandingPageData = () => {
     }
   };
 
+  // Today's operation status fetching function
+  const fetchTodayOperationStatus = async () => {
+    operationHoursLoading.value = true;
+    operationHoursError.value = null;
+    try {
+      const result = await useApi().getTodayOperationStatus();
+      //console.log("🕐 Frontend received operation status:", result);
+      todayOperationStatus.value = result;
+    } catch (err: any) {
+      //console.error("🕐 Frontend error fetching operation status:", err);
+      operationHoursError.value =
+        err.message || "Error fetching operation status";
+      todayOperationStatus.value = null;
+    } finally {
+      operationHoursLoading.value = false;
+    }
+  };
+
   // Initialize all data
   const initializeAllData = async () => {
     await Promise.all([
@@ -313,6 +351,7 @@ export const useLandingPageData = () => {
       fetchEventsData(),
       fetchContactInfo(),
       fetchSpecialsData(), // Add specials data fetching
+      fetchTodayOperationStatus(), // Add today's operation status fetching
     ]);
   };
 
@@ -325,8 +364,11 @@ export const useLandingPageData = () => {
     dailySpecials,
     seasonalSpecials,
     lateNightSpecials,
+    todayOperationStatus,
     isLoading,
     error,
+    operationHoursLoading,
+    operationHoursError,
 
     // Computed
     featuredMenuItems,
@@ -342,6 +384,7 @@ export const useLandingPageData = () => {
     fetchEventsData,
     fetchContactInfo,
     fetchSpecialsData,
+    fetchTodayOperationStatus,
     initializeAllData,
   };
 };

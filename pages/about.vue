@@ -157,19 +157,20 @@
         </div>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div 
+          <div
             v-for="(story, index) in stories" 
             :key="story.id || index"
-            class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-500 hover:scale-105"
+            @click="openStoryModal(story.id)"
+            class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-500 hover:scale-105 cursor-pointer"
           >
-            <div class="relative h-80 overflow-hidden">
+            <div class="relative h-100 overflow-hidden">
               <img 
                 :src="getCurrentImage(story)" 
                 :alt="story.title"
                 class="w-full h-full object-cover transform group-hover:scale-110 transition-all duration-700"
                 :key="getCurrentImage(story)"
               />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-300"></div>
               
               <!-- Image indicator dots for multiple images -->
               <div v-if="story.images && story.images.length > 1" class="absolute top-4 right-4 flex space-x-1">
@@ -187,28 +188,48 @@
                   {{ (currentImageIndexes[story.id] || 0) + 1 }} / {{ story.images.length }}
                 </span>
               </div>
+
+              <!-- Read More Icon -->
+              <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                  <UIcon name="i-heroicons-arrow-right" class="w-5 h-5 text-white" />
+                </div>
+              </div>
             </div>
             
-            <!-- Story Content Overlay -->
+            <!-- Story Content Overlay - Title Only with Clean Layout -->
             <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
               <div class="flex items-center mb-3">
                 <UIcon :name="story.icon || 'i-heroicons-heart'" class="w-5 h-5 text-yellow-400 mr-2" />
                 <span class="text-yellow-400 text-sm font-semibold uppercase tracking-wide">{{ story.category || 'Story' }}</span>
               </div>
-              <h3 class="text-xl font-bold mb-2 group-hover:text-yellow-300 transition-colors">{{ story.title }}</h3>
-              <p class="text-gray-200 text-sm leading-relaxed">{{ story.description }}</p>
-              <div class="flex items-center mt-3 text-xs text-gray-300">
-                <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-1" />
-                <span>{{ story.date || 'Recently' }}</span>
+              
+              <!-- Main Title - Prominent Display -->
+              <h3 class="text-2xl font-bold mb-3 group-hover:text-yellow-300 transition-colors leading-tight">
+                {{ story.title }}
+              </h3>
+              
+              <!-- Subtitle or brief description (optional) -->
+              <p class="text-gray-200 text-sm leading-relaxed line-clamp-2 opacity-90">
+                {{ getStorySubtitle(story) }}
+              </p>
+              
+              <div class="flex items-center justify-between mt-4">
+                <div class="flex items-center text-xs text-gray-300">
+                  <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-1" />
+                  <span>{{ story.date || 'Recently' }}</span>
+                </div>
+                
+                <!-- Read More Text -->
+                <div class="flex items-center text-yellow-400 text-sm font-medium">
+                  <span class="mr-1">Read Story</span>
+                  <UIcon name="i-heroicons-arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                </div>
               </div>
             </div>
 
-            <!-- Hover Effect Badge -->
-            <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                <UIcon name="i-heroicons-eye" class="w-4 h-4 text-white" />
-              </div>
-            </div>
+            <!-- Hover overlay for better interaction feedback -->
+            <div class="absolute inset-0 bg-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
         </div>
       </div>
@@ -301,12 +322,19 @@
       </div>
     </section>
   </div>
+
+  <!-- Story Modal -->
+  <StoryModal 
+    v-model="isModalOpen"
+    :story-id="selectedStoryId"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { publicApi } from '~/composables/usePublicApi'
 import type { ApiStory } from '~/composables/usePublicApi'
+import StoryModal from '~/components/StoryModal.vue'
 
 // Simple animation state
 const animationState = ref({
@@ -322,6 +350,16 @@ const storiesLoading = ref(true)
 
 // Image rotation for stories with multiple images
 const currentImageIndexes = ref<{ [key: string]: number }>({})
+
+// Modal state
+const isModalOpen = ref(false)
+const selectedStoryId = ref('')
+
+// Modal functions
+const openStoryModal = (storyId: string) => {
+  selectedStoryId.value = storyId
+  isModalOpen.value = true
+}
 
 // Load stories from API
 const loadStories = async () => {
@@ -362,6 +400,17 @@ const getCurrentImage = (story: ApiStory) => {
   
   const currentIndex = currentImageIndexes.value[story.id] || 0
   return story.images[currentIndex] || story.images[0]
+}
+
+// Get story subtitle (first 50 characters of description)
+const getStorySubtitle = (story: ApiStory) => {
+  if (!story.description) return 'Click to read the full story...'
+  
+  const subtitle = story.description.length > 50 
+    ? story.description.substring(0, 50) + '...' 
+    : story.description
+  
+  return subtitle
 }
 
 // Initialize image rotation for stories with multiple images
