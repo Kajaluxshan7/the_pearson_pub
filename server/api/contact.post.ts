@@ -1,5 +1,4 @@
-import { readBody, createError } from "h3";
-import type { H3Event } from "h3";
+import { readBody, createError, H3Event } from "h3";
 import nodemailer from "nodemailer";
 
 export default defineEventHandler(async (event: H3Event) => {
@@ -14,6 +13,7 @@ export default defineEventHandler(async (event: H3Event) => {
     if (!firstName || !lastName || !email || !message || !subject) {
       throw createError({
         statusCode: 400,
+        statusMessage: "Bad Request",
         message: "All fields are required",
       });
     }
@@ -23,7 +23,26 @@ export default defineEventHandler(async (event: H3Event) => {
     if (!emailRegex.test(email)) {
       throw createError({
         statusCode: 400,
+        statusMessage: "Bad Request", 
         message: "Invalid email format",
+      });
+    }
+
+    // Check if SMTP is configured
+    const smtpHost = config.smtpHost || process.env.NUXT_SMTP_HOST;
+    const smtpUser = config.smtpUser || process.env.NUXT_SMTP_USER;
+    const smtpPass = config.smtpPass || process.env.NUXT_SMTP_PASS;
+
+    if (!smtpHost || !smtpUser || !smtpPass) {
+      console.error("❌ SMTP configuration missing:", {
+        host: smtpHost ? "✅" : "❌",
+        user: smtpUser ? "✅" : "❌", 
+        pass: smtpPass ? "✅" : "❌"
+      });
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Internal Server Error",
+        message: "Email service is not configured properly. Please contact support.",
       });
     }
 
@@ -43,14 +62,9 @@ export default defineEventHandler(async (event: H3Event) => {
 
     // Prepare email content with modern template
     const mailOptions = {
-      from: `"${firstName} ${lastName}" <${
-        config.smtpUser || process.env.NUXT_SMTP_USER
-      }>`,
+      from: `"${firstName} ${lastName}" <${smtpUser}>`,
       replyTo: email,
-      to:
-        config.contactEmail ||
-        process.env.NUXT_CONTACT_EMAIL ||
-        "contact@thepearsonpub.ca",
+      to: config.contactEmail || process.env.NUXT_CONTACT_EMAIL || "contact@thepearsonpubwhitby.ca",
       subject: `🍺 New Contact Form Submission - The Pearson Pub | ${subject}`,
       text: `
         Name: ${firstName} ${lastName}
@@ -59,7 +73,6 @@ export default defineEventHandler(async (event: H3Event) => {
         Message: ${message}
       `,
       html: `
-        <!DOCTYPE html>
         <html lang="en">
         <head>
           <meta charset="UTF-8">
@@ -219,34 +232,20 @@ export default defineEventHandler(async (event: H3Event) => {
       `,
     };
 
-    // Log configuration for debugging (without sensitive data)
-    console.log("Email configuration:", {
-      host: config.smtpHost || process.env.NUXT_SMTP_HOST || "smtp.gmail.com",
-      port: parseInt(config.smtpPort || process.env.NUXT_SMTP_PORT || "587"),
-      user:
-        config.smtpUser || process.env.NUXT_SMTP_USER
-          ? "***configured***"
-          : "NOT SET",
-      pass:
-        config.smtpPass || process.env.NUXT_SMTP_PASS
-          ? "***configured***"
-          : "NOT SET",
-      contactEmail:
-        config.contactEmail ||
-        process.env.NUXT_CONTACT_EMAIL ||
-        "contact@thepearsonpub.ca",
-    });
-
     // Verify transporter configuration
     try {
       await transport.verify();
       console.log("✅ SMTP connection verified successfully");
     } catch (verifyError: any) {
-  console.error("❌ SMTP verification failed:", verifyError);
+      console.error("❌ SMTP verification failed:", {
+        message: verifyError.message,
+        code: verifyError.code,
+        command: verifyError.command
+      });
       throw createError({
         statusCode: 500,
-        message:
-          "Email service configuration error. Please check your SMTP settings.",
+        statusMessage: "Internal Server Error",
+        message: "Email service configuration error. Please check your SMTP settings.",
       });
     }
 
@@ -261,22 +260,32 @@ export default defineEventHandler(async (event: H3Event) => {
         messageId: result.messageId,
       };
     } catch (sendError: any) {
-      console.error("❌ Failed to send email:", sendError.message);
+      console.error("❌ Failed to send email:", {
+        message: sendError.message,
+        code: sendError.code,
+        command: sendError.command
+      });
       throw createError({
         statusCode: 500,
-        message: "Failed to send email. Please try again later.",
+        statusMessage: "Internal Server Error",
+        message: "Failed to send email. Please try again later or contact us directly.",
       });
     }
   } catch (error: any) {
-    console.error("Contact form error:", error);
+    console.error("Contact form error:", {
+      message: error.message,
+      statusCode: error.statusCode,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
 
     // Return appropriate error based on the type
     const statusCode = error.statusCode || 500;
-    const message =
-      error.message || "An error occurred while sending the message";
+    const statusMessage = error.statusMessage || "Internal Server Error";
+    const message = error.message || "An error occurred while sending the message";
 
     throw createError({
       statusCode,
+      statusMessage,
       message,
     });
   }

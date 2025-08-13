@@ -234,9 +234,9 @@ const structuredData = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "name": "The Pearson Pub",
-  "image": "https://thepearsonpub.ca/images/pub/interior-main.jpg",
-  "@id": "https://thepearsonpub.ca/contact",
-  "url": "https://thepearsonpub.ca/contact",
+  "image": "https://thepearsonpubwhitby.ca/images/pub/interior-main.jpg",
+  "@id": "https://thepearsonpubwhitby.ca/contact",
+  "url": "https://thepearsonpubwhitby.ca/contact",
   "telephone": "+1-905-668-2828",
   "address": {
     "@type": "PostalAddress",
@@ -257,7 +257,7 @@ onMounted(() => {
   useSEO().setSEO({
     title: 'Contact Us',
     description: 'Contact The Pearson Pub for reservations, inquiries, or feedback.',
-    canonical: 'https://thepearsonpub.ca/contact',
+    canonical: 'https://thepearsonpubwhitby.ca/contact',
     ogImage: '/images/pub/interior-main.jpg',
     structuredData: [{ type: 'application/ld+json', innerHTML: JSON.stringify(structuredData) }],
   });
@@ -440,9 +440,6 @@ const submitForm = async () => {
       subject: form.value.subject,
       message: form.value.message
     }
-
-    console.log('Submitting contact form:', { ...contactData, message: 'Hidden for security' })
-
     const response = await $fetch('/api/contact', {
       method: 'POST',
       body: contactData,

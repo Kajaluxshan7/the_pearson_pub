@@ -21,13 +21,13 @@ onMounted(async () => {
   useSEO().setSEO({
     title: 'Offline | The Pearson Pub',
     description: 'Basic restaurant information when offline.',
-    canonical: 'https://thepearsonpub.ca/offline',
+    canonical: 'https://thepearsonpubwhitby.ca/offline',
     ogImage: '/images/pub/interior-main.jpg',
     structuredData: [{ type: 'application/ld+json', innerHTML: JSON.stringify({
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "The Pearson Pub",
-      "url": "https://thepearsonpub.ca/offline"
+      "url": "https://thepearsonpubwhitby.ca/offline"
     }) }],
     noIndex: true
   });

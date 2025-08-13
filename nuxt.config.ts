@@ -15,7 +15,8 @@ export default defineNuxtConfig({
       appDescription:
         process.env.NUXT_PUBLIC_APP_DESCRIPTION ||
         "A traditional pub atmosphere with modern amenities in Whitby",
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "https://thepearsonpub.ca",
+      siteUrl:
+        process.env.NUXT_PUBLIC_SITE_URL || "https://thepearsonpubwhitby.ca",
     },
   },
 
@@ -118,14 +119,15 @@ export default defineNuxtConfig({
 
   // SEO configuration
   site: {
-    url: process.env.NUXT_PUBLIC_SITE_URL || "https://thepearsonpub.ca",
+    url: process.env.NUXT_PUBLIC_SITE_URL || "https://thepearsonpubwhitby.ca",
     name: "The Pearson Pub",
     description: "A traditional pub atmosphere with modern amenities in Whitby",
     defaultLocale: "en",
   },
 
   sitemap: {
-    hostname: process.env.NUXT_PUBLIC_SITE_URL || "https://thepearsonpub.ca",
+    hostname:
+      process.env.NUXT_PUBLIC_SITE_URL || "https://thepearsonpubwhitby.ca",
     gzip: true,
     routes: [
       {
