@@ -437,7 +437,8 @@ const submitForm = async () => {
       firstName: form.value.firstName,
       lastName: form.value.lastName,
       email: form.value.email,
-      message: `Subject: ${form.value.subject}\n\nMessage: ${form.value.message}`
+      subject: form.value.subject,
+      message: form.value.message
     }
 
     console.log('Submitting contact form:', { ...contactData, message: 'Hidden for security' })
