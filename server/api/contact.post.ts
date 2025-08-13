@@ -242,7 +242,7 @@ export default defineEventHandler(async (event: H3Event) => {
       await transport.verify();
       console.log("✅ SMTP connection verified successfully");
     } catch (verifyError: any) {
-      console.error("❌ SMTP verification failed:", verifyError.message);
+  console.error("❌ SMTP verification failed:", verifyError);
       throw createError({
         statusCode: 500,
         message:
