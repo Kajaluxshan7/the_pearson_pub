@@ -631,10 +631,10 @@ const structuredData = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "The Pearson Pub",
-  "url": "https://thepearsonpub.ca/events",
+  "url": "https://thepearsonpubwhitby.ca/events",
   "potentialAction": {
     "@type": "SearchAction",
-    "target": "https://thepearsonpub.ca/events?q={search_term_string}",
+    "target": "https://thepearsonpubwhitby.ca/events?q={search_term_string}",
     "query-input": "required name=search_term_string"
   }
 };
@@ -643,7 +643,7 @@ onMounted(() => {
   useSEO().setSEO({
     title: 'Events & Entertainment',
     description: 'Live music, pub quizzes, and special events at The Pearson Pub.',
-    canonical: 'https://thepearsonpub.ca/events',
+    canonical: 'https://thepearsonpubwhitby.ca/events',
     ogImage: '/images/entertainment/music.jpg',
     structuredData: [{ type: 'application/ld+json', innerHTML: JSON.stringify(structuredData) }],
   });

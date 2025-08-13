@@ -1,31 +1,58 @@
-FROM node:22.16.0-alpine
-
-RUN apk add --no-cache libc6-compat python3 make g++ curl su-exec
+# ------------------------
+# Stage 1: Builder image
+# ------------------------
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+# Install system dependencies
+RUN apk add --no-cache python3 make g++
+
+# Copy package files
 COPY package.json package-lock.json* ./
 
-RUN npm install
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
 
+# Copy source code
 COPY . .
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nuxtjs
+# Build the application
+RUN npm run build
 
-# Initially set /app ownership to nuxtjs
+# ------------------------
+# Stage 2: Production image
+# ------------------------
+FROM node:22-alpine AS production
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nuxtjs -u 1001
+
+WORKDIR /app
+
+# Copy built application
+COPY --from=builder /app/.output ./.output
+COPY --from=builder /app/package.json ./
+
+# Install only production dependencies if needed
+RUN npm ci --only=production && npm cache clean --force
+
+# Change ownership to non-root user
 RUN chown -R nuxtjs:nodejs /app
+USER nuxtjs
 
+# Expose port
 EXPOSE 3000
 
-ENV NUXT_HOST=0.0.0.0
-ENV NUXT_PORT=3000
-ENV NODE_ENV=development
+# Environment variables
+ENV NODE_ENV=production
+ENV NITRO_PORT=3000
+ENV NITRO_HOST=0.0.0.0
 
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-# Run as root to fix permissions on volumes, then switch user to nuxtjs for dev server
-USER root
-
-CMD ["sh", "-c", "chown -R nuxtjs:nodejs /app/.output /app/.nuxt && su-exec nuxtjs npm run dev"]
+# Start the application
+CMD ["node", ".output/server/index.mjs"]
