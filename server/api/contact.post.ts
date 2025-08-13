@@ -5,13 +5,13 @@ import nodemailer from "nodemailer";
 export default defineEventHandler(async (event: H3Event) => {
   try {
     const body = await readBody(event);
-    const { firstName, lastName, email, message } = body;
+    const { firstName, lastName, email, message, subject } = body;
 
     // Get runtime config
     const config = useRuntimeConfig();
 
     // Validate required fields
-    if (!firstName || !lastName || !email || !message) {
+    if (!firstName || !lastName || !email || !message || !subject) {
       throw createError({
         statusCode: 400,
         message: "All fields are required",
@@ -29,16 +29,16 @@ export default defineEventHandler(async (event: H3Event) => {
 
     // Create mail transporter using environment variables
     const transport = nodemailer.createTransport({
-      host: config.smtpHost || process.env.NUXT_SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(config.smtpPort || process.env.NUXT_SMTP_PORT || '587'),
+      host: config.smtpHost || process.env.NUXT_SMTP_HOST || "smtp.gmail.com",
+      port: parseInt(config.smtpPort || process.env.NUXT_SMTP_PORT || "587"),
       secure: false, // true for 465, false for other ports like 587
       auth: {
         user: config.smtpUser || process.env.NUXT_SMTP_USER,
         pass: config.smtpPass || process.env.NUXT_SMTP_PASS,
       },
       tls: {
-        rejectUnauthorized: false
-      }
+        rejectUnauthorized: false,
+      },
     });
 
     // Prepare email content with modern template
@@ -51,10 +51,11 @@ export default defineEventHandler(async (event: H3Event) => {
         config.contactEmail ||
         process.env.NUXT_CONTACT_EMAIL ||
         "contact@thepearsonpub.ca",
-      subject: "🍺 New Contact Form Submission - The Pearson Pub",
+      subject: `🍺 New Contact Form Submission - The Pearson Pub | ${subject}`,
       text: `
         Name: ${firstName} ${lastName}
         Email: ${email}
+        Subject: ${subject}
         Message: ${message}
       `,
       html: `
@@ -188,6 +189,10 @@ export default defineEventHandler(async (event: H3Event) => {
                   <div class="info-value">${email}</div>
                 </div>
                 <div class="info-row">
+                  <div class="info-label">Subject:</div>
+                  <div class="info-value">${subject}</div>
+                </div>
+                <div class="info-row">
                   <div class="info-label">Message:</div>
                 </div>
                 <div class="message-content">
@@ -262,13 +267,13 @@ export default defineEventHandler(async (event: H3Event) => {
         message: "Failed to send email. Please try again later.",
       });
     }
-
   } catch (error: any) {
     console.error("Contact form error:", error);
 
     // Return appropriate error based on the type
     const statusCode = error.statusCode || 500;
-    const message = error.message || "An error occurred while sending the message";
+    const message =
+      error.message || "An error occurred while sending the message";
 
     throw createError({
       statusCode,

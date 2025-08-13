@@ -570,9 +570,9 @@
                   <UIcon name="i-heroicons-currency-dollar" class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                 </div>
                 <div class="flex-1">
-                  <p class="font-semibold text-gray-900 dark:text-white text-lg">Price</p>
+                  <p class="font-semibold text-gray-900 dark:text-white text-lg">Entry Fee</p>
                   <p class="text-gray-600 dark:text-gray-400">
-                    {{ selectedEvent.price }}
+                  Free for all
                   </p>
                 </div>
               </div>
@@ -585,20 +585,6 @@
               <div
                 class="flex items-center space-x-4 text-gray-600 dark:text-gray-400"
               >
-                <div class="flex items-center">
-                  <UIcon
-                    name="i-heroicons-calendar"
-                    class="w-5 h-5 mr-2 text-yellow-500"
-                  />
-                  <span>{{ formatEventDate(selectedEvent.date) }}</span>
-                </div>
-                <div class="flex items-center">
-                  <UIcon
-                    name="i-heroicons-clock"
-                    class="w-5 h-5 mr-2 text-yellow-500"
-                  />
-                  <span>{{ selectedEvent.time || 'TBA' }}</span>
-                </div>
               </div>
 
               <div class="flex space-x-3">
@@ -619,7 +605,7 @@
                   @click="addToCalendar"
                   class="shadow-lg"
                 >
-                  <UIcon name="i-heroicons-calendar-plus" class="w-5 h-5 mr-2" />
+                  <UIcon name="i-heroicons-calendar" class="w-5 h-5 mr-2" />
                   Add to Calendar
                 </UButton>
               </div>
@@ -661,10 +647,7 @@ onMounted(() => {
     ogImage: '/images/entertainment/music.jpg',
     structuredData: [{ type: 'application/ld+json', innerHTML: JSON.stringify(structuredData) }],
   });
-  
-  console.log('All Events:', allEvents.value);
-  console.log('Filtered Events:', filteredEvents.value);
-});
+  });
 
 // Types
 interface Event {

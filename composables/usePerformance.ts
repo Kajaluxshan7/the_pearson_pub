@@ -325,7 +325,6 @@ export const usePerformance = () => {
     new PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
       entries.forEach((entry: any) => {
-        console.log("FID:", entry.processingStart - entry.startTime);
       });
     }).observe({ type: "first-input", buffered: true });
 
