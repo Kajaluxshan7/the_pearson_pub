@@ -6,27 +6,24 @@
 import StaticFallback from "~/components/StaticFallback.vue";
 import { useRouter } from "vue-router";
 import { useConnectivity } from "@/composables/useConnectivity";
-import { watchEffect, onMounted, onUnmounted } from "vue";
+import { onMounted } from "vue";
 import { useSEO } from '@/composables/useSEO';
 
 const router = useRouter();
 const { status, checkConnectivity } = useConnectivity();
 
-let reconnectInterval: NodeJS.Timeout | null = null;
-
 const attemptReconnection = async () => {
-  console.log("Attempting to reconnect...");
+  console.log("Attempting to reconnect (forced check)...");
   try {
-    const isConnected = await checkConnectivity();
+    // Force a fresh network check (bypass any cached status)
+    const isConnected = await checkConnectivity(true);
     if (isConnected) {
       console.log("Connection restored, navigating to home");
-      // Clear any session storage that might interfere
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem("pearson-pub-visited");
       }
-      // Navigate to home with force refresh
+      // Navigate to home and reload to ensure fresh content
       await router.push("/");
-      // Reload the page to ensure fresh content
       window.location.reload();
       return true;
     }
@@ -39,22 +36,13 @@ const attemptReconnection = async () => {
 onMounted(async () => {
   console.log("Offline page mounted");
   
-  // Check immediately if we're actually connected
-  const isConnected = await checkConnectivity();
+  // Check immediately (force a fresh connectivity probe) and redirect on success.
+  const isConnected = await checkConnectivity(true);
   if (isConnected) {
     await router.push("/");
     window.location.reload();
     return;
   }
-
-  // Set up periodic reconnection attempts
-  reconnectInterval = setInterval(async () => {
-    const connected = await attemptReconnection();
-    if (connected && reconnectInterval) {
-      clearInterval(reconnectInterval);
-      reconnectInterval = null;
-    }
-  }, 5000); // Check every 5 seconds
 
   useSEO().setSEO({
     title: 'Offline | The Pearson Pub',
@@ -71,18 +59,7 @@ onMounted(async () => {
   });
 });
 
-onUnmounted(() => {
-  if (reconnectInterval) {
-    clearInterval(reconnectInterval);
-    reconnectInterval = null;
-  }
-});
-
-// Watch for connectivity changes
-watchEffect(async () => {
-  if (status.value.backendReachable && status.value.lastChecked) {
-    console.log("Backend reachable detected, attempting navigation");
-    await attemptReconnection();
-  }
-});
+// No periodic checks or automatic reconnection watchers by design —
+// reloading this page will run a fresh connectivity probe and redirect to home
+// when the backend is reachable.
 </script>
