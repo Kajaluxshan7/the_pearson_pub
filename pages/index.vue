@@ -1,7 +1,7 @@
 <template>
-  <!-- Full Screen Loading -->
+  <!-- Full Screen Loading with Logo for initial landing -->
   <FullScreenLoading
-    v-if="showMainLoading"
+    v-if="initialLoading"
     :title="loadingConfig.title"
     :subtitle="loadingConfig.subtitle"
     :progress="loadingProgress"
@@ -18,8 +18,11 @@
   <!-- Static Fallback (Offline Mode) -->
   <StaticFallback v-else-if="showFallback" />
 
-  <!-- Main Content -->
-  <div v-else class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Main Content - Hidden while initial full-screen loader is active to prevent flash -->
+  <div v-else
+       :style="initialLoading ? 'display: none;' : ''"
+       :aria-hidden="initialLoading ? 'true' : 'false'"
+       class="min-h-screen bg-gray-50 dark:bg-gray-900">
       <!-- Lazy loaded Hero -->
       <component :is="Hero" v-if="Hero" />
 
@@ -266,8 +269,8 @@
 
       <!-- About Section -->
       <section class="py-20 bg-white dark:bg-gray-800 relative overflow-hidden"
-        :class="{ 'opacity-0 transform translate-y-8': !isVisible.about, 'animate-fade-in-up': isVisible.about }"
-        ref="aboutRef">
+        ref="aboutRef"
+        :class="{ 'animate-fade-in-up': isVisible.about }">
         <!-- Decorative Background -->
         <div class="absolute inset-0 opacity-5">
           <div class="absolute top-10 left-10 w-32 h-32 rounded-full border-2 border-yellow-500"></div>
@@ -277,7 +280,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div class="space-y-8"
-              :class="{ 'opacity-0 transform translate-x-8': !isVisible.about, 'animate-fade-in-left': isVisible.about }"
+              :class="{ 'animate-fade-in-left': isVisible.about }"
               style="animation-delay: 200ms">
               <div class="inline-block">
                 <span class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase">Our
@@ -317,7 +320,7 @@
             </div>
 
             <div class="relative"
-              :class="{ 'opacity-0 transform translate-x-8': !isVisible.about, 'animate-fade-in-right': isVisible.about }"
+              :class="{ 'animate-fade-in-right': isVisible.about }"
               style="animation-delay: 400ms">
               <!-- Instagram Portrait Grid (4:5 Aspect Ratio) -->
               <div class="grid grid-cols-2 gap-4 lg:gap-6">
@@ -424,6 +427,7 @@ import FullScreenLoading from "~/components/loading/FullScreenLoading.vue";
 import StaticFallback from "~/components/StaticFallback.vue";
 import { TimezoneUtil } from '~/utils/timezone';
 import { operationHoursApi } from '@/composables/useApi';
+import { useFirstVisit } from '~/composables/useFirstVisit';
 
 // SEO Configuration
 const { setSEO, getLocalBusinessSchema } = useSEO()
@@ -439,14 +443,18 @@ definePageMeta({
   description: 'Experience authentic pub dining in Whitby. Live music, daily specials, craft beverages and traditional fare in a warm, welcoming atmosphere.',
   layout: 'default',
   prerender: true,
-  middleware: 'connectivity-client'
+  middleware: 'connectivity-client',
+  key: 'home',
+  keepalive: false // Disable keep-alive to ensure fresh loads
 })
 
-// SEO/SSG: useAsyncData for consolidated backend data
+// SEO/SSG: Non-blocking data loading for better performance
 const { data: landingData } = await useAsyncData('landing-content', async () => {
-  const { initializeAllData } = useLandingPageData()
-  await initializeAllData()
+  // Don't block page load for data initialization
   return true
+}, {
+  server: false, // Skip server-side rendering for this data
+  default: () => true
 })
 
 // Set comprehensive SEO
@@ -500,16 +508,29 @@ const {
   cleanup: cleanupConnectivity,
 } = useConnectivity();
 
-// Loading states
-const initialLoading = ref(!process.client || !window.sessionStorage.getItem('pearson-pub-visited'));
+// First visit tracking
+const { shouldShowLoading, markLoadingShown, isFirstVisit, getVisitCount } = useFirstVisit();
+
+// Simplified loading states
+// Start with loader visible for both server and client to keep SSR and client render consistent.
+// onMounted will decide whether to keep the full-screen loader (hard reload / first visit)
+// or hide it immediately for SPA navigations and run background initialization.
+const initialLoading = ref(true);
 const retryingConnection = ref(false);
 const forceFallback = ref(false);
+const pageReady = ref(false);
+const canShowFallbackAfterTimeout = ref(false);
 
 // Loading configuration
 const loadingConfig = ref({
   title: "The Pearson Pub",
   subtitle: "A traditional pub atmosphere with modern amenities in Whitby",
   texts: [
+    "Preparing your experience...",
+    "Loading menu items...", 
+    "Fetching latest events...",
+    "Getting today's specials...",
+    "Almost ready..."
   ],
   steps: ["Connect", "Menu", "Events", "Hours", "Specials"],
   subText: "",
@@ -520,13 +541,19 @@ const loadingProgress = ref(0);
 const currentLoadingStep = ref(0);
 const loadingError = ref<string | null>(null);
 
-// Computed states
+// Simplified computed states
 const showMainLoading = computed(() => {
-  return initialLoading.value || (backendLoading.value && canUseBackend.value);
+  // Never show main loading screen to fix reload issues
+  return false;
 });
 
 const showFallback = computed(() => {
-  return !initialLoading.value && (forceFallback.value || shouldShowFallback.value);
+  // Only show fallback if explicitly forced OR if backend is unreachable AND not loading
+  // Wait for a short timeout before showing fallback to avoid flicker on hard reloads
+  return (
+    forceFallback.value ||
+    (canShowFallbackAfterTimeout.value && !initialLoading.value && !canUseBackend.value && !pageReady.value)
+  );
 });
 
 // Handle retry functionality
@@ -537,7 +564,7 @@ const handleRetry = async () => {
   try {
     const isConnected = await checkConnectivity(true);
     if (isConnected) {
-      initialLoading.value = true;
+      pageReady.value = false;
       await initializeDataWithProgress();
     } else {
       loadingError.value = "Unable to connect to server. Please check your internet connection.";
@@ -553,52 +580,87 @@ const handleRetry = async () => {
 const showFallbackMode = () => {
   forceFallback.value = true;
   initialLoading.value = false;
+  pageReady.value = true;
+  markLoadingShown(); // Mark loading as shown
 };
 
-// Initialize data with progress tracking
+// Initialize data with progress tracking and smooth progress animation
 const initializeDataWithProgress = async () => {
+  let progressTimer: ReturnType<typeof setInterval> | null = null;
   try {
+    console.log("Initializing page data with progress...");
+
+    // Reset progress
     loadingProgress.value = 0;
     currentLoadingStep.value = 0;
     loadingConfig.value.subText = "";
+    loadingError.value = null;
 
-    // Step 1: Check connectivity
-    loadingProgress.value = 10;
+    // Start a smooth fake-progress timer to give visual feedback while work runs
+    progressTimer = setInterval(() => {
+      // Increment slowly but never reach 95% so we can complete to 100% when real work finishes
+      if (loadingProgress.value < 90) {
+        const bump = Math.random() * 6 + 2; // 2-8%
+        loadingProgress.value = Math.min(90, Math.round(loadingProgress.value + bump));
+      }
+    }, 250);
+
+    // Step 1: quick connectivity check
     currentLoadingStep.value = 0;
+    loadingProgress.value = Math.max(5, loadingProgress.value);
+    loadingConfig.value.subText = "Checking connectivity...";
     const isConnected = await checkConnectivity();
-    
+
     if (!isConnected) {
-      throw new Error("Unable to connect to server");
+      console.warn("Backend not available, using static content");
+      // fast-forward progress to indicate completion of offline path
+      loadingProgress.value = 100;
+      loadingConfig.value.subText = "Offline mode";
+      pageReady.value = true;
+      return;
     }
 
-    // Step 2: Initialize all data
-    loadingProgress.value = 20;
+    // Step 2: start real initialization
     currentLoadingStep.value = 1;
     loadingConfig.value.subText = "Loading restaurant data...";
-    
+    loadingProgress.value = Math.max(20, loadingProgress.value);
+
+    // Run the heavy initializer
     await initializeAllData();
 
-    // Simulate progress for better UX
+    // Simulate a few named steps to give users clearer progress
     const progressSteps = [40, 60, 80, 95];
     const stepNames = ["Menu loaded", "Events loaded", "Hours loaded", "Specials loaded"];
-    
+
     for (let i = 0; i < progressSteps.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // small delay to allow the UI to show progress changes
+      // but don't stall if things finished quickly
+      await new Promise((resolve) => setTimeout(resolve, 220));
       loadingProgress.value = progressSteps[i];
       currentLoadingStep.value = i + 2;
       loadingConfig.value.subText = stepNames[i];
     }
 
-    // Final step
+    // Finalize
+    loadingConfig.value.subText = "Finalizing...";
     loadingProgress.value = 100;
-    loadingConfig.value.subText = "Ready!";
-    
-    await new Promise(resolve => setTimeout(resolve, 500));
-    initialLoading.value = false;
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    pageReady.value = true;
 
   } catch (error: any) {
     console.error("Failed to initialize data:", error);
-    loadingError.value = error.message || "Failed to load content. Please try again.";
+    loadingError.value = null; // don't show raw error
+    pageReady.value = true;
+  } finally {
+    // Clear progress timer
+    if (progressTimer) {
+      clearInterval(progressTimer);
+    }
+    // Ensure final progress is 100 when finishing normally
+    if (loadingProgress.value < 100) loadingProgress.value = 100;
+    initialLoading.value = false;
+    markLoadingShown();
   }
 };
 
@@ -1011,18 +1073,47 @@ const retryLoading = async () => {
 }
 
 onMounted(async () => {
+  console.log("Home page mounted, visit count:", getVisitCount());
+  
   // Setup connectivity monitoring
   setupEventListeners();
 
-  // Initialize loading process
+  // Always initialize data on mount - no complex loading logic
   if (process.client) {
-    // Mark that user has visited the site
-    window.sessionStorage.setItem('pearson-pub-visited', 'true');
-    await initializeDataWithProgress();
-    await fetchTodayOperationStatus();
+    // Decide whether to show full-screen loader or hide it immediately for SPA navigations.
+    const showLoader = shouldShowLoading();
+
+    if (showLoader) {
+      // Hard reload / first visit: keep loader visible and await initialization
+      pageReady.value = false; // keep hidden until loader completes
+      await initializeDataWithProgress();
+      // initialization will set pageReady = true and clear initialLoading in finally
+      initialLoading.value = false;
+    } else {
+      // SPA navigation: hide loader immediately to avoid flash, then initialize in background
+      initialLoading.value = false;
+      pageReady.value = false; // keep false so we can show lightweight state as needed
+      initializeDataWithProgress().catch(error => {
+        console.warn('Background data loading failed:', error);
+        // Continue with static content if data loading fails
+      });
+
+      // Load operation status in background
+      fetchTodayOperationStatus().catch(error => {
+        console.warn('Operation status loading failed:', error);
+      });
+    }
+
+    // Start a short grace period before showing offline fallback to avoid flicker on hard reloads
+    canShowFallbackAfterTimeout.value = false;
+    setTimeout(() => {
+      canShowFallbackAfterTimeout.value = true;
+      // Trigger a fresh connectivity check once timeout expires
+      checkConnectivity().catch(() => {});
+    }, 3000); // 3s grace period
   }
 
-  // Initialize intersection observer
+  // Initialize intersection observer for animations
   observer = new IntersectionObserver(handleIntersection, {
     threshold: 0.1,
     rootMargin: '50px'

@@ -164,18 +164,8 @@ onMounted(() => {
   });
 });
 
-// Single connectivity check on landing
-onMounted(async () => {
-  try {
-    const isConnected = await checkConnectivity();
-    if (!isConnected) {
-      router.push("/offline");
-    }
-  } catch (error) {
-    console.error("Connectivity check failed:", error);
-    router.push("/offline");
-  }
-});
+// Connectivity check is handled by the parent (pages/index.vue) to allow
+// grace periods and avoid premature redirects; do not auto-navigate here.
 </script>
 
 <style scoped>

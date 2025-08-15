@@ -3,31 +3,10 @@ import { useApi } from "./useApi";
 import type { MenuItem, MenuCategory } from "~/types/menu";
 import type { Event } from "~/types/events";
 import type { ApiSpecial } from "./useApi";
+import type { LandingPageContent } from "./usePublicApi";
 
 // Access publicApi and specialsApi from useApi
 const { publicApi, specialsApi } = useApi();
-
-// Landing page content interface
-export interface LandingPageContent {
-  categories: any[];
-  featuredItems: any[];
-  allItems: any[];
-  upcomingEvents: any[];
-  todaysSpecials: any[];
-  operationHours: any[];
-  siteInfo: {
-    name: string;
-    phone: string;
-    email: string;
-    address: string;
-    description: string;
-    socialMedia: {
-      facebook?: string;
-      instagram?: string;
-      twitter?: string;
-    };
-  };
-}
 
 export interface ContactInfo {
   name: string;

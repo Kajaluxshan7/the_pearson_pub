@@ -74,6 +74,7 @@ const loadDataInBackground = async () => {
   try {
     // Load data in background without blocking UI
     await initializeAllData();
+    console.log("Background data loading completed");
   } catch (error) {
     console.error('Failed to load background data:', error);
     loadingState.value.error = 'Failed to load some data. Website will still work.';
@@ -83,8 +84,15 @@ const loadDataInBackground = async () => {
 };
 
 onMounted(() => {
-  // Load data in background without blocking the UI
-  loadDataInBackground();
+  console.log("App mounted");
+  
+  // Load data in background without blocking the UI - only on first app load
+  const hasBackgroundLoaded = sessionStorage.getItem('background-data-loaded');
+  if (!hasBackgroundLoaded) {
+    loadDataInBackground().finally(() => {
+      sessionStorage.setItem('background-data-loaded', 'true');
+    });
+  }
   
   if (typeof window !== 'undefined') {
     window.addEventListener('scroll', updateScroll);

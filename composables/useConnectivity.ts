@@ -30,7 +30,7 @@ export const useConnectivity = () => {
   };
 
   // Check if backend API is reachable
-  const checkBackendHealth = async (timeout = 5000): Promise<boolean> => {
+  const checkBackendHealth = async (timeout = 8000): Promise<boolean> => {
     if (!status.value.isOnline) {
       return false;
     }
@@ -48,6 +48,8 @@ export const useConnectivity = () => {
         headers: {
           Accept: "application/json",
         },
+        // Add cache busting to avoid stale responses
+        cache: "no-cache",
       });
 
       clearTimeout(timeoutId);
@@ -62,7 +64,10 @@ export const useConnectivity = () => {
 
       return isReachable;
     } catch (error) {
-      console.warn("Backend health check failed:", error);
+      // Don't log as error if it's just an abort
+      if (error instanceof Error && error.name !== "AbortError") {
+        console.warn("Backend health check failed:", error);
+      }
       status.value.backendReachable = false;
       status.value.lastChecked = new Date();
       return false;
@@ -72,7 +77,7 @@ export const useConnectivity = () => {
   };
 
   // Alternative backend check using any API endpoint
-  const checkBackendAlternative = async (timeout = 5000): Promise<boolean> => {
+  const checkBackendAlternative = async (timeout = 8000): Promise<boolean> => {
     if (!status.value.isOnline) {
       return false;
     }
@@ -84,16 +89,14 @@ export const useConnectivity = () => {
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
       // Try to reach the public API endpoint
-      const response = await fetch(
-        `${apiBaseUrl}api/public/landing-content`,
-        {
-          method: "GET",
-          signal: controller.signal,
-          headers: {
-            Accept: "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${apiBaseUrl}api/public/landing-content`, {
+        method: "GET",
+        signal: controller.signal,
+        headers: {
+          Accept: "application/json",
+        },
+        cache: "no-cache",
+      });
 
       clearTimeout(timeoutId);
 
@@ -107,7 +110,9 @@ export const useConnectivity = () => {
 
       return isReachable;
     } catch (error) {
-      console.warn("Backend alternative check failed:", error);
+      if (error instanceof Error && error.name !== "AbortError") {
+        console.warn("Backend alternative check failed:", error);
+      }
       status.value.backendReachable = false;
       status.value.lastChecked = new Date();
       return false;
@@ -126,10 +131,10 @@ export const useConnectivity = () => {
     }
 
     // Try health endpoint first, then fallback to API endpoint
-    let isReachable = await checkBackendHealth(3000);
+    let isReachable = await checkBackendHealth(5000);
 
     if (!isReachable) {
-      isReachable = await checkBackendAlternative(3000);
+      isReachable = await checkBackendAlternative(5000);
     }
 
     // Retry logic
@@ -162,7 +167,7 @@ export const useConnectivity = () => {
       return false;
     }
 
-    return await checkBackendAlternative(2000);
+    return await checkBackendAlternative(4000);
   };
 
   // Setup online/offline event listeners
