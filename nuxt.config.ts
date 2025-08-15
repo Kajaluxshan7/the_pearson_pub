@@ -1,5 +1,29 @@
 export default defineNuxtConfig({
   devtools: { enabled: false },
+  ssr: true, // Ensure SSR is enabled for production
+
+  // Fix router warnings and dev issues
+  router: {
+    options: {
+      strict: false, // Allow trailing slashes
+      sensitive: false, // Case insensitive routes
+    },
+  },
+
+  // Vite configuration for development
+  vite: {
+    server: {
+      hmr: {
+        port: 24678, // Use a specific port for HMR to avoid conflicts
+      },
+    },
+    define: {
+      // Remove React-specific references that are causing router warnings
+      "process.env.NODE_ENV": JSON.stringify(
+        process.env.NODE_ENV || "development"
+      ),
+    },
+  },
 
   runtimeConfig: {
     smtpHost: process.env.NUXT_SMTP_HOST,
@@ -21,18 +45,45 @@ export default defineNuxtConfig({
   },
 
   // Performance optimizations
-  nitro: {
-    preset: "node-server",
-    minify: true,
-    compressPublicAssets: true,
-    prerender: {
-      routes: ["/sitemap.xml", "/robots.txt"],
-    },
-  },
+  // Nitro configuration. Make storage driver conditional so we don't import
+  // optional drivers (which can trigger bundler warnings) unless Redis is configured.
+  nitro: (() => {
+    const redisUrl = process.env.NUXT_REDIS_URL || process.env.REDIS_URL || '';
+    const base: any = {
+      preset: 'node-server',
+      minify: true,
+      compressPublicAssets: true,
+      prerender: {
+        routes: ['/sitemap.xml', '/robots.txt', '/offline'],
+        failOnError: false,
+      },
+      // Improve production performance
+      experimental: {
+        wasm: true,
+      },
+    };
 
-  // Route-based caching
+    if (redisUrl) {
+      // Only configure Redis storage when a URL is provided (production)
+      base.storage = {
+        redis: {
+          driver: 'redis',
+          url: redisUrl,
+        },
+      };
+    }
+
+    return base;
+  })(),
+
+  // Route-based caching - improved for better performance
   routeRules: {
-    "/": { prerender: true, headers: { "cache-control": "s-maxage=60" } },
+    "/": {
+      prerender: true,
+      headers: { "cache-control": "s-maxage=60" },
+      // Enable client-side hydration
+      isr: false,
+    },
     "/about": {
       prerender: true,
       headers: { "cache-control": "s-maxage=3600" },
@@ -41,23 +92,39 @@ export default defineNuxtConfig({
       prerender: true,
       headers: { "cache-control": "s-maxage=3600" },
     },
-    "/menu": { isr: 300 }, // ISR for dynamic content
-    "/events": { isr: 300 },
+    "/menu": {
+      isr: 300, // ISR for dynamic content
+      headers: { "cache-control": "s-maxage=300" },
+    },
+    "/events": {
+      isr: 300,
+      headers: { "cache-control": "s-maxage=300" },
+    },
+    "/offline": {
+      prerender: true,
+      headers: { "cache-control": "s-maxage=3600" },
+    },
     "/api/**": { headers: { "cache-control": "max-age=300" } },
     "/images/**": { headers: { "cache-control": "max-age=31536000" } },
+    // Ignore problematic dev routes
+    "/@vite/**": { index: false },
+    "/@react-refresh": { index: false },
+    "/src/**": { index: false },
   },
 
-  modules: [
-    "@nuxt/ui",
-    "@nuxt/image",
-    "@vite-pwa/nuxt",
-    "@nuxtjs/color-mode",
-    "@nuxtjs/sitemap",
-  ],
+  modules: ["@nuxt/ui", "@nuxt/image", "@nuxtjs/color-mode", "@nuxtjs/sitemap"],
 
   app: {
     head: {
+      htmlAttrs: {
+        lang: "en",
+      },
       link: [
+        {
+          rel: "icon",
+          type: "image/png",
+          href: "/pearson-pub-logo.png",
+        },
         {
           rel: "preload",
           href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap",
@@ -74,8 +141,15 @@ export default defineNuxtConfig({
           as: "image",
         },
         { rel: "stylesheet", href: "/fonts/cinzel-v23-latin-regular.woff2" },
+        // Preload critical fonts
+        {
+          rel: "preload",
+          href: "/fonts/cinzel-v23-latin-regular.woff2",
+          as: "font",
+          type: "font/woff2",
+          crossorigin: "",
+        },
       ],
-      script: [{ src: "/sw.js", type: "text/javascript", async: true }],
     },
   },
   // Enhanced image optimization
@@ -125,39 +199,6 @@ export default defineNuxtConfig({
     defaultLocale: "en",
   },
 
-  sitemap: {
-    hostname:
-      process.env.NUXT_PUBLIC_SITE_URL || "https://thepearsonpubwhitby.ca",
-    gzip: true,
-    routes: [
-      {
-        url: "/",
-        changefreq: "daily",
-        priority: 1.0,
-      },
-      {
-        url: "/menu",
-        changefreq: "daily",
-        priority: 0.9,
-      },
-      {
-        url: "/events",
-        changefreq: "daily",
-        priority: 0.8,
-      },
-      {
-        url: "/about",
-        changefreq: "monthly",
-        priority: 0.7,
-      },
-      {
-        url: "/contact",
-        changefreq: "monthly",
-        priority: 0.6,
-      },
-    ],
-  },
-
   colorMode: {
     classSuffix: "",
     fallback: "light",
@@ -181,92 +222,6 @@ export default defineNuxtConfig({
       "tailwindcss/nesting": {},
       tailwindcss: {},
       autoprefixer: {},
-    },
-  },
-
-  app: {
-    head: {
-      htmlAttrs: {
-        lang: "en",
-      },
-      link: [
-        {
-          rel: "icon",
-          type: "image/png",
-          href: "/pearson-pub-logo.png",
-        },
-        // Preload critical fonts
-        {
-          rel: "preload",
-          href: "/fonts/cinzel-v23-latin-regular.woff2",
-          as: "font",
-          type: "font/woff2",
-          crossorigin: "",
-        },
-      ],
-    },
-  },
-
-  pwa: {
-    registerType: "autoUpdate",
-    manifest: {
-      name: "The Pearson Pub",
-      short_name: "PearsonPub",
-      description:
-        "A traditional pub atmosphere with modern amenities in Whitby",
-      theme_color: "#f59e0b",
-      background_color: "#18181b",
-      display: "standalone",
-      start_url: "/",
-      lang: "en",
-      icons: [
-        {
-          src: "/pearson-pub-logo.png",
-          sizes: "192x192",
-          type: "image/png",
-        },
-        {
-          src: "/pearson-pub-logo.png",
-          sizes: "512x512",
-          type: "image/png",
-        },
-        {
-          src: "/pearson-pub-logo.png",
-          sizes: "512x512",
-          type: "image/png",
-          purpose: "any maskable",
-        },
-      ],
-    },
-    workbox: {
-      navigateFallback: "/offline",
-      globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
-      runtimeCaching: [
-        {
-          urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*$/,
-          handler: "CacheFirst",
-          options: {
-            cacheName: "google-fonts-stylesheets",
-            expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-          },
-        },
-        {
-          urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*$/,
-          handler: "CacheFirst",
-          options: {
-            cacheName: "google-fonts-webfonts",
-            expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-          },
-        },
-        {
-          urlPattern: /\/api\/.*$/,
-          handler: "NetworkFirst",
-          options: {
-            cacheName: "api-cache",
-            expiration: { maxEntries: 100, maxAgeSeconds: 300 },
-          },
-        },
-      ],
     },
   },
 
