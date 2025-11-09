@@ -1,55 +1,24 @@
 export default defineNuxtPlugin((nuxtApp) => {
-  // Only run on client side
-  if (process.client) {
-    // Handle router navigation to prevent warnings for dev server routes
-    nuxtApp.vueApp.config.warnHandler = (
-      msg: string,
-      instance: any,
-      trace: string
-    ) => {
-      // Suppress Vue Router warnings for development server routes
+  // Only run on client side in development
+  if (process.client && process.dev) {
+    // Minimal warning handler - only suppress very specific noisy warnings
+    const originalWarn = console.warn;
+    console.warn = (...args: any[]) => {
+      const message = args[0]?.toString() || "";
+
+      // Suppress only Vue Router warnings about missing named routes
       if (
-        msg.includes("[Vue Router warn]") &&
-        (msg.includes("/@vite/client") ||
-          msg.includes("/src/main.tsx") ||
-          msg.includes("/@react-refresh") ||
-          msg.includes("/site.webmanifest") ||
-          msg.includes("/sw.js") ||
-          msg.includes("/fonts/"))
+        message.includes("[Vue Router warn]") &&
+        (message.includes("No match found") || message.includes("named route"))
       ) {
-        return; // Suppress these warnings
+        return;
       }
 
-      // Log other warnings normally in development
-      if (process.dev) {
-        console.warn(msg, trace);
-      }
+      // Log all other warnings normally
+      originalWarn.apply(console, args);
     };
 
-    // Handle service worker and manifest routes gracefully
-    const originalFetch = window.fetch;
-    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-      let url: string;
-
-      if (typeof input === "string") {
-        url = input;
-      } else if (input instanceof URL) {
-        url = input.href;
-      } else {
-        url = input.url;
-      }
-
-      // Handle problematic requests gracefully
-      if (
-        url.includes("sw.js") ||
-        url.includes("site.webmanifest") ||
-        url.includes("/fonts/cinzel-v23-latin-regular.woff2")
-      ) {
-        // Return empty response for these requests to prevent errors
-        return new Response("", { status: 404, statusText: "Not Found" });
-      }
-
-      return originalFetch(input, init);
-    };
+    // NOTE: Fetch override removed - it was causing 404/503 errors
+    // All resources now load naturally through the browser/dev server
   }
 });

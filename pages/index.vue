@@ -1,28 +1,30 @@
 <template>
-  <!-- Full Screen Loading with Logo for initial landing -->
-  <FullScreenLoading
-    v-if="initialLoading"
-    :title="loadingConfig.title"
-    :subtitle="loadingConfig.subtitle"
-    :progress="loadingProgress"
-    :current-step="currentLoadingStep"
-    :texts="loadingConfig.texts"
-    :steps="loadingConfig.steps"
-    :sub-text="loadingConfig.subText"
-    :error="loadingError"
-    :retrying="retryingConnection"
-    @retry="handleRetry"
-    @fallback="showFallbackMode"
-  />
+  <!-- Always render main content to prevent blank screen on hydration -->
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Full Screen Loading Overlay - positioned absolutely to overlay content -->
+    <FullScreenLoading
+      v-show="initialLoading"
+      :title="loadingConfig.title"
+      :subtitle="loadingConfig.subtitle"
+      :progress="loadingProgress"
+      :current-step="currentLoadingStep"
+      :texts="loadingConfig.texts"
+      :steps="loadingConfig.steps"
+      :sub-text="loadingConfig.subText"
+      :error="loadingError"
+      :retrying="retryingConnection"
+      @retry="handleRetry"
+      @fallback="showFallbackMode"
+    />
 
-  <!-- Static Fallback (Offline Mode) -->
-  <StaticFallback v-else-if="showFallback" />
+    <!-- Static Fallback (Offline Mode) -->
+    <StaticFallback v-if="showFallback && !initialLoading" />
 
-  <!-- Main Content - Hidden while initial full-screen loader is active to prevent flash -->
-  <div v-else
-       :style="initialLoading ? 'display: none;' : ''"
-       :aria-hidden="initialLoading ? 'true' : 'false'"
-       class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Main Content - Always present but may be overlaid by loader -->
+    <div
+      v-show="!initialLoading && !showFallback"
+      class="min-h-screen"
+    >
       <!-- Lazy loaded Hero -->
       <component :is="Hero" v-if="Hero" />
 
@@ -414,7 +416,10 @@
           </div>
         </div>
       </section>
+    </div>
+    <!-- End main content wrapper -->
   </div>
+  <!-- End outer container -->
 </template>
 
 <!-- pages/index.vue - Enhanced with SEO -->
@@ -424,7 +429,7 @@ import { useLandingPageData } from "~/composables/useLandingPageData";
 import { useConnectivity } from "~/composables/useConnectivity";
 import { useSEO } from "~/composables/useSEO";
 import FullScreenLoading from "~/components/loading/FullScreenLoading.vue";
-import StaticFallback from "~/components/StaticFallback.vue";
+import StaticFallback from "~/components/feedback/StaticFallback.vue";
 import { TimezoneUtil } from '~/utils/timezone';
 import { operationHoursApi } from '@/composables/useApi';
 import { useFirstVisit } from '~/composables/useFirstVisit';
@@ -1078,6 +1083,13 @@ onMounted(async () => {
   // Setup connectivity monitoring
   setupEventListeners();
 
+  // Safety timeout: ensure loader clears even if initialization hangs
+  const safetyTimeout = setTimeout(() => {
+    console.warn('⚠️ Safety timeout triggered - forcing loader to clear');
+    initialLoading.value = false;
+    pageReady.value = true;
+  }, 10000); // 10 second maximum loader time
+
   // Always initialize data on mount - no complex loading logic
   if (process.client) {
     // Decide whether to show full-screen loader or hide it immediately for SPA navigations.
@@ -1089,10 +1101,13 @@ onMounted(async () => {
       await initializeDataWithProgress();
       // initialization will set pageReady = true and clear initialLoading in finally
       initialLoading.value = false;
+      clearTimeout(safetyTimeout); // Clear safety timeout on successful load
     } else {
       // SPA navigation: hide loader immediately to avoid flash, then initialize in background
       initialLoading.value = false;
-      pageReady.value = false; // keep false so we can show lightweight state as needed
+      pageReady.value = true; // Show content immediately - data will refresh in background
+      clearTimeout(safetyTimeout); // Clear safety timeout for SPA nav
+      
       initializeDataWithProgress().catch(error => {
         console.warn('Background data loading failed:', error);
         // Continue with static content if data loading fails

@@ -1,6 +1,13 @@
 export default defineNuxtConfig({
   devtools: { enabled: false },
   ssr: true, // Ensure SSR is enabled for production
+  components: [
+    { path: "~/components/base", pathPrefix: false },
+    { path: "~/components/ui", pathPrefix: false },
+    { path: "~/components/feedback", pathPrefix: false },
+    { path: "~/features/events/components", pathPrefix: false },
+    { path: "~/features/stories/components", pathPrefix: false },
+  ],
 
   // Fix router warnings and dev issues
   router: {
@@ -16,6 +23,9 @@ export default defineNuxtConfig({
       hmr: {
         port: 24678, // Use a specific port for HMR to avoid conflicts
       },
+      fs: {
+        strict: false, // Allow serving files outside of root
+      },
     },
     define: {
       // Remove React-specific references that are causing router warnings
@@ -23,6 +33,8 @@ export default defineNuxtConfig({
         process.env.NODE_ENV || "development"
       ),
     },
+    // Better error overlay handling
+    clearScreen: false,
   },
 
   runtimeConfig: {
@@ -48,26 +60,34 @@ export default defineNuxtConfig({
   // Nitro configuration. Make storage driver conditional so we don't import
   // optional drivers (which can trigger bundler warnings) unless Redis is configured.
   nitro: (() => {
-    const redisUrl = process.env.NUXT_REDIS_URL || process.env.REDIS_URL || '';
+    const redisUrl = process.env.NUXT_REDIS_URL || process.env.REDIS_URL || "";
     const base: any = {
-      preset: 'node-server',
+      preset: "node-server",
       minify: true,
       compressPublicAssets: true,
       prerender: {
-        routes: ['/sitemap.xml', '/robots.txt', '/offline'],
+        routes: ["/sitemap.xml", "/robots.txt", "/offline"],
         failOnError: false,
       },
       // Improve production performance
       experimental: {
         wasm: true,
       },
+      // Serve static files directly, don't route through Vue Router
+      publicAssets: [
+        {
+          baseURL: '/',
+          dir: 'public',
+          maxAge: 0 // No cache for sw.js
+        }
+      ],
     };
 
     if (redisUrl) {
       // Only configure Redis storage when a URL is provided (production)
       base.storage = {
         redis: {
-          driver: 'redis',
+          driver: "redis",
           url: redisUrl,
         },
       };
@@ -106,10 +126,25 @@ export default defineNuxtConfig({
     },
     "/api/**": { headers: { "cache-control": "max-age=300" } },
     "/images/**": { headers: { "cache-control": "max-age=31536000" } },
-    // Ignore problematic dev routes
-    "/@vite/**": { index: false },
-    "/@react-refresh": { index: false },
-    "/src/**": { index: false },
+    // Service worker and PWA files - serve as static files, don't route through Vue Router
+    "/sw.js": { 
+      headers: { 
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "application/javascript"
+      } 
+    },
+    "/workbox-*.js": { 
+      headers: { 
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-type": "application/javascript"
+      } 
+    },
+    "/manifest.json": { 
+      headers: { 
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "application/manifest+json"
+      } 
+    },
   },
 
   modules: ["@nuxt/ui", "@nuxt/image", "@nuxtjs/color-mode", "@nuxtjs/sitemap"],
@@ -148,6 +183,11 @@ export default defineNuxtConfig({
           as: "font",
           type: "font/woff2",
           crossorigin: "",
+        },
+        // PWA Manifest
+        {
+          rel: "manifest",
+          href: "/site.webmanifest",
         },
       ],
     },
@@ -214,8 +254,11 @@ export default defineNuxtConfig({
     transpile: ["@heroicons/vue"],
   },
 
-  // Font optimization
-  css: ["@/assets/css/fonts.css"],
+  // Font optimization and main styles
+  css: [
+    "@/assets/css/fonts.css",
+    "@/assets/styles/index.css"
+  ],
 
   postcss: {
     plugins: {

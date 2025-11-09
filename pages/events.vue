@@ -615,8 +615,8 @@
       </div>
     </UModal>
 
-    <!-- Weekly Schedule Section -->
-    <WeeklyEntertainment />
+  <!-- Weekly Schedule Section -->
+  <WeeklyEntertainment />
   </div>
 </template>
 

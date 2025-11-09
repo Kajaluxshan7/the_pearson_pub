@@ -1,0 +1,17 @@
+{
+  "name": "The Pearson Pub",
+  "short_name": "Pearson Pub",
+  "description": "A traditional pub atmosphere with modern amenities in Whitby",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#d97706",
+  "icons": [
+    {
+      "src": "/images/brooklinpub-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

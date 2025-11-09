@@ -2,17 +2,15 @@
   <div>
     <!-- Connectivity Indicator -->
     <ConnectivityIndicator>
-      <!-- Remove the blocking loading screen that causes white screen -->
       <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-        <!-- Header -->
-        <LayoutsHeader />
-
-        <!-- Main Content -->
-        <main class="flex-grow">
+        <!-- Use NuxtLayout for proper Nuxt 3 structure -->
+        <NuxtLayout>
+          <LayoutHeader/>
+ <main class="flex-grow">
           <NuxtPage />
         </main>
-        <!-- Footer -->
-        <LayoutsFooter />
+          <LayoutFooter/>
+        </NuxtLayout>
 
         <!-- Scroll to Top Button -->
         <ClientOnly>
@@ -21,7 +19,7 @@
             icon="i-heroicons-arrow-up"
             color="yellow"
             variant="solid"
-            class="fixed bottom-10 left-1/2 transform -translate-x-1/2 rounded-full shadow-lg"
+            class="fixed bottom-10 left-1/2 transform -translate-x-1/2 rounded-full shadow-lg z-40"
             size="xs"
             @click="scrollToTop"
           />
@@ -35,6 +33,10 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useColorMode } from '#imports'
 import { useLandingPageData } from '~/composables/useLandingPageData'
+
+// Import header and footer components (adjust paths if needed)
+import LayoutHeader from '~/components/layout/Header.vue'
+import LayoutFooter from '~/components/layout/Footer.vue'
 
 const colorMode = useColorMode()
 if (colorMode) colorMode.preference = 'light'
@@ -86,13 +88,8 @@ const loadDataInBackground = async () => {
 onMounted(() => {
   console.log("App mounted");
   
-  // Load data in background without blocking the UI - only on first app load
-  const hasBackgroundLoaded = sessionStorage.getItem('background-data-loaded');
-  if (!hasBackgroundLoaded) {
-    loadDataInBackground().finally(() => {
-      sessionStorage.setItem('background-data-loaded', 'true');
-    });
-  }
+  // Note: Data initialization is now handled by index.vue page
+  // No need to load here as it would be redundant
   
   if (typeof window !== 'undefined') {
     window.addEventListener('scroll', updateScroll);
