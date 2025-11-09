@@ -1,28 +1,30 @@
 <template>
-  <!-- Full Screen Loading with Logo for initial landing -->
-  <FullScreenLoading
-    v-if="initialLoading"
-    :title="loadingConfig.title"
-    :subtitle="loadingConfig.subtitle"
-    :progress="loadingProgress"
-    :current-step="currentLoadingStep"
-    :texts="loadingConfig.texts"
-    :steps="loadingConfig.steps"
-    :sub-text="loadingConfig.subText"
-    :error="loadingError"
-    :retrying="retryingConnection"
-    @retry="handleRetry"
-    @fallback="showFallbackMode"
-  />
+  <!-- Always render main content to prevent blank screen on hydration -->
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Full Screen Loading Overlay - positioned absolutely to overlay content -->
+    <FullScreenLoading
+      v-show="initialLoading"
+      :title="loadingConfig.title"
+      :subtitle="loadingConfig.subtitle"
+      :progress="loadingProgress"
+      :current-step="currentLoadingStep"
+      :texts="loadingConfig.texts"
+      :steps="loadingConfig.steps"
+      :sub-text="loadingConfig.subText"
+      :error="loadingError"
+      :retrying="retryingConnection"
+      @retry="handleRetry"
+      @fallback="showFallbackMode"
+    />
 
-  <!-- Static Fallback (Offline Mode) -->
-  <StaticFallback v-else-if="showFallback" />
+    <!-- Static Fallback (Offline Mode) -->
+    <StaticFallback v-if="showFallback && !initialLoading" />
 
-  <!-- Main Content - Hidden while initial full-screen loader is active to prevent flash -->
-  <div v-else
-       :style="initialLoading ? 'display: none;' : ''"
-       :aria-hidden="initialLoading ? 'true' : 'false'"
-       class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Main Content - Always present but may be overlaid by loader -->
+    <div
+      v-show="!initialLoading && !showFallback"
+      class="min-h-screen"
+    >
       <!-- Lazy loaded Hero -->
       <component :is="Hero" v-if="Hero" />
 
@@ -45,7 +47,13 @@
               <div class="flex items-center gap-3">
                 <span>{{ formatOperationTime(todayOperationStatus.todayHours.open_time) }} - {{ formatOperationTime(todayOperationStatus.todayHours.close_time) }}</span>
                 <span
-                  v-if="isCurrentlyOpen(todayOperationStatus.todayHours.day, todayOperationStatus.todayHours.open_time, todayOperationStatus.todayHours.close_time)"
+                  v-if="todayOperationStatus.todayHours.status === false"
+                  class="px-2 py-1 rounded-full text-xs font-semibold bg-red-500 text-white"
+                >
+                  CLOSED
+                </span>
+                <span
+                  v-else-if="isCurrentlyOpen(todayOperationStatus.todayHours.day, todayOperationStatus.todayHours.open_time, todayOperationStatus.todayHours.close_time)"
                   class="px-2 py-1 rounded-full text-xs font-semibold bg-green-500 text-white"
                 >
                   OPEN NOW
@@ -161,23 +169,26 @@
                     </div>
 
                     <!-- Title -->
-                    <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white leading-tight">
+                    <h3 :class="[
+                      'text-3xl lg:text-4xl font-bold leading-tight flex items-center gap-3',
+                      selectedTab.specialType === 'seasonal' ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'
+                    ]">
                       {{ selectedTab.title }}
+                      <span v-if="selectedTab.specialType === 'seasonal' && selectedTab.specials && selectedTab.specials.length > 0"
+                            :class="[
+                              'inline-block px-3 py-1 rounded-full text-xs font-semibold',
+                              isSeasonalAvailable(selectedTab.specials[0].seasonal_start_datetime, selectedTab.specials[0].seasonal_end_datetime)
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                            ]">
+                        {{ isSeasonalAvailable(selectedTab.specials[0].seasonal_start_datetime, selectedTab.specials[0].seasonal_end_datetime) ? 'Available' : 'Not Available' }}
+                      </span>
                     </h3>
 
                     <!-- Description -->
                     <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
                       {{ selectedTab.description }}
                     </p>
-
-                    <!-- Seasonal Date Range -->
-                    <div v-if="selectedTab.specialType === 'seasonal' && ('start_date' in selectedTab || 'end_date' in selectedTab)"
-                         class="flex items-center space-x-2 text-green-600 dark:text-green-400">
-                      <UIcon name="i-heroicons-calendar-days" class="w-5 h-5" />
-                      <span class="font-medium">
-                        Available: {{ formatSpecialDate(selectedTab.start_date as any) }} - {{ formatSpecialDate(selectedTab.end_date as any) }}
-                      </span>
-                    </div>
 
                     <!-- Day Name for Daily Specials -->
                     <div v-if="selectedTab.specialType === 'daily' && (selectedTab as any).dayName"
@@ -414,7 +425,10 @@
           </div>
         </div>
       </section>
+    </div>
+    <!-- End main content wrapper -->
   </div>
+  <!-- End outer container -->
 </template>
 
 <!-- pages/index.vue - Enhanced with SEO -->
@@ -424,7 +438,7 @@ import { useLandingPageData } from "~/composables/useLandingPageData";
 import { useConnectivity } from "~/composables/useConnectivity";
 import { useSEO } from "~/composables/useSEO";
 import FullScreenLoading from "~/components/loading/FullScreenLoading.vue";
-import StaticFallback from "~/components/StaticFallback.vue";
+import StaticFallback from "~/components/feedback/StaticFallback.vue";
 import { TimezoneUtil } from '~/utils/timezone';
 import { operationHoursApi } from '@/composables/useApi';
 import { useFirstVisit } from '~/composables/useFirstVisit';
@@ -749,20 +763,30 @@ const specialsTabs = computed(() => {
     });
   }
 
-  // Add Seasonal Special tab if data exists
+  // Add Seasonal Special tab if data exists and is within display period
   if (seasonalSpecials.value?.specials?.length > 0) {
-    tabs.push({
-      id: 'seasonal-special',
-      title: 'Seasonal Specials',
-      specialType: 'seasonal',
-      specials: seasonalSpecials.value.specials,
-      subtitle: seasonalSpecials.value.specials[0].description?.substring(0, 80) + '...' || 'Fresh seasonal offering',
-      description: seasonalSpecials.value.specials[0].description || 'A delicious seasonal special prepared by our chef.',
-      images: seasonalSpecials.value.specials[0].image_urls || [seasonalSpecials.value.specials[0].image_url].filter(Boolean),
-      season_name: seasonalSpecials.value.specials[0].season_name,
-      start_date: seasonalSpecials.value.specials[0].seasonal_start_datetime,
-      end_date: seasonalSpecials.value.specials[0].seasonal_end_datetime,
+    // Filter seasonal specials by display period (display_start_time, display_end_time)
+    const now = new Date();
+    const validSeasonalSpecials = seasonalSpecials.value.specials.filter(s => {
+      if (!s.display_start_time || !s.display_end_time) return false;
+      const start = new Date(s.display_start_time);
+      const end = new Date(s.display_end_time);
+      return now >= start && now <= end;
     });
+    if (validSeasonalSpecials.length > 0) {
+      tabs.push({
+        id: 'seasonal-special',
+        title: validSeasonalSpecials[0].season_name || 'Seasonal Specials',
+        specialType: 'seasonal',
+        specials: validSeasonalSpecials,
+        subtitle: validSeasonalSpecials[0].description?.substring(0, 80) + '...' || 'Fresh seasonal offering',
+        description: validSeasonalSpecials[0].description || 'A delicious seasonal special prepared by our chef.',
+        images: validSeasonalSpecials[0].image_urls || [validSeasonalSpecials[0].image_url].filter(Boolean),
+        season_name: validSeasonalSpecials[0].season_name,
+        start_date: validSeasonalSpecials[0].display_start_time,
+        end_date: validSeasonalSpecials[0].display_end_time,
+      });
+    }
   }
 
   // Add Late Night Special tab if data exists
@@ -1044,6 +1068,15 @@ function formatOperationTime(time: string): string {
   }
 }
 
+// Helper to check if seasonal special is currently available
+function isSeasonalAvailable(startDate: string, endDate: string): boolean {
+  if (!startDate || !endDate) return false;
+  const now = new Date();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  return now >= start && now <= end;
+}
+
 // Visibility states
 const isVisible = ref({
   about: false
@@ -1078,6 +1111,13 @@ onMounted(async () => {
   // Setup connectivity monitoring
   setupEventListeners();
 
+  // Safety timeout: ensure loader clears even if initialization hangs
+  const safetyTimeout = setTimeout(() => {
+    console.warn('⚠️ Safety timeout triggered - forcing loader to clear');
+    initialLoading.value = false;
+    pageReady.value = true;
+  }, 10000); // 10 second maximum loader time
+
   // Always initialize data on mount - no complex loading logic
   if (process.client) {
     // Decide whether to show full-screen loader or hide it immediately for SPA navigations.
@@ -1089,10 +1129,13 @@ onMounted(async () => {
       await initializeDataWithProgress();
       // initialization will set pageReady = true and clear initialLoading in finally
       initialLoading.value = false;
+      clearTimeout(safetyTimeout); // Clear safety timeout on successful load
     } else {
       // SPA navigation: hide loader immediately to avoid flash, then initialize in background
       initialLoading.value = false;
-      pageReady.value = false; // keep false so we can show lightweight state as needed
+      pageReady.value = true; // Show content immediately - data will refresh in background
+      clearTimeout(safetyTimeout); // Clear safety timeout for SPA nav
+      
       initializeDataWithProgress().catch(error => {
         console.warn('Background data loading failed:', error);
         // Continue with static content if data loading fails

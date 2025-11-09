@@ -3,7 +3,8 @@
 </template>
 
 <script setup lang="ts">
-import StaticFallback from "~/components/StaticFallback.vue";
+// Updated path after moving StaticFallback into components/feedback (auto-import handles it, manual import optional)
+import StaticFallback from "~/components/feedback/StaticFallback.vue";
 import { useRouter } from "vue-router";
 import { useConnectivity } from "@/composables/useConnectivity";
 import { onMounted } from "vue";

@@ -318,7 +318,7 @@
 import { ref, onMounted } from 'vue'
 import { publicApi } from '~/composables/usePublicApi'
 import type { ApiStory } from '~/composables/usePublicApi'
-import StoryModal from '~/components/StoryModal.vue'
+import StoryModal from '~/features/stories/components/StoryModal.vue'
 
 // Simple animation state
 const animationState = ref({

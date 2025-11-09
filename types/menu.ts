@@ -13,6 +13,7 @@ export interface MenuItem {
   isFeatured: boolean;
   isPearsonFamous: boolean;
   allergens?: string[];
+  display_order?: number; // Order for displaying items (set by admin)
   dietaryInfo?: {
     isVegetarian?: boolean;
     isVegan?: boolean;
@@ -24,5 +25,6 @@ export type MenuCategory = {
   id: string;
   name: string;
   description: string;
+  display_order?: number; // Order for displaying categories (set by admin)
   items: MenuItem[];
 };

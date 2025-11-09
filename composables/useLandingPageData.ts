@@ -65,6 +65,7 @@ export const useLandingPageData = () => {
     isVisible: apiItem.visibility,
     isFeatured: apiItem.is_favourite,
     isPearsonFamous: apiItem.is_favourite,
+    display_order: apiItem.display_order,
     allergens: [],
     dietaryInfo: {
       isVegetarian: false,
@@ -175,6 +176,7 @@ export const useLandingPageData = () => {
       id: category.id,
       name: category.name,
       description: category.description || "",
+      display_order: category.display_order,
       items: category.items.map(transformItemToMenuItem),
     }));
   });
@@ -322,16 +324,38 @@ export const useLandingPageData = () => {
     }
   };
 
-  // Initialize all data
+  // Initialize all data - with individual error handling for resilience
   const initializeAllData = async () => {
-    await Promise.all([
+    const results = await Promise.allSettled([
       fetchLandingContent(),
       fetchMenuData(),
       fetchEventsData(),
       fetchContactInfo(),
-      fetchSpecialsData(), // Add specials data fetching
-      fetchTodayOperationStatus(), // Add today's operation status fetching
+      fetchSpecialsData(),
+      fetchTodayOperationStatus(),
     ]);
+
+    // Log any failures for debugging, but don't throw
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        const names = [
+          "Landing Content",
+          "Menu",
+          "Events",
+          "Contact",
+          "Specials",
+          "Operation Status",
+        ];
+        console.warn(`⚠️ Failed to load ${names[index]}:`, result.reason);
+      }
+    });
+
+    // Return summary of what succeeded/failed
+    const succeeded = results.filter((r) => r.status === "fulfilled").length;
+    const failed = results.filter((r) => r.status === "rejected").length;
+    console.log(
+      `✅ Data initialization: ${succeeded} succeeded, ${failed} failed`
+    );
   };
 
   return {
