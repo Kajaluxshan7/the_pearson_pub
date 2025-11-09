@@ -47,7 +47,13 @@
               <div class="flex items-center gap-3">
                 <span>{{ formatOperationTime(todayOperationStatus.todayHours.open_time) }} - {{ formatOperationTime(todayOperationStatus.todayHours.close_time) }}</span>
                 <span
-                  v-if="isCurrentlyOpen(todayOperationStatus.todayHours.day, todayOperationStatus.todayHours.open_time, todayOperationStatus.todayHours.close_time)"
+                  v-if="todayOperationStatus.todayHours.status === false"
+                  class="px-2 py-1 rounded-full text-xs font-semibold bg-red-500 text-white"
+                >
+                  CLOSED
+                </span>
+                <span
+                  v-else-if="isCurrentlyOpen(todayOperationStatus.todayHours.day, todayOperationStatus.todayHours.open_time, todayOperationStatus.todayHours.close_time)"
                   class="px-2 py-1 rounded-full text-xs font-semibold bg-green-500 text-white"
                 >
                   OPEN NOW
@@ -163,23 +169,26 @@
                     </div>
 
                     <!-- Title -->
-                    <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white leading-tight">
+                    <h3 :class="[
+                      'text-3xl lg:text-4xl font-bold leading-tight flex items-center gap-3',
+                      selectedTab.specialType === 'seasonal' ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'
+                    ]">
                       {{ selectedTab.title }}
+                      <span v-if="selectedTab.specialType === 'seasonal' && selectedTab.specials && selectedTab.specials.length > 0"
+                            :class="[
+                              'inline-block px-3 py-1 rounded-full text-xs font-semibold',
+                              isSeasonalAvailable(selectedTab.specials[0].seasonal_start_datetime, selectedTab.specials[0].seasonal_end_datetime)
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                            ]">
+                        {{ isSeasonalAvailable(selectedTab.specials[0].seasonal_start_datetime, selectedTab.specials[0].seasonal_end_datetime) ? 'Available' : 'Not Available' }}
+                      </span>
                     </h3>
 
                     <!-- Description -->
                     <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
                       {{ selectedTab.description }}
                     </p>
-
-                    <!-- Seasonal Date Range -->
-                    <div v-if="selectedTab.specialType === 'seasonal' && ('start_date' in selectedTab || 'end_date' in selectedTab)"
-                         class="flex items-center space-x-2 text-green-600 dark:text-green-400">
-                      <UIcon name="i-heroicons-calendar-days" class="w-5 h-5" />
-                      <span class="font-medium">
-                        Available: {{ formatSpecialDate(selectedTab.start_date as any) }} - {{ formatSpecialDate(selectedTab.end_date as any) }}
-                      </span>
-                    </div>
 
                     <!-- Day Name for Daily Specials -->
                     <div v-if="selectedTab.specialType === 'daily' && (selectedTab as any).dayName"
@@ -754,20 +763,30 @@ const specialsTabs = computed(() => {
     });
   }
 
-  // Add Seasonal Special tab if data exists
+  // Add Seasonal Special tab if data exists and is within display period
   if (seasonalSpecials.value?.specials?.length > 0) {
-    tabs.push({
-      id: 'seasonal-special',
-      title: 'Seasonal Specials',
-      specialType: 'seasonal',
-      specials: seasonalSpecials.value.specials,
-      subtitle: seasonalSpecials.value.specials[0].description?.substring(0, 80) + '...' || 'Fresh seasonal offering',
-      description: seasonalSpecials.value.specials[0].description || 'A delicious seasonal special prepared by our chef.',
-      images: seasonalSpecials.value.specials[0].image_urls || [seasonalSpecials.value.specials[0].image_url].filter(Boolean),
-      season_name: seasonalSpecials.value.specials[0].season_name,
-      start_date: seasonalSpecials.value.specials[0].seasonal_start_datetime,
-      end_date: seasonalSpecials.value.specials[0].seasonal_end_datetime,
+    // Filter seasonal specials by display period (display_start_time, display_end_time)
+    const now = new Date();
+    const validSeasonalSpecials = seasonalSpecials.value.specials.filter(s => {
+      if (!s.display_start_time || !s.display_end_time) return false;
+      const start = new Date(s.display_start_time);
+      const end = new Date(s.display_end_time);
+      return now >= start && now <= end;
     });
+    if (validSeasonalSpecials.length > 0) {
+      tabs.push({
+        id: 'seasonal-special',
+        title: validSeasonalSpecials[0].season_name || 'Seasonal Specials',
+        specialType: 'seasonal',
+        specials: validSeasonalSpecials,
+        subtitle: validSeasonalSpecials[0].description?.substring(0, 80) + '...' || 'Fresh seasonal offering',
+        description: validSeasonalSpecials[0].description || 'A delicious seasonal special prepared by our chef.',
+        images: validSeasonalSpecials[0].image_urls || [validSeasonalSpecials[0].image_url].filter(Boolean),
+        season_name: validSeasonalSpecials[0].season_name,
+        start_date: validSeasonalSpecials[0].display_start_time,
+        end_date: validSeasonalSpecials[0].display_end_time,
+      });
+    }
   }
 
   // Add Late Night Special tab if data exists
@@ -1047,6 +1066,15 @@ function formatOperationTime(time: string): string {
     console.error("Error formatting time:", error);
     return time;
   }
+}
+
+// Helper to check if seasonal special is currently available
+function isSeasonalAvailable(startDate: string, endDate: string): boolean {
+  if (!startDate || !endDate) return false;
+  const now = new Date();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  return now >= start && now <= end;
 }
 
 // Visibility states

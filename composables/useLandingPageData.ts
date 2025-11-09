@@ -65,6 +65,7 @@ export const useLandingPageData = () => {
     isVisible: apiItem.visibility,
     isFeatured: apiItem.is_favourite,
     isPearsonFamous: apiItem.is_favourite,
+    display_order: apiItem.display_order,
     allergens: [],
     dietaryInfo: {
       isVegetarian: false,
@@ -175,6 +176,7 @@ export const useLandingPageData = () => {
       id: category.id,
       name: category.name,
       description: category.description || "",
+      display_order: category.display_order,
       items: category.items.map(transformItemToMenuItem),
     }));
   });

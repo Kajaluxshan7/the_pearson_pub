@@ -680,7 +680,7 @@ const categories = computed<MenuCategory[]>(() =>
   Array.isArray(menuCategories.value) ? menuCategories.value : []
 );
 
-// Sort categories alphabetically with daily specials at the bottom in weekday order
+// Sort categories by display_order (admin-defined order) with fallback to alphabetical
 const sortedCategories = computed(() => {
   const regularCategories: MenuCategory[] = [];
   const dailySpecials: MenuCategory[] = [];
@@ -701,15 +701,23 @@ const sortedCategories = computed(() => {
     }
   });
   
-  // Sort regular categories alphabetically
-  regularCategories.sort((a, b) => 
-    a.name.localeCompare(b.name, 'en', { 
+  // Sort regular categories by display_order (ascending), fallback to alphabetical
+  regularCategories.sort((a, b) => {
+    const orderA = a.display_order ?? 999999;
+    const orderB = b.display_order ?? 999999;
+    
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+    
+    // If display_order is the same, sort alphabetically
+    return a.name.localeCompare(b.name, 'en', { 
       numeric: true, 
       sensitivity: 'base',
       ignorePunctuation: true,
       caseFirst: 'lower'
-    })
-  );
+    });
+  });
   
   // Sort daily specials by day order
   dailySpecials.sort((a, b) => {
@@ -887,21 +895,35 @@ const sortItems = (items: MenuItem[]) => {
   const availableItems = items.filter(item => item.isAvailable);
   const soldOutItems = items.filter(item => !item.isAvailable);
 
-  // Enhanced sort function with strict alphabetical ordering
+  // Enhanced sort function with admin-defined order support
   const sortFunction = (a: MenuItem, b: MenuItem) => {
+    let primaryComparison = 0;
+    
     switch (sortBy.value) {
       case "name-desc":
-        return b.name.localeCompare(a.name, 'en', { 
+        primaryComparison = b.name.localeCompare(a.name, 'en', { 
           numeric: true, 
           sensitivity: 'base',
           ignorePunctuation: true,
           caseFirst: 'lower'
         });
+        break;
       case "price-low":
-        return a.price - b.price;
+        primaryComparison = a.price - b.price;
+        break;
       case "price-high":
-        return b.price - a.price;
-      default: // "name" - strict alphabetical order with enhanced locale compare
+        primaryComparison = b.price - a.price;
+        break;
+      default: // "name" - use display_order first, then alphabetical
+        // Sort by display_order (ascending) if both items have it
+        const orderA = a.display_order ?? 999999;
+        const orderB = b.display_order ?? 999999;
+        
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        
+        // If display_order is the same (or both undefined), sort alphabetically
         return a.name.localeCompare(b.name, 'en', { 
           numeric: true, 
           sensitivity: 'base',
@@ -909,6 +931,15 @@ const sortItems = (items: MenuItem[]) => {
           caseFirst: 'lower'
         });
     }
+    
+    // If primary sort criteria are equal, use display_order as tie-breaker
+    if (primaryComparison === 0) {
+      const orderA = a.display_order ?? 999999;
+      const orderB = b.display_order ?? 999999;
+      return orderA - orderB;
+    }
+    
+    return primaryComparison;
   };
 
   availableItems.sort(sortFunction);
