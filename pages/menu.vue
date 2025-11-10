@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Menu Hero Section -->
     <section
-      class="hero-section relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
+      class="hero-section relative py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
 
       <div class="absolute inset-0">
         <NuxtImg src="/images/food/foods.jpg" alt="Our Menu" class="w-full h-full object-cover opacity-30" format="webp"

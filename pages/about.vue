@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">    <!-- Hero Section -->
-    <section class="relative py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
+    <section class="relative py-36 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
       
       <div class="absolute inset-0">
         <NuxtImg 

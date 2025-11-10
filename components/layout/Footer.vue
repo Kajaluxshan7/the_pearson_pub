@@ -71,7 +71,7 @@
             class="flex flex-col items-center md:flex-row md:items-center md:space-x-3 space-y-2 md:space-y-0"
           >
             <img
-              src="../../public/images/pub/logo.png"
+              src="/images/pub/logo.png"
               alt="Pearson Pub Logo"
               class="h-12 w-auto mx-auto md:mx-0"
             />

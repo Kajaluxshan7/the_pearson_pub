@@ -87,7 +87,7 @@
                 >
                   {{ event.category }}
                 </span>
-                <span v-if="event.is_featured" class="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                <span v-if="event.featured" class="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
                   Featured
                 </span>
               </div>
@@ -99,22 +99,22 @@
               <div class="flex items-center space-x-3">
                 <UIcon name="i-heroicons-calendar-days" class="h-5 w-5 text-gray-400" />
                 <div>
-                  <p class="font-medium text-gray-900">{{ formatEventDate(event.event_date) }}</p>
-                  <p class="text-sm text-gray-600">{{ formatEventDay(event.event_date) }}</p>
+                  <p class="font-medium text-gray-900">{{ formatEventDate(event.date || event.startDate || '') }}</p>
+                  <p class="text-sm text-gray-600">{{ formatEventDay(event.date || event.startDate || '') }}</p>
                 </div>
               </div>
 
               <!-- Time -->
-              <div v-if="event.event_time" class="flex items-center space-x-3">
+              <div v-if="event.time" class="flex items-center space-x-3">
                 <UIcon name="i-heroicons-clock" class="h-5 w-5 text-gray-400" />
-                <span class="text-gray-900">{{ event.event_time }}</span>
+                <span class="text-gray-900">{{ event.time }}</span>
               </div>
 
               <!-- Price -->
-              <div v-if="event.price !== null" class="flex items-center space-x-3">
+              <div v-if="event.price && typeof event.price === 'object'" class="flex items-center space-x-3">
                 <UIcon name="i-heroicons-currency-dollar" class="h-5 w-5 text-gray-400" />
                 <span class="text-gray-900">
-                  {{ event.price === 0 ? 'Free' : `$${event.price}` }}
+                  {{ event.price.general === 0 ? 'Free' : `$${event.price.general}` }}
                 </span>
               </div>
 
@@ -152,13 +152,15 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-const activeImageIndex = ref(0);
 import { useRoute, useRouter } from 'vue-router';
 import { useLandingPageData } from '~/composables/useLandingPageData';
 
 const route = useRoute();
 const router = useRouter();
-const { allEvents, error } = useLandingPageData();
+const { allEvents, error, isLoading } = useLandingPageData();
+
+const activeImageIndex = ref(0);
+const pending = computed(() => isLoading.value);
 
 const event = computed(() => {
   if (!allEvents.value) return null;

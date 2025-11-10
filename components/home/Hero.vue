@@ -1,38 +1,50 @@
 <template>
-  <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+  <section
+    class="relative min-h-screen flex items-center justify-center overflow-hidden bg-gray-900"
+  >
     <div class="absolute inset-0 z-0">
       <img
-        src="/images/pub/hero-background.webp" 
+        src="/images/pub/hero-background.webp"
         alt="The Pearson Pub Interior"
         class="w-full h-full object-cover"
-        loading="lazy"
+        loading="eager"
+        fetchpriority="high"
+        @error="handleImageError"
       />
       <div class="absolute inset-0 bg-black/60"></div>
     </div>
-    <div 
+    <div
       class="container mx-auto px-4 relative z-10 text-center"
-      :class="{ 'opacity-100 translate-y-0': isVisible, 'opacity-0 translate-y-8': !isVisible }"
+      :class="{
+        'opacity-100 translate-y-0': isVisible,
+        'opacity-0 translate-y-8': !isVisible,
+      }"
       style="transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1)"
     >
       <!-- Main Hero Content -->
       <div class="max-w-4xl mx-auto space-y-8">
-        <h1 
+        <h1
           class="text-5xl md:text-7xl font-bold text-white leading-tight mb-6"
-          style="text-shadow: 2px 4px 8px rgba(0,0,0,0.5); font-family: 'Cinzel', 'Georgia', serif;"
+          style="
+            text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.5);
+            font-family: 'Cinzel', 'Georgia', serif;
+          "
         >
-          Welcome to<br>
+          Welcome to<br />
           <span class="text-yellow-400">The Pearson Pub</span>
         </h1>
-        
-        <p 
+
+        <p
           class="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto mb-12"
-          style="text-shadow: 1px 2px 4px rgba(0,0,0,0.7)"
+          style="text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.7)"
         >
           A Traditional Pub with a Modern Touch
         </p>
 
         <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
+        <div
+          class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16"
+        >
           <UButton
             to="/menu"
             color="yellow"
@@ -58,15 +70,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from "vue";
 
-const isVisible = ref(false)
+const isVisible = ref(false);
+
+const handleImageError = (event: Event) => {
+  // Log error in development only
+  if (process.dev) {
+    console.error('Hero image failed to load:', event);
+  }
+};
 
 onMounted(() => {
   setTimeout(() => {
-    isVisible.value = true
-  }, 100)
-})
+    isVisible.value = true;
+  }, 100);
+});
 </script>
 
 <style scoped>
@@ -75,7 +94,8 @@ onMounted(() => {
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(-50%, 0);
   }
   50% {

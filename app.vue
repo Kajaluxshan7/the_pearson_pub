@@ -38,18 +38,9 @@ import { useLandingPageData } from '~/composables/useLandingPageData'
 import LayoutHeader from '~/components/layout/Header.vue'
 import LayoutFooter from '~/components/layout/Footer.vue'
 
+// Set light mode as default
 const colorMode = useColorMode()
 if (colorMode) colorMode.preference = 'light'
-
-// Initialize landing page data composable
-const { initializeAllData } = useLandingPageData()
-
-// Background loading state (non-blocking)
-const loadingState = ref({
-  isLoading: false,
-  progress: 0,
-  error: null as string | null
-})
 
 // Scroll position
 const scrollY = ref(0)
@@ -68,29 +59,11 @@ const scrollToTop = () => {
   }
 }
 
-// Background data loading (non-blocking)
-const loadDataInBackground = async () => {
-  loadingState.value.isLoading = true;
-  loadingState.value.error = null;
-  
-  try {
-    // Load data in background without blocking UI
-    await initializeAllData();
-    console.log("Background data loading completed");
-  } catch (error) {
-    console.error('Failed to load background data:', error);
-    loadingState.value.error = 'Failed to load some data. Website will still work.';
-  } finally {
-    loadingState.value.isLoading = false;
-  }
-};
+// OPTIMIZATION: Data loading removed from app.vue - handled by individual pages
+// This prevents loading all data on every page navigation
 
 onMounted(() => {
-  console.log("App mounted");
-  
-  // Note: Data initialization is now handled by index.vue page
-  // No need to load here as it would be redundant
-  
+  // Setup scroll tracking for scroll-to-top button
   if (typeof window !== 'undefined') {
     window.addEventListener('scroll', updateScroll);
     updateScroll();
