@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "node .output/server/index.mjs",
-    "build": "nuxt build",
+    "build": "cross-env NODE_OPTIONS=--max_old_space_size=4096 nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
@@ -34,6 +34,7 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "@nuxt/types": "^2.18.1",
     "@nuxtjs/eslint-config-typescript": "^12.1.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
