@@ -1,6 +1,10 @@
 export default defineNuxtConfig({
   devtools: { enabled: false },
   ssr: true, // Ensure SSR is enabled for production
+  sourcemap: {
+    server: false,
+    client: false,
+  },
   components: [
     { path: "~/components/base", pathPrefix: false },
     { path: "~/components/ui", pathPrefix: false },
@@ -35,6 +39,28 @@ export default defineNuxtConfig({
     },
     // Better error overlay handling
     clearScreen: false,
+    build: {
+      sourcemap: false, // Disable source maps in production to save memory
+      cssCodeSplit: true,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              if (id.includes("gsap")) return "gsap";
+              if (id.includes("swiper")) return "swiper";
+              if (id.includes("@heroicons")) return "heroicons";
+              if (id.includes("@vueuse")) return "vueuse";
+              if (id.includes("luxon")) return "luxon";
+              return "vendor";
+            }
+          },
+        },
+      },
+    },
+    optimizeDeps: {
+      include: ["luxon"],
+      exclude: ["gsap", "swiper"], // Defer heavy animation libs
+    },
   },
 
   runtimeConfig: {
@@ -76,10 +102,10 @@ export default defineNuxtConfig({
       // Serve static files directly, don't route through Vue Router
       publicAssets: [
         {
-          baseURL: '/',
-          dir: 'public',
-          maxAge: 0 // No cache for sw.js
-        }
+          baseURL: "/",
+          dir: "public",
+          maxAge: 0, // No cache for sw.js
+        },
       ],
     };
 
@@ -127,23 +153,23 @@ export default defineNuxtConfig({
     "/api/**": { headers: { "cache-control": "max-age=300" } },
     "/images/**": { headers: { "cache-control": "max-age=31536000" } },
     // Service worker and PWA files - serve as static files, don't route through Vue Router
-    "/sw.js": { 
-      headers: { 
+    "/sw.js": {
+      headers: {
         "cache-control": "public, max-age=0, must-revalidate",
-        "content-type": "application/javascript"
-      } 
+        "content-type": "application/javascript",
+      },
     },
-    "/workbox-*.js": { 
-      headers: { 
+    "/workbox-*.js": {
+      headers: {
         "cache-control": "public, max-age=31536000, immutable",
-        "content-type": "application/javascript"
-      } 
+        "content-type": "application/javascript",
+      },
     },
-    "/manifest.json": { 
-      headers: { 
+    "/manifest.json": {
+      headers: {
         "cache-control": "public, max-age=0, must-revalidate",
-        "content-type": "application/manifest+json"
-      } 
+        "content-type": "application/manifest+json",
+      },
     },
   },
 
@@ -255,10 +281,7 @@ export default defineNuxtConfig({
   },
 
   // Font optimization and main styles
-  css: [
-    "@/assets/css/fonts.css",
-    "@/assets/styles/index.css"
-  ],
+  css: ["@/assets/css/fonts.css", "@/assets/styles/index.css"],
 
   postcss: {
     plugins: {
@@ -267,6 +290,12 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+
+  // Future optimization hints (kept as comments for maintainers):
+  // 1. Convert global GSAP plugin to route-level dynamic imports where needed.
+  // 2. Replace large iconify JSON packages with on-demand icon imports via unplugin-icons.
+  // 3. Consider pruning Tailwind content globs if build time remains high.
+  // 4. If mostly static marketing pages, evaluate full static generation (nuxt generate) + deploy to CDN.
 
   compatibilityDate: "2025-07-19",
 });
