@@ -1,6 +1,15 @@
 import { DateTime } from "luxon";
 
 /**
+ * Log errors only in development environment
+ */
+function logError(message: string, error: unknown) {
+  if (process.dev) {
+    console.error(message, error);
+  }
+}
+
+/**
  * Centralized timezone utilities for the Nuxt frontend.
  * All date/time operations should use America/Toronto timezone.
  * Backend stores UTC, we convert at API boundaries.
@@ -27,7 +36,7 @@ export class TimezoneUtil {
 
       return dt.toFormat(format);
     } catch (error) {
-      console.error("Error formatting Toronto time:", error);
+      logError("Error formatting Toronto time:", error);
       return String(utcDateLike);
     }
   }
@@ -49,7 +58,7 @@ export class TimezoneUtil {
       });
       return dt.toUTC().toISO() ?? "";
     } catch (error) {
-      console.error("Error parsing Toronto input:", error);
+      logError("Error parsing Toronto input:", error);
       throw new Error(`Invalid date format: ${torontoLocal}`);
     }
   }
@@ -69,7 +78,7 @@ export class TimezoneUtil {
 
       return dt.toFormat("yyyy-MM-dd'T'HH:mm");
     } catch (error) {
-      console.error("Error formatting for datetime input:", error);
+      logError("Error formatting for datetime input:", error);
       return "";
     }
   }
@@ -139,7 +148,7 @@ export class TimezoneUtil {
 
       return dt.offsetNameShort === "EDT";
     } catch (error) {
-      console.error("Error checking DST:", error);
+      logError("Error checking DST:", error);
       return false;
     }
   }
@@ -167,7 +176,7 @@ export class TimezoneUtil {
         isDST: this.isDaylightSavingTime(date),
       };
     } catch (error) {
-      console.error("Error getting timezone info:", error);
+      logError("Error getting timezone info:", error);
       return {
         timezone: this.TIMEZONE,
         abbreviation: "EST",
@@ -200,7 +209,7 @@ export class TimezoneUtil {
 
       return `${openFormatted} - ${closeFormatted}`;
     } catch (error) {
-      console.error("Error formatting operation hours:", error);
+      logError("Error formatting operation hours:", error);
       return "Closed";
     }
   }
@@ -246,7 +255,7 @@ export class TimezoneUtil {
 
       return now >= openDt && now <= closeDt;
     } catch (error) {
-      console.error("Error checking business hours:", error);
+      logError("Error checking business hours:", error);
       return false;
     }
   }
@@ -276,7 +285,7 @@ export class TimezoneUtil {
       const displayHour = hours % 12 || 12;
       return `${displayHour}:${minutes.toString().padStart(2, "0")} ${period}`;
     } catch (error) {
-      console.error("Error formatting time:", error);
+      logError("Error formatting time:", error);
       return timeString;
     }
   }
@@ -298,7 +307,7 @@ export class TimezoneUtil {
       if (now >= start && now <= end) return "current";
       return "ended";
     } catch (error) {
-      console.error("Error calculating event status:", error);
+      logError("Error calculating event status:", error);
       return "upcoming";
     }
   }
@@ -335,7 +344,7 @@ export class TimezoneUtil {
         )}`;
       }
     } catch (error) {
-      console.error("Error formatting event date range:", error);
+      logError("Error formatting event date range:", error);
       return "";
     }
   }
@@ -348,7 +357,7 @@ export class TimezoneUtil {
       const dateObj = typeof date === "string" ? new Date(date) : date;
       return dateObj.toISOString();
     } catch (error) {
-      console.error("Error converting to ISO string:", error);
+      logError("Error converting to ISO string:", error);
       return "";
     }
   }
@@ -371,7 +380,7 @@ export class TimezoneUtil {
       const dt = DateTime.fromISO(dateString).setZone(this.TIMEZONE);
       return dt.toJSDate();
     } catch (error) {
-      console.error("Error parsing Toronto date:", error);
+      logError("Error parsing Toronto date:", error);
       return new Date();
     }
   }
@@ -415,7 +424,7 @@ export class TimezoneUtil {
         return "now";
       }
     } catch (error) {
-      console.error("Error getting relative time:", error);
+      logError("Error getting relative time:", error);
       return "";
     }
   }
@@ -436,7 +445,7 @@ export class TimezoneUtil {
 
       return dt.toFormat("h:mm a");
     } catch (error) {
-      console.error("Error formatting operation time:", error);
+      logError("Error formatting operation time:", error);
       return timeString;
     }
   }
@@ -480,7 +489,7 @@ export class TimezoneUtil {
 
       return now >= openDt && now <= closeDt;
     } catch (error) {
-      console.error("Error checking if currently open:", error);
+      logError("Error checking if currently open:", error);
       return false;
     }
   }
@@ -531,7 +540,7 @@ export class TimezoneUtil {
 
       return closeMinutes < openMinutes;
     } catch (error) {
-      console.error("Error checking overnight hours:", error);
+      logError("Error checking overnight hours:", error);
       return false;
     }
   }

@@ -289,16 +289,16 @@ const storyId = route.params.id;
 // Reactive state
 const currentImageIndex = ref(0);
 
-// Get the API instance
-const { getStoryById } = usePublicApi();
+// Import the API methods
+import { publicApi } from '~/composables/usePublicApi';
 
 // Fetch story data
 const {
   data: story,
   pending,
   error,
-} = await useFetch(`story-${storyId}`, () => getStoryById(storyId as string), {
-  key: `story-${storyId}`,
+} = await useAsyncData(`story-${storyId}`, () => publicApi.getStoryById(storyId as string), {
+  default: () => ({} as any),
 });
 
 // Fetch related stories

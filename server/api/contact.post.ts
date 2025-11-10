@@ -1,6 +1,29 @@
 import { readBody, createError, H3Event } from "h3";
 import nodemailer from "nodemailer";
 
+/**
+ * Log messages only in development environment
+ */
+function logMessage(message: string, data?: unknown) {
+  if (process.dev) {
+    if (data) {
+      console.log(message, data);
+    } else {
+      console.log(message);
+    }
+  }
+}
+
+function logError(message: string, data?: unknown) {
+  if (process.dev) {
+    if (data) {
+      console.error(message, data);
+    } else {
+      console.error(message);
+    }
+  }
+}
+
 export default defineEventHandler(async (event: H3Event) => {
   try {
     const body = await readBody(event);
@@ -34,10 +57,10 @@ export default defineEventHandler(async (event: H3Event) => {
     const smtpPass = config.smtpPass || process.env.NUXT_SMTP_PASS;
 
     if (!smtpHost || !smtpUser || !smtpPass) {
-      console.error("❌ SMTP configuration missing:", {
-        host: smtpHost ? "✅" : "❌",
-        user: smtpUser ? "✅" : "❌", 
-        pass: smtpPass ? "✅" : "❌"
+      logError("SMTP configuration missing:", {
+        host: smtpHost ? "configured" : "missing",
+        user: smtpUser ? "configured" : "missing", 
+        pass: smtpPass ? "configured" : "missing"
       });
       throw createError({
         statusCode: 500,
@@ -235,9 +258,9 @@ export default defineEventHandler(async (event: H3Event) => {
     // Verify transporter configuration
     try {
       await transport.verify();
-      console.log("✅ SMTP connection verified successfully");
+      logMessage("✅ SMTP connection verified successfully");
     } catch (verifyError: any) {
-      console.error("❌ SMTP verification failed:", {
+      logError("❌ SMTP verification failed:", {
         message: verifyError.message,
         code: verifyError.code,
         command: verifyError.command
@@ -252,7 +275,7 @@ export default defineEventHandler(async (event: H3Event) => {
     // Send email
     try {
       const result = await transport.sendMail(mailOptions);
-      console.log("✅ Email sent successfully:", result.messageId);
+      logMessage("✅ Email sent successfully:", result.messageId);
 
       return {
         success: true,
@@ -260,7 +283,7 @@ export default defineEventHandler(async (event: H3Event) => {
         messageId: result.messageId,
       };
     } catch (sendError: any) {
-      console.error("❌ Failed to send email:", {
+      logError("❌ Failed to send email:", {
         message: sendError.message,
         code: sendError.code,
         command: sendError.command
@@ -272,7 +295,7 @@ export default defineEventHandler(async (event: H3Event) => {
       });
     }
   } catch (error: any) {
-    console.error("Contact form error:", {
+    logError("Contact form error:", {
       message: error.message,
       statusCode: error.statusCode,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined

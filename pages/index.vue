@@ -25,8 +25,8 @@
       v-show="!initialLoading && !showFallback"
       class="min-h-screen"
     >
-      <!-- Lazy loaded Hero -->
-      <component :is="Hero" v-if="Hero" />
+      <!-- Hero Section -->
+      <Hero />
 
       <!-- Operation Hours Banner (uses today's status from backend) -->
       <section class="bg-yellow-600 dark:bg-yellow-700 py-4">
@@ -174,7 +174,7 @@
                       selectedTab.specialType === 'seasonal' ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'
                     ]">
                       {{ selectedTab.title }}
-                      <span v-if="selectedTab.specialType === 'seasonal' && selectedTab.specials && selectedTab.specials.length > 0"
+                      <span v-if="selectedTab.specialType === 'seasonal' && 'specials' in selectedTab && selectedTab.specials && selectedTab.specials.length > 0"
                             :class="[
                               'inline-block px-3 py-1 rounded-full text-xs font-semibold',
                               isSeasonalAvailable(selectedTab.specials[0].seasonal_start_datetime, selectedTab.specials[0].seasonal_end_datetime)
@@ -439,18 +439,13 @@ import { useConnectivity } from "~/composables/useConnectivity";
 import { useSEO } from "~/composables/useSEO";
 import FullScreenLoading from "~/components/loading/FullScreenLoading.vue";
 import StaticFallback from "~/components/feedback/StaticFallback.vue";
+import Hero from "../components/home/Hero.vue";
 import { TimezoneUtil } from '~/utils/timezone';
 import { operationHoursApi } from '@/composables/useApi';
 import { useFirstVisit } from '~/composables/useFirstVisit';
 
 // SEO Configuration
 const { setSEO, getLocalBusinessSchema } = useSEO()
-
-// Lazy load Hero for better LCP
-const Hero = shallowRef<any>(null)
-if (process.client) {
-  import('../components/home/Hero.vue').then(mod => Hero.value = mod.default)
-}
 
 definePageMeta({
   title: 'The Pearson Pub | Traditional Pub in Whitby, ON',
@@ -767,7 +762,7 @@ const specialsTabs = computed(() => {
   if (seasonalSpecials.value?.specials?.length > 0) {
     // Filter seasonal specials by display period (display_start_time, display_end_time)
     const now = new Date();
-    const validSeasonalSpecials = seasonalSpecials.value.specials.filter(s => {
+    const validSeasonalSpecials = seasonalSpecials.value.specials.filter((s: any) => {
       if (!s.display_start_time || !s.display_end_time) return false;
       const start = new Date(s.display_start_time);
       const end = new Date(s.display_end_time);

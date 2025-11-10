@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Hero Section -->
     <section
-      class="hero-section relative py-20 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
+      class="hero-section relative py-36 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden"
     >
       <div class="absolute inset-0">
         <NuxtImg
@@ -626,6 +626,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { useLandingPageData } from "~/composables/useLandingPageData";
 import { TimezoneUtil } from '~/utils/timezone';
 import { DateTime } from 'luxon';
+import { useGsap } from '~/composables/useGsap';
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -1104,37 +1105,42 @@ onMounted(async () => {
   checkViewMode();
   window.addEventListener("resize", checkViewMode);
   
-  // Initialize animations if GSAP is available
+  // OPTIMIZATION: Load GSAP lazily only if animations are needed
   if (process.client) {
-    nextTick(() => {
-      const nuxtApp = useNuxtApp();
-      const $gsap = (nuxtApp as any)?.$gsap;
-      
-      if ($gsap && typeof $gsap.from === "function") {
-        // Animate hero content
-        $gsap.timeline()
-          .from(".hero-content h1", {
-            opacity: 0,
-            y: 30,
-            duration: 0.8,
-            ease: "power2.out"
-          })
-          .from(".hero-content p", {
-            opacity: 0,
-            y: 20,
-            duration: 0.6,
-            ease: "power2.out"
-          }, "-=0.4");
+    nextTick(async () => {
+      try {
+        // Dynamic import - only loads GSAP when needed
+        const { gsap } = await useGsap();
         
-        // Animate event cards - removed opacity animation to ensure all cards are fully visible
-        $gsap.utils.toArray(".event-card").forEach((el: any, i: number) => {
-          $gsap.from(el, {
-            y: 20,
-            duration: 0.6,
-            ease: "power2.out",
-            delay: i * 0.1
+        if (gsap && typeof gsap.from === "function") {
+          // Animate hero content
+          gsap.timeline()
+            .from(".hero-content h1", {
+              opacity: 0,
+              y: 30,
+              duration: 0.8,
+              ease: "power2.out"
+            })
+            .from(".hero-content p", {
+              opacity: 0,
+              y: 20,
+              duration: 0.6,
+              ease: "power2.out"
+            }, "-=0.4");
+          
+          // Animate event cards - removed opacity animation to ensure all cards are fully visible
+          gsap.utils.toArray(".event-card").forEach((el: any, i: number) => {
+            gsap.from(el, {
+              y: 20,
+              duration: 0.6,
+              ease: "power2.out",
+              delay: i * 0.1
+            });
           });
-        });
+        }
+      } catch (error) {
+        // Fail gracefully - page still works without animations
+        console.warn('GSAP animations disabled:', error);
       }
     });
   }

@@ -23,6 +23,24 @@ export default defineNuxtConfig({
 
   // Vite configuration for development
   vite: {
+    plugins: [
+      {
+        name: "suppress-nuxt-manifest-errors",
+        configResolved() {
+          const originalOnwarn = this.onwarn || (() => {});
+          this.onwarn = (warning, warn) => {
+            // Suppress #app-manifest warnings - it's dead code in development
+            if (
+              warning.message?.includes("#app-manifest") ||
+              warning.id?.includes("manifest.js")
+            ) {
+              return;
+            }
+            originalOnwarn.call(this, warning, warn);
+          };
+        },
+      },
+    ],
     server: {
       hmr: {
         port: 24678, // Use a specific port for HMR to avoid conflicts
@@ -46,7 +64,8 @@ export default defineNuxtConfig({
         output: {
           manualChunks(id) {
             if (id.includes("node_modules")) {
-              if (id.includes("gsap")) return "gsap";
+              // OPTIMIZATION: Don't bundle GSAP in vendor - it's dynamically imported
+              // if (id.includes("gsap")) return "gsap";
               if (id.includes("swiper")) return "swiper";
               if (id.includes("@heroicons")) return "heroicons";
               if (id.includes("@vueuse")) return "vueuse";
@@ -59,7 +78,8 @@ export default defineNuxtConfig({
     },
     optimizeDeps: {
       include: ["luxon"],
-      exclude: ["gsap", "swiper"], // Defer heavy animation libs
+      // OPTIMIZATION: Exclude GSAP since it's now lazy loaded
+      exclude: ["gsap", "swiper", "#app-manifest"], // Defer heavy animation libs and suppress virtual module warnings
     },
   },
 
@@ -186,29 +206,43 @@ export default defineNuxtConfig({
           type: "image/png",
           href: "/pearson-pub-logo.png",
         },
+        // Preconnect to API domain for faster data fetching
+        {
+          rel: "preconnect",
+          href: process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:5000",
+        },
+        // DNS prefetch for Google Fonts
+        {
+          rel: "dns-prefetch",
+          href: "https://fonts.googleapis.com",
+        },
+        {
+          rel: "preconnect",
+          href: "https://fonts.googleapis.com",
+          crossorigin: "anonymous",
+        },
+        {
+          rel: "preconnect",
+          href: "https://fonts.gstatic.com",
+          crossorigin: "anonymous",
+        },
+        // Preload critical fonts only (400, 600 weights)
         {
           rel: "preload",
-          href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap",
+          href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap",
           as: "style",
         },
         {
           rel: "preload",
-          href: "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap",
+          href: "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&display=swap",
           as: "style",
         },
+        // Preload hero background image for better LCP
         {
           rel: "preload",
-          href: "/images/pub/interior-main.jpg",
+          href: "/images/pub/hero-background.webp",
           as: "image",
-        },
-        { rel: "stylesheet", href: "/fonts/cinzel-v23-latin-regular.woff2" },
-        // Preload critical fonts
-        {
-          rel: "preload",
-          href: "/fonts/cinzel-v23-latin-regular.woff2",
-          as: "font",
-          type: "font/woff2",
-          crossorigin: "",
+          type: "image/webp",
         },
         // PWA Manifest
         {
@@ -290,12 +324,5 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-
-  // Future optimization hints (kept as comments for maintainers):
-  // 1. Convert global GSAP plugin to route-level dynamic imports where needed.
-  // 2. Replace large iconify JSON packages with on-demand icon imports via unplugin-icons.
-  // 3. Consider pruning Tailwind content globs if build time remains high.
-  // 4. If mostly static marketing pages, evaluate full static generation (nuxt generate) + deploy to CDN.
-
   compatibilityDate: "2025-07-19",
 });
