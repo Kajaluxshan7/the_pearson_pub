@@ -183,8 +183,19 @@
       </div>
 
       <!-- Copyright -->
-      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400 space-y-2">
         <p>© {{ currentYear }} The Pearson Pub. All rights reserved.</p>
+        <p>
+          Designed & Developed by
+          <a
+            href="https://www.akvisionsystems.com"
+            target="_blank"
+            rel="noopener"
+            class="text-yellow-500 hover:text-yellow-400 transition-colors duration-200 no-underline font-medium"
+          >
+            AK Visions Systems
+          </a>
+        </p>
       </div>
     </UContainer>
   </footer>

@@ -31,13 +31,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useColorMode } from '#imports'
 
 // Import header and footer components (adjust paths if needed)
 import LayoutHeader from '~/components/layout/Header.vue'
 import LayoutFooter from '~/components/layout/Footer.vue'
 
-// Set light mode as default
+// Set light mode as default — useColorMode is auto-imported by @nuxt/ui via @nuxtjs/color-mode
 const colorMode = useColorMode()
 if (colorMode) {
   colorMode.preference = 'light'

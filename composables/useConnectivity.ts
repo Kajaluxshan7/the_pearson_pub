@@ -19,8 +19,13 @@ export const useConnectivity = () => {
     maxRetries: 3
   })
 
-  const config = useRuntimeConfig()
-  const apiBaseUrl = config.public.apiBaseUrl as string
+  let apiBaseUrl = 'http://localhost:5000'
+  try {
+    const config = useRuntimeConfig()
+    apiBaseUrl = (config.public.apiBaseUrl as string) || apiBaseUrl
+  } catch {
+    // useRuntimeConfig() not available — use default
+  }
 
   // Simple online/offline detection
   const updateOnlineStatus = () => {

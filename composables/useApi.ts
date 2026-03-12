@@ -1,34 +1,39 @@
 import { $fetch } from 'ofetch'
 import { publicApi } from './usePublicApi'
 
-// Function to get API base URL from runtime config
+// Cached base URL — resolved once and reused to avoid useRuntimeConfig() context loss in async callbacks
+let _cachedBaseUrl: string | null = null
+
+// Function to get API base URL from runtime config (with persistent cache)
 const getApiBaseUrl = () => {
+  if (_cachedBaseUrl) {
+    return _cachedBaseUrl
+  }
   try {
     const config = useRuntimeConfig()
     const apiBaseUrl = config.public.apiBaseUrl as string
-    if (!apiBaseUrl) {
-      if (process.dev) {
-        console.warn(
-          'NUXT_PUBLIC_API_BASE_URL is not set in runtime config. Falling back to default.'
-        )
-      }
-      return 'http://localhost:5000'
+    if (apiBaseUrl) {
+      _cachedBaseUrl = apiBaseUrl
+      return apiBaseUrl
     }
-    return apiBaseUrl
-  } catch (error) {
-    if (process.dev) {
-      console.error('Error accessing runtime config:', error)
-    }
-    // Fallback for SSR or when runtime config is not available
-    return 'http://localhost:5000'
+  } catch {
+    // useRuntimeConfig() not available — use cached or fallback
   }
+  return _cachedBaseUrl || 'http://localhost:5000'
 }
 
-// Create fetch instance with base configuration and error handling
+// Cached $fetch client — reuse the same instance for connection efficiency
+let _cachedClient: ReturnType<typeof $fetch.create> | null = null
+
+// Create or return cached fetch instance with base configuration and error handling
 const createApiClient = () => {
-  const API_BASE_URL = getApiBaseUrl()
-  return $fetch.create({
-    baseURL: API_BASE_URL,
+  const baseURL = getApiBaseUrl()
+  // Return cached client if base URL hasn't changed
+  if (_cachedClient && _cachedBaseUrl === baseURL) {
+    return _cachedClient
+  }
+  _cachedClient = $fetch.create({
+    baseURL,
     credentials: 'include', // Include cookies
     headers: {
       'Content-Type': 'application/json'
@@ -37,15 +42,14 @@ const createApiClient = () => {
       if (process.dev) {
         console.warn('API Request Error:', error)
       }
-      // Don't throw error, let components handle gracefully
     },
     onResponseError({ response }) {
       if (process.dev) {
         console.warn('API Response Error:', response.status, response.statusText)
       }
-      // Don't throw error, let components handle gracefully
     }
   })
+  return _cachedClient
 }
 
 // Lazy getter for API client
@@ -284,36 +288,16 @@ export const specialsApi = {
       heading: 'Latenight Special'
     }),
 
-  // Helper method to get current day specials with proper heading
-  getCurrentDaySpecials: (): Promise<any> => {
-    return specialsApi.getDailySpecials()
-  },
-
-  // Legacy methods for backward compatibility
-  getCurrentDaySpecialsLegacy: (): Promise<ApiSpecial[]> => {
-    return safeApiCall(
-      () => specialsApi.getDailySpecials().then(response => response.specials || []),
-      []
-    )
-  },
-
-  getSeasonalSpecialsLegacy: (): Promise<ApiSpecial[]> =>
-    safeApiCall(
-      () => specialsApi.getSeasonalSpecials().then(response => response.specials || []),
-      []
-    ),
-
-  getLastNightSpecials: (): Promise<ApiSpecial[]> =>
-    safeApiCall(
-      () => specialsApi.getLateNightSpecials().then(response => response.specials || []),
-      []
-    )
 }
 
 export default getApi
 
 // Main composable function
 export const useApi = () => {
+  // Eagerly resolve and cache the API base URL while we're in the Nuxt setup context.
+  // This ensures all subsequent async calls (after await) use the correct URL.
+  getApiBaseUrl()
+
   return {
     // Categories
     getCategories: categoriesApi.getAll,
@@ -339,13 +323,6 @@ export const useApi = () => {
     getDailySpecials: specialsApi.getDailySpecials,
     getSeasonalSpecials: specialsApi.getSeasonalSpecials,
     getLateNightSpecials: specialsApi.getLateNightSpecials,
-    getCurrentDaySpecials: specialsApi.getCurrentDaySpecials,
-
-    // Legacy methods for backward compatibility
-    getCurrentDaySpecialsLegacy: specialsApi.getCurrentDaySpecialsLegacy,
-    getSeasonalSpecialsLegacy: specialsApi.getSeasonalSpecialsLegacy,
-    getLastNightSpecials: specialsApi.getLastNightSpecials,
-
     // Public API methods
     getPublicLandingContent: publicApi.getLandingContent,
     getPublicMenuData: publicApi.getMenuData,

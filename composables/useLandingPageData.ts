@@ -4,9 +4,6 @@ import type { LandingPageContent } from './usePublicApi'
 import type { MenuItem, MenuCategory } from '~/types/menu'
 import type { Event } from '~/types/events'
 
-// Access publicApi and specialsApi from useApi
-const { publicApi, specialsApi } = useApi()
-
 export interface ContactInfo {
   name: string
   phone: string
@@ -26,6 +23,9 @@ export interface ContactInfo {
 }
 
 export const useLandingPageData = () => {
+  // Access publicApi and specialsApi inside the composable so useRuntimeConfig() is called in the correct context
+  const { publicApi, specialsApi, getTodayOperationStatus: fetchOperationStatus } = useApi()
+
   // State
   const landingContent = ref<LandingPageContent | null>(null)
   const menuData = ref<any>(null)
@@ -334,7 +334,7 @@ export const useLandingPageData = () => {
     loadingCount.value += 1
     operationHoursError.value = null
     try {
-      const result = await useApi().getTodayOperationStatus()
+      const result = await fetchOperationStatus()
       todayOperationStatus.value = result
     } catch (err: any) {
       operationHoursError.value = err?.message || 'Error fetching operation status'

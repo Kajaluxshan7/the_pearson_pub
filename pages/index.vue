@@ -232,7 +232,7 @@
                             selectedTab.specials[0].seasonal_end_datetime
                           )
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                         ]"
                       >
                         {{
@@ -240,8 +240,8 @@
                             selectedTab.specials[0].seasonal_start_datetime,
                             selectedTab.specials[0].seasonal_end_datetime
                           )
-                            ? 'Available'
-                            : 'Not Available'
+                            ? 'Available Now'
+                            : 'Coming Soon'
                         }}
                       </span>
                     </h3>
@@ -635,8 +635,6 @@ const {
   operationHoursError,
   fetchTodayOperationStatus
 } = useLandingPageData()
-
-console.log()
 
 // Connectivity and Loading Management
 const {
@@ -1094,7 +1092,12 @@ watch(activeSpecialTab, newTab => {
 // Watch for changes in specials data to restart rotations
 watch(
   specialsTabs,
-  () => {
+  (tabs) => {
+    // If the currently selected tab no longer exists, switch to the first available tab
+    if (tabs.length > 0 && !tabs.find(tab => tab.id === activeSpecialTab.value)) {
+      activeSpecialTab.value = tabs[0].id
+    }
+
     stopSpecialRotation()
     stopImageRotation()
     currentImageIndex.value = 0
@@ -1177,7 +1180,7 @@ function formatOperationTime(time: string): string {
   }
 }
 
-// Helper to check if seasonal special is currently available
+// Helper to check if seasonal special is currently available (for badge display)
 function isSeasonalAvailable(startDate: string, endDate: string): boolean {
   if (!startDate || !endDate) {
     return false

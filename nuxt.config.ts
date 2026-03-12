@@ -6,7 +6,6 @@ export default defineNuxtConfig({
     client: false
   },
   components: [
-    { path: '~/components/ui', pathPrefix: false },
     { path: '~/components/feedback', pathPrefix: false },
     { path: '~/features/events/components', pathPrefix: false },
     { path: '~/features/stories/components', pathPrefix: false }
@@ -193,7 +192,7 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/ui',
     '@nuxt/image',
-    '@nuxtjs/color-mode',
+    // '@nuxtjs/color-mode' is already installed by @nuxt/ui internally — do not list it separately
     '@nuxtjs/sitemap',
     '@nuxtjs/google-fonts'
   ],

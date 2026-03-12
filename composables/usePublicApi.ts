@@ -1,36 +1,41 @@
 import { $fetch } from 'ofetch'
 
+// Cached base URL — resolved once and reused to avoid useRuntimeConfig() context loss in async callbacks
+let _cachedBaseUrl: string | null = null
+
 const getApiBaseUrl = () => {
+  if (_cachedBaseUrl) {
+    return _cachedBaseUrl
+  }
   try {
     const config = useRuntimeConfig()
     const apiBaseUrl = config.public.apiBaseUrl as string
-    if (!apiBaseUrl) {
-      if (process.dev) {
-        console.warn(
-          'NUXT_PUBLIC_API_BASE_URL is not set in runtime config. Falling back to default.'
-        )
-      }
-      return 'http://localhost:5000'
+    if (apiBaseUrl) {
+      _cachedBaseUrl = apiBaseUrl
+      return apiBaseUrl
     }
-    return apiBaseUrl
-  } catch (error) {
-    if (process.dev) {
-      console.error('Error accessing runtime config:', error)
-    }
-    // Fallback for SSR or when runtime config is not available
-    return 'http://localhost:5000'
+  } catch {
+    // useRuntimeConfig() not available — use cached or fallback
   }
+  return _cachedBaseUrl || 'http://localhost:5000'
 }
 
-// Create fetch instance with base configuration (lazy initialization)
+// Cached $fetch client — reuse the same instance
+let _cachedClient: ReturnType<typeof $fetch.create> | null = null
+
+// Create or return cached fetch instance with base configuration
 const createApiClient = () => {
   const baseURL = getApiBaseUrl()
-  return $fetch.create({
+  if (_cachedClient && _cachedBaseUrl === baseURL) {
+    return _cachedClient
+  }
+  _cachedClient = $fetch.create({
     baseURL,
     headers: {
       'Content-Type': 'application/json'
     }
   })
+  return _cachedClient
 }
 
 // Lazy getter for API client
@@ -269,6 +274,9 @@ export default publicApi
 
 // Main composable function for public API
 export const usePublicApi = () => {
+  // Eagerly resolve and cache the API base URL while we're in the Nuxt setup context
+  getApiBaseUrl()
+
   return {
     // Public endpoints
     getLandingContent: publicApi.getLandingContent,
