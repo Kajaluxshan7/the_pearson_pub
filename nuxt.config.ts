@@ -1,6 +1,6 @@
 export default defineNuxtConfig({
   devtools: { enabled: false },
-  ssr: true, // Ensure SSR is enabled for production
+  ssr: true,
   sourcemap: {
     server: false,
     client: false
@@ -11,56 +11,34 @@ export default defineNuxtConfig({
     { path: '~/features/stories/components', pathPrefix: false }
   ],
 
-  // Fix router warnings and dev issues
   router: {
     options: {
-      strict: false, // Allow trailing slashes
-      sensitive: false // Case insensitive routes
+      strict: false,
+      sensitive: false
     }
   },
 
-  // Vite configuration for development
   vite: {
-    plugins: [
-      {
-        name: 'suppress-nuxt-manifest-errors',
-        configResolved() {
-          const originalOnwarn = this.onwarn || (() => {})
-          this.onwarn = (warning, warn) => {
-            // Suppress #app-manifest warnings - it's dead code in development
-            if (warning.message?.includes('#app-manifest') || warning.id?.includes('manifest.js')) {
-              return
-            }
-            originalOnwarn.call(this, warning, warn)
-          }
-        }
-      }
-    ],
     server: {
       hmr: {
-        port: 24678 // Use a specific port for HMR to avoid conflicts
+        port: 24678
       },
       fs: {
-        strict: false // Allow serving files outside of root
+        strict: false
       }
     },
-    define: {
-      // Remove React-specific references that are causing router warnings
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
-    },
-    // Better error overlay handling
     clearScreen: false,
     build: {
-      sourcemap: false, // Disable source maps in production to save memory
+      sourcemap: false,
       cssCodeSplit: true,
+      // Reduce chunk size for faster loading
+      chunkSizeWarningLimit: 600,
       rollupOptions: {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
-              // OPTIMIZATION: Don't bundle GSAP in vendor - it's dynamically imported
-              // if (id.includes("gsap")) return "gsap";
-              if (id.includes('@heroicons')) {
-                return 'heroicons'
+              if (id.includes('@nuxt/ui') || id.includes('@headlessui') || id.includes('@heroicons')) {
+                return 'ui'
               }
               if (id.includes('@vueuse')) {
                 return 'vueuse'
@@ -76,8 +54,7 @@ export default defineNuxtConfig({
     },
     optimizeDeps: {
       include: ['luxon'],
-      // OPTIMIZATION: Exclude GSAP since it's now lazy loaded
-      exclude: ['gsap', '#app-manifest'] // Defer heavy animation libs and suppress virtual module warnings
+      exclude: ['gsap', '#app-manifest']
     }
   },
 
@@ -98,9 +75,6 @@ export default defineNuxtConfig({
     }
   },
 
-  // Performance optimizations
-  // Nitro configuration. Make storage driver conditional so we don't import
-  // optional drivers (which can trigger bundler warnings) unless Redis is configured.
   nitro: (() => {
     const redisUrl = process.env.NUXT_REDIS_URL || process.env.REDIS_URL || ''
     const base: any = {
@@ -111,22 +85,19 @@ export default defineNuxtConfig({
         routes: ['/sitemap.xml', '/robots.txt', '/offline'],
         failOnError: false
       },
-      // Improve production performance
       experimental: {
         wasm: true
       },
-      // Serve static files directly, don't route through Vue Router
       publicAssets: [
         {
           baseURL: '/',
           dir: 'public',
-          maxAge: 0 // No cache for sw.js
+          maxAge: 0
         }
       ]
     }
 
     if (redisUrl) {
-      // Only configure Redis storage when a URL is provided (production)
       base.storage = {
         redis: {
           driver: 'redis',
@@ -138,12 +109,10 @@ export default defineNuxtConfig({
     return base
   })(),
 
-  // Route-based caching - improved for better performance
   routeRules: {
     '/': {
       prerender: true,
       headers: { 'cache-control': 's-maxage=60' },
-      // Enable client-side hydration
       isr: false
     },
     '/about': {
@@ -155,7 +124,7 @@ export default defineNuxtConfig({
       headers: { 'cache-control': 's-maxage=3600' }
     },
     '/menu': {
-      isr: 300, // ISR for dynamic content
+      isr: 300,
       headers: { 'cache-control': 's-maxage=300' }
     },
     '/events': {
@@ -167,8 +136,8 @@ export default defineNuxtConfig({
       headers: { 'cache-control': 's-maxage=3600' }
     },
     '/api/**': { headers: { 'cache-control': 'max-age=300' } },
-    '/images/**': { headers: { 'cache-control': 'max-age=31536000' } },
-    // Service worker and PWA files - serve as static files, don't route through Vue Router
+    '/images/**': { headers: { 'cache-control': 'max-age=31536000, immutable' } },
+    '/_nuxt/**': { headers: { 'cache-control': 'max-age=31536000, immutable' } },
     '/sw.js': {
       headers: {
         'cache-control': 'public, max-age=0, must-revalidate',
@@ -192,7 +161,6 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/ui',
     '@nuxt/image',
-    // '@nuxtjs/color-mode' is already installed by @nuxt/ui internally — do not list it separately
     '@nuxtjs/sitemap',
     '@nuxtjs/google-fonts'
   ],
@@ -213,32 +181,6 @@ export default defineNuxtConfig({
           rel: 'preconnect',
           href: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
         },
-        // DNS prefetch for Google Fonts
-        {
-          rel: 'dns-prefetch',
-          href: 'https://fonts.googleapis.com'
-        },
-        {
-          rel: 'preconnect',
-          href: 'https://fonts.googleapis.com',
-          crossorigin: 'anonymous'
-        },
-        {
-          rel: 'preconnect',
-          href: 'https://fonts.gstatic.com',
-          crossorigin: 'anonymous'
-        },
-        // Preload critical fonts only (400, 600 weights)
-        {
-          rel: 'preload',
-          href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap',
-          as: 'style'
-        },
-        {
-          rel: 'preload',
-          href: 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&display=swap',
-          as: 'style'
-        },
         // Preload hero background image for better LCP
         {
           rel: 'preload',
@@ -254,10 +196,10 @@ export default defineNuxtConfig({
       ]
     }
   },
-  // Enhanced image optimization
+
   image: {
     provider: 'ipx',
-    quality: 85,
+    quality: 80,
     format: ['webp', 'avif'],
     screens: {
       xs: 320,
@@ -271,7 +213,7 @@ export default defineNuxtConfig({
       default: {
         modifiers: {
           format: 'webp',
-          quality: 85
+          quality: 80
         }
       },
       avatar: {
@@ -285,25 +227,29 @@ export default defineNuxtConfig({
       hero: {
         modifiers: {
           format: 'webp',
-          quality: 90,
+          quality: 85,
           width: 1920,
           height: 1080
         }
       }
     }
   },
-  // Configure google fonts module to ensure efficient font loading
+
+  // Google fonts - download locally instead of loading from CDN
   googleFonts: {
     families: {
       Inter: [400, 600, 700],
       Cinzel: [400, 600]
     },
+    download: true,
+    base64: false,
+    fontsDir: 'fonts',
+    stylePath: 'css/google-fonts.css',
     preconnect: true,
     preload: true,
     display: 'swap'
   },
 
-  // SEO configuration
   site: {
     url: process.env.NUXT_PUBLIC_SITE_URL || 'https://thepearsonpubwhitby.ca',
     name: 'The Pearson Pub',
@@ -323,12 +269,11 @@ export default defineNuxtConfig({
   },
 
   build: {
-    // Removed unused '@heroicons/vue' from transpile list. Icons are provided by `@nuxtjs/icon` via Iconify and `@nuxt/ui`.
     transpile: []
   },
 
-  // Font optimization and main styles
-  css: ['@/assets/css/fonts.css', '@/assets/styles/index.css'],
+  // Remove empty fonts.css - only need the main stylesheet
+  css: ['@/assets/styles/index.css'],
 
   postcss: {
     plugins: {
