@@ -5,7 +5,7 @@
       class="relative py-12 px-4 text-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white border-b border-gray-200 dark:border-gray-700"
     >
       <!-- Background overlay for light mode -->
-      <div class="absolute inset-0 bg-white dark:bg-transparent"></div>
+      <div class="absolute inset-0 bg-white dark:bg-transparent" />
       <div class="relative max-w-4xl mx-auto z-10">
         <!-- Logo -->
         <div class="mb-6">
@@ -30,9 +30,7 @@
           The
           <span class="text-yellow-600 dark:text-yellow-400">Pearson Pub</span>
         </h1>
-        <p
-          class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-light"
-        >
+        <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 font-light">
           A traditional pub atmosphere with modern amenities in Whitby
         </p>
       </div>
@@ -47,7 +45,7 @@
             class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase"
             >Get in Touch</span
           >
-          <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2"></div>
+          <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2" />
         </div>
         <h2
           class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
@@ -57,8 +55,8 @@
           <span class="text-yellow-600 dark:text-yellow-400">Pub</span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          We're here to serve you with great food, drinks, and hospitality.
-          Here's how to reach us and visit our location.
+          We're here to serve you with great food, drinks, and hospitality. Here's how to reach us
+          and visit our location.
         </p>
       </div>
 
@@ -71,9 +69,7 @@
             <div class="p-2 bg-yellow-600/20 rounded-lg">
               <UIcon name="i-heroicons-phone" class="w-6 h-6 text-yellow-400" />
             </div>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-              Contact Us
-            </h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Contact Us</h2>
           </div>
           <div class="space-y-3 text-gray-700 dark:text-gray-300">
             <div class="flex items-center gap-3">
@@ -108,9 +104,7 @@
             <div class="p-2 bg-yellow-600/20 rounded-lg">
               <UIcon name="i-heroicons-clock" class="w-6 h-6 text-yellow-400" />
             </div>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-              Hours
-            </h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Hours</h2>
           </div>
           <div class="space-y-2 text-gray-700 dark:text-gray-300">
             <div class="flex justify-between">
@@ -134,18 +128,13 @@
         >
           <div class="flex items-center gap-3 mb-4">
             <div class="p-2 bg-yellow-600/20 rounded-lg">
-              <UIcon
-                name="i-heroicons-information-circle"
-                class="w-6 h-6 text-yellow-400"
-              />
+              <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-yellow-400" />
             </div>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-              About
-            </h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">About</h2>
           </div>
           <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-            A traditional pub atmosphere with modern amenities, offering great
-            food, drinks, and entertainment in the heart of Whitby.
+            A traditional pub atmosphere with modern amenities, offering great food, drinks, and
+            entertainment in the heart of Whitby.
           </p>
         </div>
       </div>
@@ -154,20 +143,13 @@
       <div
         class="mt-12 text-center bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-2xl p-8 shadow-lg"
       >
-        <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-          Visit Us Today!
-        </h2>
+        <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Visit Us Today!</h2>
         <p class="text-gray-700 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
-          Experience the perfect blend of traditional pub atmosphere and modern
-          dining. Join us for great food, drinks, and memorable moments.
+          Experience the perfect blend of traditional pub atmosphere and modern dining. Join us for
+          great food, drinks, and memorable moments.
         </p>
         <div class="flex flex-wrap justify-center gap-4">
-          <UButton
-            color="yellow"
-            size="lg"
-            @click="makeCall"
-            class="font-semibold"
-          >
+          <UButton color="yellow" size="lg" class="font-semibold" @click="makeCall">
             <UIcon name="i-heroicons-phone" class="w-5 h-5 mr-2" />
             Call for Reservations
           </UButton>
@@ -175,8 +157,8 @@
             color="gray"
             variant="outline"
             size="lg"
-            @click="getDirections"
             class="font-semibold"
+            @click="getDirections"
           >
             <UIcon name="i-heroicons-map-pin" class="w-5 h-5 mr-2" />
             Get Directions
@@ -188,12 +170,8 @@
     <!-- Maps Section -->
     <section class="max-w-7xl mx-auto px-4 pb-16">
       <div class="text-center mb-8">
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Find Us
-        </h3>
-        <p class="text-gray-600 dark:text-gray-300">
-          Located in the heart of Whitby
-        </p>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Find Us</h3>
+        <p class="text-gray-600 dark:text-gray-300">Located in the heart of Whitby</p>
       </div>
       <div
         class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-xl border border-gray-200 dark:border-gray-700"
@@ -209,7 +187,7 @@
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
             title="The Pearson Pub Location"
-          ></iframe>
+          />
         </div>
       </div>
     </section>
@@ -217,41 +195,15 @@
 </template>
 
 <script setup lang="ts">
-import { useConnectivity } from "@/composables/useConnectivity";
-
-const logoError = ref(false);
-const isRetrying = ref(false);
-const router = useRouter();
-const { checkConnectivity } = useConnectivity();
+const logoError = ref(false)
 
 const makeCall = () => {
-  window.location.href = "tel:+19054305699";
-};
+  window.location.href = 'tel:+19054305699'
+}
 
 const getDirections = () => {
-  const address = "101 Mary Street, Whitby, ON L1N 2R4";
-  const encodedAddress = encodeURIComponent(address);
-  window.open(
-    `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`,
-    "_blank"
-  );
-};
-
-const retryConnection = async () => {
-  isRetrying.value = true;
-
-  try {
-    const isConnected = await checkConnectivity();
-    if (isConnected) {
-      router.push("/");
-    } else {
-      // Show a toast or notification that connection is still unavailable
-      console.log("Connection still unavailable");
-    }
-  } catch (error) {
-    console.error("Error checking connectivity:", error);
-  } finally {
-    isRetrying.value = false;
-  }
-};
+  const address = '101 Mary Street, Whitby, ON L1N 2R4'
+  const encodedAddress = encodeURIComponent(address)
+  window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank')
+}
 </script>

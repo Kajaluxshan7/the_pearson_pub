@@ -11,13 +11,13 @@
         fetchpriority="high"
         @error="handleImageError"
       />
-      <div class="absolute inset-0 bg-black/60"></div>
+      <div class="absolute inset-0 bg-black/60" />
     </div>
     <div
       class="container mx-auto px-4 relative z-10 text-center"
       :class="{
         'opacity-100 translate-y-0': isVisible,
-        'opacity-0 translate-y-8': !isVisible,
+        'opacity-0 translate-y-8': !isVisible
       }"
       style="transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1)"
     >
@@ -42,9 +42,7 @@
         </p>
 
         <!-- Action Buttons -->
-        <div
-          class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16"
-        >
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
           <UButton
             to="/menu"
             color="yellow"
@@ -70,22 +68,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted } from 'vue'
 
-const isVisible = ref(false);
+const isVisible = ref(false)
 
 const handleImageError = (event: Event) => {
   // Log error in development only
   if (process.dev) {
-    console.error('Hero image failed to load:', event);
+    console.error('Hero image failed to load:', event)
   }
-};
+}
 
 onMounted(() => {
   setTimeout(() => {
-    isVisible.value = true;
-  }, 100);
-});
+    isVisible.value = true
+  }, 100)
+})
 </script>
 
 <style scoped>

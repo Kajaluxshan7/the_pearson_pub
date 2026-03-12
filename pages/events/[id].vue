@@ -4,7 +4,7 @@
     <!-- Loading State -->
     <div v-if="pending" class="flex justify-center items-center min-h-[400px]">
       <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
         <p class="text-gray-600">Loading event details...</p>
       </div>
     </div>
@@ -13,7 +13,10 @@
     <div v-else-if="error" class="text-center py-12">
       <h1 class="text-2xl font-bold text-red-600 mb-4">Event Not Found</h1>
       <p class="text-gray-600 mb-6">Sorry, we couldn't find the event you're looking for.</p>
-      <NuxtLink to="/events" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+      <NuxtLink
+        to="/events"
+        class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+      >
         <UIcon name="i-heroicons-arrow-left" class="mr-2" />
         Back to Events
       </NuxtLink>
@@ -23,9 +26,9 @@
     <div v-else-if="event" class="max-w-4xl mx-auto">
       <!-- Breadcrumb -->
       <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-6">
-        <NuxtLink to="/" class="hover:text-primary">Home</NuxtLink>
+        <NuxtLink to="/" class="hover:text-primary"> Home </NuxtLink>
         <UIcon name="i-heroicons-chevron-right" class="h-4 w-4" />
-        <NuxtLink to="/events" class="hover:text-primary">Events</NuxtLink>
+        <NuxtLink to="/events" class="hover:text-primary"> Events </NuxtLink>
         <UIcon name="i-heroicons-chevron-right" class="h-4 w-4" />
         <span class="text-gray-900">{{ event.title }}</span>
       </nav>
@@ -36,7 +39,7 @@
           <!-- Main Image (16:9) -->
           <div class="lg:w-2/3 flex flex-col gap-4">
             <div class="aspect-video relative rounded-lg overflow-hidden bg-gray-100">
-              <img 
+              <img
                 v-if="event.images && event.images.length > 0"
                 :src="event.images[activeImageIndex]"
                 :alt="event.title"
@@ -47,31 +50,47 @@
                 <UIcon name="i-heroicons-photo" class="h-16 w-16 text-gray-400" />
               </div>
               <!-- Gallery Navigation -->
-              <button v-if="event.images && event.images.length > 1 && activeImageIndex > 0"
-                @click="activeImageIndex = activeImageIndex - 1"
+              <button
+                v-if="event.images && event.images.length > 1 && activeImageIndex > 0"
                 class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow hover:bg-yellow-100 transition"
                 aria-label="Previous image"
+                @click="activeImageIndex = activeImageIndex - 1"
               >
                 <UIcon name="i-heroicons-chevron-left" class="h-5 w-5 text-gray-700" />
               </button>
-              <button v-if="event.images && event.images.length > 1 && activeImageIndex < event.images.length - 1"
-                @click="activeImageIndex = activeImageIndex + 1"
+              <button
+                v-if="
+                  event.images &&
+                  event.images.length > 1 &&
+                  activeImageIndex < event.images.length - 1
+                "
                 class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow hover:bg-yellow-100 transition"
                 aria-label="Next image"
+                @click="activeImageIndex = activeImageIndex + 1"
               >
                 <UIcon name="i-heroicons-chevron-right" class="h-5 w-5 text-gray-700" />
               </button>
             </div>
             <!-- Thumbnails (4:5 ratio, max 5) -->
-            <div v-if="event.images && event.images.length > 1" class="flex gap-2 justify-center mt-2">
-              <div v-for="(img, idx) in event.images.slice(0, 5)" :key="img" class="aspect-[4/5] w-16 rounded-lg overflow-hidden border-2 transition-all duration-200"
+            <div
+              v-if="event.images && event.images.length > 1"
+              class="flex gap-2 justify-center mt-2"
+            >
+              <div
+                v-for="(img, idx) in event.images.slice(0, 5)"
+                :key="img"
+                class="aspect-[4/5] w-16 rounded-lg overflow-hidden border-2 transition-all duration-200"
                 :class="activeImageIndex === idx ? 'border-yellow-500' : 'border-gray-200'"
-                @click="activeImageIndex = idx"
                 tabindex="0"
                 role="button"
                 aria-label="View image"
+                @click="activeImageIndex = idx"
               >
-                <img :src="img" :alt="event.title + ' thumbnail ' + (idx+1)" class="w-full h-full object-cover" />
+                <img
+                  :src="img"
+                  :alt="event.title + ' thumbnail ' + (idx + 1)"
+                  class="w-full h-full object-cover"
+                />
               </div>
             </div>
           </div>
@@ -79,15 +98,20 @@
           <!-- Event Info -->
           <div class="lg:w-1/3 space-y-4">
             <div>
-              <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">{{ event.title }}</h1>
+              <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+                {{ event.title }}
+              </h1>
               <div class="flex items-center space-x-2">
-                <span 
+                <span
                   class="px-3 py-1 rounded-full text-sm font-medium"
                   :class="getBadgeClass(event.category)"
                 >
                   {{ event.category }}
                 </span>
-                <span v-if="event.featured" class="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                <span
+                  v-if="event.featured"
+                  class="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800"
+                >
                   Featured
                 </span>
               </div>
@@ -99,8 +123,12 @@
               <div class="flex items-center space-x-3">
                 <UIcon name="i-heroicons-calendar-days" class="h-5 w-5 text-gray-400" />
                 <div>
-                  <p class="font-medium text-gray-900">{{ formatEventDate(event.date || event.startDate || '') }}</p>
-                  <p class="text-sm text-gray-600">{{ formatEventDay(event.date || event.startDate || '') }}</p>
+                  <p class="font-medium text-gray-900">
+                    {{ formatEventDate(event.date || event.startDate || '') }}
+                  </p>
+                  <p class="text-sm text-gray-600">
+                    {{ formatEventDay(event.date || event.startDate || '') }}
+                  </p>
                 </div>
               </div>
 
@@ -111,7 +139,10 @@
               </div>
 
               <!-- Price -->
-              <div v-if="event.price && typeof event.price === 'object'" class="flex items-center space-x-3">
+              <div
+                v-if="event.price && typeof event.price === 'object'"
+                class="flex items-center space-x-3"
+              >
                 <UIcon name="i-heroicons-currency-dollar" class="h-5 w-5 text-gray-400" />
                 <span class="text-gray-900">
                   {{ event.price.general === 0 ? 'Free' : `$${event.price.general}` }}
@@ -127,9 +158,9 @@
 
             <!-- Share Button -->
             <div class="pt-4">
-              <button 
-                @click="shareEvent"
+              <button
                 class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                @click="shareEvent"
               >
                 <UIcon name="i-heroicons-share" class="h-4 w-4" />
                 <span>Share Event</span>
@@ -143,7 +174,9 @@
       <div v-if="event.description" class="bg-white rounded-xl shadow-sm p-6 mb-8">
         <h2 class="text-xl font-bold text-gray-900 mb-4">About This Event</h2>
         <div class="prose prose-gray max-w-none">
-          <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ event.description }}</p>
+          <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">
+            {{ event.description }}
+          </p>
         </div>
       </div>
     </div>
@@ -151,93 +184,101 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useLandingPageData } from '~/composables/useLandingPageData';
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useLandingPageData } from '~/composables/useLandingPageData'
 
-const route = useRoute();
-const router = useRouter();
-const { allEvents, error, isLoading } = useLandingPageData();
+const route = useRoute()
+const router = useRouter()
+const { allEvents, error, isLoading } = useLandingPageData()
 
-const activeImageIndex = ref(0);
-const pending = computed(() => isLoading.value);
+const activeImageIndex = ref(0)
+const pending = computed(() => isLoading.value)
 
 const event = computed(() => {
-  if (!allEvents.value) return null;
-  let id = route.params.id;
-  if (Array.isArray(id)) id = id[0];
-  return allEvents.value.find(e => String(e.id) === String(id));
-});
+  if (!allEvents.value) {
+    return null
+  }
+  let id = route.params.id
+  if (Array.isArray(id)) {
+    id = id[0]
+  }
+  return allEvents.value.find(e => String(e.id) === String(id))
+})
 
 const getBadgeClass = (category: string) => {
   const classes: Record<string, string> = {
     'Live Music': 'bg-purple-100 text-purple-800',
     'Special Event': 'bg-blue-100 text-blue-800',
-    'Sports': 'bg-green-100 text-green-800',
-    'Trivia': 'bg-orange-100 text-orange-800',
-    'Karaoke': 'bg-pink-100 text-pink-800',
+    Sports: 'bg-green-100 text-green-800',
+    Trivia: 'bg-orange-100 text-orange-800',
+    Karaoke: 'bg-pink-100 text-pink-800',
     'Food Special': 'bg-red-100 text-red-800',
-    'music': 'bg-purple-100 text-purple-800',
-    'entertainment': 'bg-blue-100 text-blue-800',
-    'food': 'bg-red-100 text-red-800',
-  };
-  return classes[category] || 'bg-gray-100 text-gray-800';
-};
+    music: 'bg-purple-100 text-purple-800',
+    entertainment: 'bg-blue-100 text-blue-800',
+    food: 'bg-red-100 text-red-800'
+  }
+  return classes[category] || 'bg-gray-100 text-gray-800'
+}
 
 const formatEventDate = (dateString: string) => {
   try {
-    const date = new Date(dateString);
+    const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric',
-    });
+      day: 'numeric'
+    })
   } catch (error) {
-    return dateString;
+    return dateString
   }
-};
+}
 
 const formatEventDay = (dateString: string) => {
   try {
-    const date = new Date(dateString);
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const date = new Date(dateString)
+    const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
     if (date.toDateString() === today.toDateString()) {
-      return 'Today';
+      return 'Today'
     } else if (date.toDateString() === tomorrow.toDateString()) {
-      return 'Tomorrow';
+      return 'Tomorrow'
     }
-    return '';
+    return ''
   } catch (error) {
-    return '';
+    return ''
   }
-};
+}
 
 const handleImageError = (event: Event) => {
-  const target = event.target as HTMLImageElement;
-  if (target) target.style.display = 'none';
-};
+  const target = event.target as HTMLImageElement
+  if (target) {
+    target.style.display = 'none'
+  }
+}
 
 const shareEvent = async () => {
-  if (!event.value) return;
+  if (!event.value) {
+    return
+  }
   const shareData = {
     title: event.value.title,
     text: event.value.description,
-    url: window.location.href,
-  };
+    url: window.location.href
+  }
   try {
     if (navigator.share) {
-      await navigator.share(shareData);
+      await navigator.share(shareData)
     } else {
-      await navigator.clipboard.writeText(window.location.href);
-      alert('Event link copied to clipboard!');
+      await navigator.clipboard.writeText(window.location.href)
+      alert('Event link copied to clipboard!')
     }
   } catch (error) {
-    console.error('Error sharing:', error);
+    console.error('Error sharing:', error)
   }
-};
+}
 </script>
 
 <style scoped>

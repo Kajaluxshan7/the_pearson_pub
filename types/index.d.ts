@@ -1,9 +1,9 @@
-declare module "#app" {
+declare module '#app' {
   interface NuxtApp {
     $validateForm: (form: Record<string, any>) => {
-      isValid: boolean;
-      errors: Record<string, string>;
-    };
+      isValid: boolean
+      errors: Record<string, string>
+    }
   }
 }
 
@@ -11,4 +11,4 @@ declare module "#app" {
 export * from './events'
 export * from './menu'
 
-export {};
+export {}

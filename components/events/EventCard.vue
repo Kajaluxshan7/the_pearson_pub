@@ -1,17 +1,22 @@
-<template>  <UCard
+<template>
+  <UCard
     class="overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 bg-white dark:bg-gray-800 border-0"
     :class="{ 'lg:max-w-none': isDetailView }"
   >
     <!-- Event Image Carousel -->
     <template #header>
-      <div class="relative overflow-hidden">        <template v-if="event.images && event.images.length > 1">
+      <div class="relative overflow-hidden">
+        <template v-if="event.images && event.images.length > 1">
           <div class="relative w-full" :class="isDetailView ? 'h-80 lg:h-96' : 'h-64 lg:h-80'">
             <NuxtImg
               v-for="(img, idx) in event.images"
-              :key="img"
               v-show="carouselIndex === idx"
+              :key="img"
               :src="img"
-              :class="['w-full object-cover absolute top-0 left-0 transition-opacity duration-500', isDetailView ? 'h-80 lg:h-96' : 'h-64 lg:h-80']"
+              :class="[
+                'w-full object-cover absolute top-0 left-0 transition-opacity duration-500',
+                isDetailView ? 'h-80 lg:h-96' : 'h-64 lg:h-80'
+              ]"
               :alt="event.title + ' image ' + (idx + 1)"
               format="webp"
               quality="80"
@@ -19,36 +24,31 @@
             <!-- Carousel Controls -->
             <button
               v-if="event.images.length > 1"
-              @click="previousImage"
               class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all"
+              @click="previousImage"
             >
               <UIcon name="i-heroicons-chevron-left" class="w-5 h-5" />
             </button>
             <button
               v-if="event.images.length > 1"
-              @click="nextImage"
               class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all"
+              @click="nextImage"
             >
               <UIcon name="i-heroicons-chevron-right" class="w-5 h-5" />
             </button>
             <!-- Carousel Indicators -->
-            <div
-              class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2"
-            >
+            <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2">
               <span
                 v-for="(img, idx) in event.images"
                 :key="idx"
                 class="w-2 h-2 rounded-full cursor-pointer transition-all"
-                :class="
-                  carouselIndex === idx
-                    ? 'bg-yellow-500'
-                    : 'bg-gray-300 hover:bg-gray-400'
-                "
+                :class="carouselIndex === idx ? 'bg-yellow-500' : 'bg-gray-300 hover:bg-gray-400'"
                 @click="carouselIndex = idx"
               />
             </div>
           </div>
-        </template>        <template v-else>
+        </template>
+        <template v-else>
           <NuxtImg
             :src="event.image || '/images/entertainment/music.jpg'"
             :alt="event.title"
@@ -60,33 +60,18 @@
 
         <!-- Event Badges -->
         <div class="absolute top-4 left-4 flex flex-col gap-2">
-          <UBadge
-            v-if="event.featured"
-            color="yellow"
-            variant="solid"
-            class="font-semibold"
-          >
+          <UBadge v-if="event.featured" color="yellow" variant="solid" class="font-semibold">
             Featured
           </UBadge>
-          <UBadge
-            :color="getStatusColor(event.status)"
-            variant="solid"
-            class="font-semibold"
-          >
+          <UBadge :color="getStatusColor(event.status)" variant="solid" class="font-semibold">
             {{ event.status.charAt(0).toUpperCase() + event.status.slice(1) }}
           </UBadge>
         </div>
 
         <!-- Category Badge -->
         <div class="absolute top-4 right-4">
-          <UBadge
-            :color="getCategoryColor(event.category)"
-            variant="subtle"
-            class="font-semibold"
-          >
-            {{
-              event.category.charAt(0).toUpperCase() + event.category.slice(1)
-            }}
+          <UBadge :color="getCategoryColor(event.category)" variant="subtle" class="font-semibold">
+            {{ event.category.charAt(0).toUpperCase() + event.category.slice(1) }}
           </UBadge>
         </div>
 
@@ -96,11 +81,7 @@
           class="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full"
         >
           <span class="text-sm font-semibold">
-            From ${{
-              Math.min(
-                ...Object.values(event.price).filter((p) => p !== undefined)
-              )
-            }}
+            From ${{ Math.min(...Object.values(event.price).filter(p => p !== undefined)) }}
           </span>
         </div>
       </div>
@@ -109,9 +90,7 @@
     <div class="p-6 space-y-6" :class="{ 'lg:p-8': isDetailView }">
       <!-- Event Header -->
       <div class="space-y-4">
-        <h1
-          class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white"
-        >
+        <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
           {{ event.title }}
         </h1>
 
@@ -133,10 +112,7 @@
             <span class="font-medium">{{ event.time }}</span>
             <span v-if="event.endTime" class="ml-2">- {{ event.endTime }}</span>
           </div>
-          <div
-            v-if="event.location"
-            class="flex items-center text-gray-600 dark:text-gray-300"
-          >
+          <div v-if="event.location" class="flex items-center text-gray-600 dark:text-gray-300">
             <UIcon
               name="i-heroicons-map-pin"
               class="w-5 h-5 mr-2 text-yellow-600 dark:text-yellow-400"
@@ -162,18 +138,12 @@
               v-for="star in 5"
               :key="star"
               name="i-heroicons-star-solid"
-              :class="
-                star <= Math.floor(event.averageRating)
-                  ? 'text-yellow-400'
-                  : 'text-gray-300'
-              "
+              :class="star <= Math.floor(event.averageRating) ? 'text-yellow-400' : 'text-gray-300'"
               class="w-5 h-5"
             />
           </div>
           <span class="text-sm text-gray-600 dark:text-gray-300">
-            {{ event.averageRating.toFixed(1) }} ({{
-              event.totalReviews
-            }}
+            {{ event.averageRating.toFixed(1) }} ({{ event.totalReviews }}
             reviews)
           </span>
         </div>
@@ -187,30 +157,23 @@
 
         <!-- Full Description (if available) -->
         <div v-if="event.fullDescription && showFullDescription">
-          <div
-            class="prose prose-sm max-w-none text-gray-600 dark:text-gray-300"
-          >
-            <div v-html="formatDescription(event.fullDescription)"></div>
+          <div class="prose prose-sm max-w-none text-gray-600 dark:text-gray-300">
+            <div v-html="formatDescription(event.fullDescription)" />
           </div>
         </div>
 
         <button
           v-if="event.fullDescription"
-          @click="showFullDescription = !showFullDescription"
           class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 font-medium text-sm transition-colors"
+          @click="showFullDescription = !showFullDescription"
         >
-          {{ showFullDescription ? "Show Less" : "Read More" }}
+          {{ showFullDescription ? 'Show Less' : 'Read More' }}
         </button>
       </div>
 
       <!-- Venue Information -->
-      <div
-        v-if="event.venue"
-        class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2"
-      >
-        <h3 class="font-semibold text-gray-900 dark:text-white">
-          Venue Information
-        </h3>
+      <div v-if="event.venue" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
+        <h3 class="font-semibold text-gray-900 dark:text-white">Venue Information</h3>
         <div class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
           <p><span class="font-medium">Venue:</span> {{ event.venue.name }}</p>
           <p>
@@ -224,10 +187,7 @@
       </div>
 
       <!-- Performers -->
-      <div
-        v-if="event.performers && event.performers.length > 0"
-        class="space-y-3"
-      >
+      <div v-if="event.performers && event.performers.length > 0" class="space-y-3">
         <h3 class="font-semibold text-gray-900 dark:text-white">Performers</h3>
         <div class="flex flex-wrap gap-2">
           <UBadge
@@ -259,10 +219,7 @@
       </div>
 
       <!-- Pricing Information -->
-      <div
-        v-if="event.price"
-        class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 space-y-3"
-      >
+      <div v-if="event.price" class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 space-y-3">
         <h3 class="font-semibold text-gray-900 dark:text-white">Pricing</h3>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div v-if="event.price.general" class="text-center">
@@ -296,29 +253,17 @@
         v-if="event.specialRequirements && event.specialRequirements.length > 0"
         class="space-y-3"
       >
-        <h3 class="font-semibold text-gray-900 dark:text-white">
-          Important Information
-        </h3>
-        <ul
-          class="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 space-y-1"
-        >
-          <li
-            v-for="requirement in event.specialRequirements"
-            :key="requirement"
-          >
+        <h3 class="font-semibold text-gray-900 dark:text-white">Important Information</h3>
+        <ul class="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 space-y-1">
+          <li v-for="requirement in event.specialRequirements" :key="requirement">
             {{ requirement }}
           </li>
         </ul>
       </div>
 
       <!-- Organizer Information -->
-      <div
-        v-if="event.organizer"
-        class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-3"
-      >
-        <h3 class="font-semibold text-gray-900 dark:text-white">
-          Organized by
-        </h3>
+      <div v-if="event.organizer" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-3">
+        <h3 class="font-semibold text-gray-900 dark:text-white">Organized by</h3>
         <div class="flex items-start gap-3">
           <NuxtImg
             v-if="event.organizer.image"
@@ -330,10 +275,7 @@
             <p class="font-medium text-gray-900 dark:text-white">
               {{ event.organizer.name }}
             </p>
-            <p
-              v-if="event.organizer.description"
-              class="text-sm text-gray-600 dark:text-gray-300"
-            >
+            <p v-if="event.organizer.description" class="text-sm text-gray-600 dark:text-gray-300">
               {{ event.organizer.description }}
             </p>
           </div>
@@ -342,9 +284,7 @@
 
       <!-- Contact Information -->
       <div v-if="event.contactInfo" class="space-y-3">
-        <h3 class="font-semibold text-gray-900 dark:text-white">
-          Contact Information
-        </h3>
+        <h3 class="font-semibold text-gray-900 dark:text-white">Contact Information</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div
             v-if="event.contactInfo.phone"
@@ -381,9 +321,7 @@
 
       <!-- Social Media -->
       <div v-if="event.socialMedia" class="space-y-3">
-        <h3 class="font-semibold text-gray-900 dark:text-white">
-          Follow this Event
-        </h3>
+        <h3 class="font-semibold text-gray-900 dark:text-white">Follow this Event</h3>
         <div class="flex gap-3">
           <a
             v-if="event.socialMedia.facebook"
@@ -414,15 +352,10 @@
 
       <!-- Reviews Section -->
       <div v-if="event.reviews && event.reviews.length > 0" class="space-y-4">
-        <h3 class="font-semibold text-gray-900 dark:text-white">
-          Recent Reviews
-        </h3>
+        <h3 class="font-semibold text-gray-900 dark:text-white">Recent Reviews</h3>
         <div class="space-y-4">
           <div
-            v-for="review in event.reviews.slice(
-              0,
-              showAllReviews ? event.reviews.length : 3
-            )"
+            v-for="review in event.reviews.slice(0, showAllReviews ? event.reviews.length : 3)"
             :key="review.id"
             class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4"
           >
@@ -436,11 +369,7 @@
                     v-for="star in 5"
                     :key="star"
                     name="i-heroicons-star-solid"
-                    :class="
-                      star <= review.rating
-                        ? 'text-yellow-400'
-                        : 'text-gray-300'
-                    "
+                    :class="star <= review.rating ? 'text-yellow-400' : 'text-gray-300'"
                     class="w-4 h-4"
                   />
                 </div>
@@ -454,14 +383,10 @@
 
           <button
             v-if="event.reviews.length > 3"
-            @click="showAllReviews = !showAllReviews"
             class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 font-medium text-sm transition-colors"
+            @click="showAllReviews = !showAllReviews"
           >
-            {{
-              showAllReviews
-                ? "Show Less Reviews"
-                : `Show All ${event.reviews.length} Reviews`
-            }}
+            {{ showAllReviews ? 'Show Less Reviews' : `Show All ${event.reviews.length} Reviews` }}
           </button>
         </div>
       </div>
@@ -492,13 +417,7 @@
           Book Now
         </UButton>
 
-        <UButton
-          color="gray"
-          variant="outline"
-          size="lg"
-          class="sm:w-auto"
-          @click="handleShare"
-        >
+        <UButton color="gray" variant="outline" size="lg" class="sm:w-auto" @click="handleShare">
           <UIcon name="i-heroicons-share" class="w-4 h-4 mr-2" />
           Share
         </UButton>
@@ -514,7 +433,7 @@
             :name="isFavorite ? 'i-heroicons-heart-solid' : 'i-heroicons-heart'"
             class="w-4 h-4 mr-2"
           />
-          {{ isFavorite ? "Favorited" : "Favorite" }}
+          {{ isFavorite ? 'Favorited' : 'Favorite' }}
         </UButton>
       </div>
     </div>
@@ -522,120 +441,118 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from "vue";
-import type { Event } from "~/types/events";
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import type { Event } from '~/types/events'
 
 const props = defineProps<{
-  event: Event;
-  isDetailView?: boolean;
-}>();
+  event: Event
+  isDetailView?: boolean
+}>()
 
-const isDetailView = computed(() => props.isDetailView || false);
+const isDetailView = computed(() => props.isDetailView || false)
 
 // Carousel functionality
-const carouselIndex = ref(0);
-const showFullDescription = ref(false);
-const showAllReviews = ref(false);
-const isFavorite = ref(false);
-let carouselInterval: NodeJS.Timeout | null = null;
+const carouselIndex = ref(0)
+const showFullDescription = ref(false)
+const showAllReviews = ref(false)
+const isFavorite = ref(false)
+let carouselInterval: NodeJS.Timeout | null = null
 
 const nextImage = () => {
   if (props.event.images && props.event.images.length > 1) {
-    carouselIndex.value = (carouselIndex.value + 1) % props.event.images.length;
+    carouselIndex.value = (carouselIndex.value + 1) % props.event.images.length
   }
-};
+}
 
 const previousImage = () => {
   if (props.event.images && props.event.images.length > 1) {
     carouselIndex.value =
-      carouselIndex.value === 0
-        ? props.event.images.length - 1
-        : carouselIndex.value - 1;
+      carouselIndex.value === 0 ? props.event.images.length - 1 : carouselIndex.value - 1
   }
-};
+}
 
 // Auto-play carousel
 const startCarousel = () => {
   if (props.event.images && props.event.images.length > 1) {
-    carouselInterval = setInterval(nextImage, 4000);
+    carouselInterval = setInterval(nextImage, 4000)
   }
-};
+}
 
 const stopCarousel = () => {
   if (carouselInterval) {
-    clearInterval(carouselInterval);
-    carouselInterval = null;
+    clearInterval(carouselInterval)
+    carouselInterval = null
   }
-};
+}
 
 // Helper functions
 const getStatusColor = (status: string) => {
   switch (status) {
-    case "upcoming":
-      return "green";
-    case "ongoing":
-      return "blue";
-    case "completed":
-      return "gray";
-    case "cancelled":
-      return "red";
+    case 'upcoming':
+      return 'green'
+    case 'current':
+      return 'blue'
+    case 'completed':
+      return 'gray'
+    case 'cancelled':
+      return 'red'
     default:
-      return "gray";
+      return 'gray'
   }
-};
+}
 
 const getCategoryColor = (category: string) => {
   switch (category) {
-    case "music":
-      return "purple";
-    case "quiz":
-      return "blue";
-    case "food":
-      return "orange";
-    case "special":
-      return "pink";
-    case "entertainment":
-      return "indigo";
+    case 'music':
+      return 'purple'
+    case 'quiz':
+      return 'blue'
+    case 'food':
+      return 'orange'
+    case 'special':
+      return 'pink'
+    case 'entertainment':
+      return 'indigo'
     default:
-      return "gray";
+      return 'gray'
   }
-};
+}
 
 const formatDescription = (description: string) => {
-  return description.replace(/\n/g, "<br>");
-};
+  return description.replace(/\n/g, '<br>')
+}
 
 const handleBooking = () => {
   // TODO: Implement booking functionality
-  alert("Booking functionality coming soon!");
-};
+  alert('Booking functionality coming soon!')
+}
 
 const handleShare = () => {
   if (navigator.share) {
     navigator.share({
       title: props.event.title,
       text: props.event.description,
-      url: window.location.href,
-    });
+      url: window.location.href
+    })
   } else {
     // Fallback: copy URL to clipboard
-    navigator.clipboard.writeText(window.location.href);
-    alert("Event URL copied to clipboard!");
+    navigator.clipboard.writeText(window.location.href)
+    alert('Event URL copied to clipboard!')
   }
-};
+}
 
 const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value;
+  isFavorite.value = !isFavorite.value
   // TODO: Implement favorites functionality
-};
+}
 
 onMounted(() => {
-  startCarousel();
-});
+  startCarousel()
+})
 
 onUnmounted(() => {
-  stopCarousel();
-});
+  stopCarousel()
+})
 </script>
 
 <style scoped>
