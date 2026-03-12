@@ -5,11 +5,11 @@
       <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
         <!-- Use NuxtLayout for proper Nuxt 3 structure -->
         <NuxtLayout>
-          <LayoutHeader/>
- <main class="flex-grow">
-          <NuxtPage />
-        </main>
-          <LayoutFooter/>
+          <LayoutHeader />
+          <main class="flex-grow">
+            <NuxtPage />
+          </main>
+          <LayoutFooter />
         </NuxtLayout>
 
         <!-- Scroll to Top Button -->
@@ -32,7 +32,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useColorMode } from '#imports'
-import { useLandingPageData } from '~/composables/useLandingPageData'
 
 // Import header and footer components (adjust paths if needed)
 import LayoutHeader from '~/components/layout/Header.vue'
@@ -40,7 +39,9 @@ import LayoutFooter from '~/components/layout/Footer.vue'
 
 // Set light mode as default
 const colorMode = useColorMode()
-if (colorMode) colorMode.preference = 'light'
+if (colorMode) {
+  colorMode.preference = 'light'
+}
 
 // Scroll position
 const scrollY = ref(0)
@@ -59,22 +60,22 @@ const scrollToTop = () => {
   }
 }
 
-// OPTIMIZATION: Data loading removed from app.vue - handled by individual pages
+// OPTIMIZATION: Data loading is handled by individual pages and composables
 // This prevents loading all data on every page navigation
 
 onMounted(() => {
   // Setup scroll tracking for scroll-to-top button
   if (typeof window !== 'undefined') {
-    window.addEventListener('scroll', updateScroll);
-    updateScroll();
+    window.addEventListener('scroll', updateScroll)
+    updateScroll()
   }
-});
+})
 
 onUnmounted(() => {
   if (typeof window !== 'undefined') {
-    window.removeEventListener('scroll', updateScroll);
+    window.removeEventListener('scroll', updateScroll)
   }
-});
+})
 </script>
 
 <style>

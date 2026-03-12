@@ -2,22 +2,15 @@
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Loading State -->
     <div v-if="pending" class="min-h-screen flex items-center justify-center">
-      <div
-        class="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-500"
-      ></div>
+      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-500" />
     </div>
 
     <!-- Error State -->
-    <div
-      v-else-if="error"
-      class="min-h-screen flex items-center justify-center"
-    >
+    <div v-else-if="error" class="min-h-screen flex items-center justify-center">
       <div class="text-center">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-          Story Not Found
-        </h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Story Not Found</h1>
         <p class="text-gray-600 dark:text-gray-400 mb-6">
-          {{ error.message || "The story you are looking for does not exist." }}
+          {{ error.message || 'The story you are looking for does not exist.' }}
         </p>
         <NuxtLink
           to="/about"
@@ -31,9 +24,7 @@
     <!-- Story Content -->
     <div v-else-if="story" class="min-h-screen">
       <!-- Hero Section with 16:9 Landscape Layout -->
-      <section
-        class="relative h-[40vh] md:h-[50vh] lg:h-[60vh] overflow-hidden"
-      >
+      <section class="relative h-[40vh] md:h-[50vh] lg:h-[60vh] overflow-hidden">
         <!-- Image Container with 16:9 aspect ratio -->
         <div class="absolute inset-0 aspect-video bg-black">
           <NuxtImg
@@ -46,7 +37,7 @@
           />
           <div
             class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
-          ></div>
+          />
         </div>
 
         <!-- Story Title Overlay -->
@@ -60,7 +51,7 @@
               <span
                 class="text-yellow-400 text-sm md:text-base font-semibold uppercase tracking-wide"
               >
-                {{ story.category || "Story" }}
+                {{ story.category || 'Story' }}
               </span>
             </div>
             <h1
@@ -74,7 +65,7 @@
             </p>
             <div class="flex items-center mt-6 text-sm text-gray-300">
               <UIcon name="i-heroicons-calendar" class="w-4 h-4 mr-2" />
-              <span>{{ story.date || "Recently" }}</span>
+              <span>{{ story.date || 'Recently' }}</span>
             </div>
           </div>
         </div>
@@ -96,14 +87,14 @@
           class="absolute top-1/2 left-6 right-6 flex justify-between items-center transform -translate-y-1/2 z-10"
         >
           <button
-            @click="previousImage"
             class="bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm"
+            @click="previousImage"
           >
             <UIcon name="i-heroicons-chevron-left" class="w-6 h-6" />
           </button>
           <button
-            @click="nextImage"
             class="bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm"
+            @click="nextImage"
           >
             <UIcon name="i-heroicons-chevron-right" class="w-6 h-6" />
           </button>
@@ -117,14 +108,10 @@
           <button
             v-for="(_, index) in story.images"
             :key="index"
-            @click="setCurrentImage(index)"
             class="w-3 h-3 rounded-full transition-all duration-300"
-            :class="
-              index === currentImageIndex
-                ? 'bg-yellow-400'
-                : 'bg-white/50 hover:bg-white/70'
-            "
-          ></button>
+            :class="index === currentImageIndex ? 'bg-yellow-400' : 'bg-white/50 hover:bg-white/70'"
+            @click="setCurrentImage(index)"
+          />
         </div>
       </section>
 
@@ -138,11 +125,9 @@
           >
             <div
               v-html="
-                formatStoryContent(
-                  story.fullDescription || story.content || story.description
-                )
+                formatStoryContent(story.fullDescription || story.content || story.description)
               "
-            ></div>
+            />
           </div>
 
           <!-- Fallback if no full content -->
@@ -157,38 +142,26 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
               <!-- Story Meta -->
               <div>
-                <h3
-                  class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
-                >
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   Story Details
                 </h3>
                 <div class="space-y-3">
-                  <div
-                    class="flex items-center text-gray-600 dark:text-gray-400"
-                  >
-                    <UIcon
-                      name="i-heroicons-calendar"
-                      class="w-5 h-5 mr-3 text-yellow-500"
-                    />
-                    <span>{{ story.date || "Recently" }}</span>
+                  <div class="flex items-center text-gray-600 dark:text-gray-400">
+                    <UIcon name="i-heroicons-calendar" class="w-5 h-5 mr-3 text-yellow-500" />
+                    <span>{{ story.date || 'Recently' }}</span>
                   </div>
-                  <div
-                    class="flex items-center text-gray-600 dark:text-gray-400"
-                  >
+                  <div class="flex items-center text-gray-600 dark:text-gray-400">
                     <UIcon
                       :name="story.icon || 'i-heroicons-heart'"
                       class="w-5 h-5 mr-3 text-yellow-500"
                     />
-                    <span>{{ story.category || "Story" }}</span>
+                    <span>{{ story.category || 'Story' }}</span>
                   </div>
                   <div
                     v-if="story.location"
                     class="flex items-center text-gray-600 dark:text-gray-400"
                   >
-                    <UIcon
-                      name="i-heroicons-map-pin"
-                      class="w-5 h-5 mr-3 text-yellow-500"
-                    />
+                    <UIcon name="i-heroicons-map-pin" class="w-5 h-5 mr-3 text-yellow-500" />
                     <span>{{ story.location }}</span>
                   </div>
                 </div>
@@ -196,22 +169,20 @@
 
               <!-- Share Options -->
               <div>
-                <h3
-                  class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
-                >
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   Share This Story
                 </h3>
                 <div class="flex space-x-4">
                   <button
-                    @click="shareStory"
                     class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+                    @click="shareStory"
                   >
                     <UIcon name="i-heroicons-share" class="w-4 h-4" />
                     <span>Share</span>
                   </button>
                   <button
-                    @click="copyLink"
                     class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+                    @click="copyLink"
                   >
                     <UIcon name="i-heroicons-link" class="w-4 h-4" />
                     <span>Copy Link</span>
@@ -229,9 +200,7 @@
         class="py-16 bg-gray-50 dark:bg-gray-900"
       >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2
-            class="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center"
-          >
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
             More Stories
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -252,7 +221,7 @@
                 />
                 <div
                   class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"
-                ></div>
+                />
               </div>
 
               <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
@@ -274,157 +243,157 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed } from 'vue'
+
+// Import the API methods
+import { publicApi } from '~/composables/usePublicApi'
 
 // Meta tags
 useHead({
-  title: "Story - The Pearson Pub",
-  meta: [{ name: "description", content: "Read our story at The Pearson Pub" }],
-});
+  title: 'Story - The Pearson Pub',
+  meta: [{ name: 'description', content: 'Read our story at The Pearson Pub' }]
+})
 
 // Get route and story ID
-const route = useRoute();
-const storyId = route.params.id;
+const route = useRoute()
+const storyId = route.params.id
 
 // Reactive state
-const currentImageIndex = ref(0);
-
-// Import the API methods
-import { publicApi } from '~/composables/usePublicApi';
+const currentImageIndex = ref(0)
 
 // Fetch story data
 const {
   data: story,
   pending,
-  error,
+  error
 } = await useAsyncData(`story-${storyId}`, () => publicApi.getStoryById(storyId as string), {
-  default: () => ({} as any),
-});
+  default: () => ({} as any)
+})
 
 // Fetch related stories
-const { data: relatedStories } = await useFetch("/public-api/stories", {
-  key: "related-stories",
-  transform: (data: any[]) => data.filter((s) => s.id !== storyId).slice(0, 3),
-});
+const { data: relatedStories } = await useFetch('/public-api/stories', {
+  key: 'related-stories',
+  transform: (data: any[]) => data.filter(s => s.id !== storyId).slice(0, 3)
+})
 
 // Update meta tags with story data
-watch(story, (newStory) => {
+watch(story, newStory => {
   if (newStory) {
     useHead({
       title: `${newStory.title} - The Pearson Pub`,
       meta: [
-        { name: "description", content: newStory.description },
+        { name: 'description', content: newStory.description },
         {
-          property: "og:title",
-          content: `${newStory.title} - The Pearson Pub`,
+          property: 'og:title',
+          content: `${newStory.title} - The Pearson Pub`
         },
-        { property: "og:description", content: newStory.description },
-        { property: "og:image", content: getStoryImage(newStory) },
-      ],
-    });
+        { property: 'og:description', content: newStory.description },
+        { property: 'og:image', content: getStoryImage(newStory) }
+      ]
+    })
   }
-});
+})
 
 // Image handling functions
 const getCurrentStoryImage = (story: any) => {
   if (story.images && story.images.length > 0) {
-    return story.images[currentImageIndex.value] || story.images[0];
+    return story.images[currentImageIndex.value] || story.images[0]
   }
-  return story.image || "/images/stories/default.jpg";
-};
+  return story.image || '/images/stories/default.jpg'
+}
 
 const getStoryImage = (story: any) => {
   if (story.images && story.images.length > 0) {
-    return story.images[0];
+    return story.images[0]
   }
-  return story.image || "/images/stories/default.jpg";
-};
+  return story.image || '/images/stories/default.jpg'
+}
 
 const handleImageError = (event: any) => {
-  if (
-    event.target &&
-    event.target.src.indexOf("/images/stories/default.jpg") === -1
-  ) {
-    event.target.src = "/images/stories/default.jpg";
+  if (event.target && !event.target.src.includes('/images/stories/default.jpg')) {
+    event.target.src = '/images/stories/default.jpg'
   }
-};
+}
 
 // Image navigation
 const nextImage = () => {
   if (story.value?.images && story.value.images.length > 1) {
-    currentImageIndex.value =
-      (currentImageIndex.value + 1) % story.value.images.length;
+    currentImageIndex.value = (currentImageIndex.value + 1) % story.value.images.length
   }
-};
+}
 
 const previousImage = () => {
   if (story.value?.images && story.value.images.length > 1) {
     currentImageIndex.value =
-      currentImageIndex.value === 0
-        ? story.value.images.length - 1
-        : currentImageIndex.value - 1;
+      currentImageIndex.value === 0 ? story.value.images.length - 1 : currentImageIndex.value - 1
   }
-};
+}
 
 const setCurrentImage = (index: number) => {
-  currentImageIndex.value = index;
-};
+  currentImageIndex.value = index
+}
 
 // Content formatting
 const formatStoryContent = (content: string) => {
-  if (!content) return "";
+  if (!content) {
+    return ''
+  }
 
   // Convert line breaks to paragraphs
   return content
-    .split("\n\n")
-    .map((paragraph) => `<p class="mb-4">${paragraph.trim()}</p>`)
-    .join("");
-};
+    .split('\n\n')
+    .map(paragraph => `<p class="mb-4">${paragraph.trim()}</p>`)
+    .join('')
+}
 
 // Sharing functions
 const shareStory = async () => {
-  if (!story.value) return;
+  if (!story.value) {
+    return
+  }
 
   const shareData = {
     title: `${story.value.title} - The Pearson Pub`,
     text: story.value.description,
-    url: window.location.href,
-  };
+    url: window.location.href
+  }
 
   try {
-    if (
-      navigator.share &&
-      navigator.canShare &&
-      navigator.canShare(shareData)
-    ) {
-      await navigator.share(shareData);
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      await navigator.share(shareData)
     } else {
-      await copyLink();
+      await copyLink()
     }
   } catch (err) {
-    console.log("Error sharing:", err);
-    await copyLink();
+    if (process.dev) {
+      console.log('Error sharing:', err)
+    }
+    await copyLink()
   }
-};
+}
 
 const copyLink = async () => {
   try {
-    await navigator.clipboard.writeText(window.location.href);
+    await navigator.clipboard.writeText(window.location.href)
     // You could add a toast notification here
-    console.log("Link copied to clipboard!");
+    if (process.dev) {
+      console.log('Link copied to clipboard!')
+    }
   } catch (err) {
-    console.log("Failed to copy link:", err);
+    if (process.dev) {
+      console.log('Failed to copy link:', err)
+    }
   }
-};
+}
 
 // Auto-rotate images if there are multiple
 onMounted(() => {
   if (story.value?.images && story.value.images.length > 1) {
     setInterval(() => {
-      nextImage();
-    }, 5000); // Change image every 5 seconds
+      nextImage()
+    }, 5000) // Change image every 5 seconds
   }
-});
+})
 </script>
 
 <style scoped>

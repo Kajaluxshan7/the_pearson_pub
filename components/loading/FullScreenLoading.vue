@@ -6,19 +6,19 @@
     <div class="absolute inset-0">
       <div
         class="absolute inset-0 bg-gradient-to-r from-yellow-600/10 via-transparent to-yellow-600/10 animate-pulse"
-      ></div>
+      />
       <div
         class="absolute top-1/4 left-1/4 w-32 h-32 bg-yellow-500/5 rounded-full animate-ping"
         style="animation-delay: 0s"
-      ></div>
+      />
       <div
         class="absolute top-3/4 right-1/4 w-24 h-24 bg-yellow-500/5 rounded-full animate-ping"
         style="animation-delay: 1s"
-      ></div>
+      />
       <div
         class="absolute top-1/2 left-3/4 w-16 h-16 bg-yellow-500/5 rounded-full animate-ping"
         style="animation-delay: 2s"
-      ></div>
+      />
     </div>
 
     <!-- Main Loading Content -->
@@ -27,20 +27,16 @@
       <div class="mb-8">
         <div class="relative w-32 h-32 mx-auto mb-6">
           <!-- Outer spinning ring -->
-          <div
-            class="absolute inset-0 rounded-full border-4 border-gray-700 opacity-30"
-          ></div>
+          <div class="absolute inset-0 rounded-full border-4 border-gray-700 opacity-30" />
           <div
             class="absolute inset-0 rounded-full border-4 border-yellow-500 border-t-transparent animate-spin"
-          ></div>
+          />
 
           <!-- Inner spinning ring (counter-clockwise) -->
-          <div
-            class="absolute inset-3 rounded-full border-2 border-gray-600 opacity-20"
-          ></div>
+          <div class="absolute inset-3 rounded-full border-2 border-gray-600 opacity-20" />
           <div
             class="absolute inset-3 rounded-full border-2 border-yellow-400 border-b-transparent animate-spin-reverse"
-          ></div>
+          />
 
           <!-- Logo Container -->
           <div
@@ -85,7 +81,7 @@
           >
             <div
               class="h-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"
-            ></div>
+            />
           </div>
         </div>
       </div>
@@ -104,65 +100,61 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from "vue-router";
-import { useConnectivity } from "@/composables/useConnectivity";
-import { watchEffect } from "vue";
+import { ref, onMounted, onUnmounted } from 'vue'
 
 interface Props {
-  title?: string;
-  subtitle?: string;
-  logoUrl?: string;
-  progress?: number;
-  showProgress?: boolean;
-  showSteps?: boolean;
-  showPreview?: boolean;
-  texts?: string[];
-  steps?: string[];
-  currentStep?: number;
-  subText?: string;
-  error?: string | null;
-  retrying?: boolean;
+  title?: string
+  subtitle?: string
+  logoUrl?: string
+  progress?: number
+  showProgress?: boolean
+  showSteps?: boolean
+  showPreview?: boolean
+  texts?: string[]
+  steps?: string[]
+  currentStep?: number
+  subText?: string
+  error?: string | null
+  retrying?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: "The Pearson Pub",
-  subtitle: "A traditional pub atmosphere with modern amenities in Whitby",
-  logoUrl: "/pearson-pub-logo.png",
+  title: 'The Pearson Pub',
+  subtitle: 'A traditional pub atmosphere with modern amenities in Whitby',
+  logoUrl: '/pearson-pub-logo.png',
   progress: 0,
   showProgress: true,
   showSteps: true,
   showPreview: true,
   texts: () => [],
-  steps: () => ["Menu", "Events", "Hours", "Specials", "Ready"],
+  steps: () => ['Menu', 'Events', 'Hours', 'Specials', 'Ready'],
   currentStep: 0,
-  subText: "",
+  subText: '',
   error: null,
-  retrying: false,
-});
+  retrying: false
+})
 
 defineEmits<{
-  retry: [];
-  fallback: [];
-}>();
+  retry: []
+  fallback: []
+}>()
 
 // State
-const logoError = ref(false);
-const currentText = ref(props.texts[0]);
-const textIndex = ref(0);
-const router = useRouter();
-const { status, checkConnectivity } = useConnectivity();
+const logoError = ref(false)
+const currentText = ref(props.texts[0])
+const textIndex = ref(0)
 
 // Cycling loading text
 onMounted(() => {
   const interval = setInterval(() => {
-    textIndex.value = (textIndex.value + 1) % props.texts.length;
-    currentText.value = props.texts[textIndex.value];
-  }, 2500);
+    textIndex.value = (textIndex.value + 1) % props.texts.length
+    currentText.value = props.texts[textIndex.value]
+  }, 2500)
 
   onUnmounted(() => {
-    clearInterval(interval);
-  });
-});
+    clearInterval(interval)
+  })
+})
 
 // Connectivity check is handled by the parent (pages/index.vue) to allow
 // grace periods and avoid premature redirects; do not auto-navigate here.

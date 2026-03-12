@@ -7,38 +7,30 @@
       <!-- Loading spinner -->
       <div
         class="animate-spin rounded-full h-5 w-5 border-2 border-yellow-500 border-t-transparent"
-      ></div>
+      />
 
       <!-- Content -->
       <div class="flex-1 min-w-0">
         <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
           {{ title }}
         </p>
-        <p
-          v-if="subtitle"
-          class="text-xs text-gray-500 dark:text-gray-400 truncate"
-        >
+        <p v-if="subtitle" class="text-xs text-gray-500 dark:text-gray-400 truncate">
           {{ subtitle }}
         </p>
       </div>
 
       <!-- Close button -->
       <button
-        @click="$emit('close')"
         class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+        @click="$emit('close')"
       >
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
             d="M6 18L18 6M6 6l12 12"
-          ></path>
+          />
         </svg>
       </button>
     </div>
@@ -47,18 +39,18 @@
 
 <script setup lang="ts">
 interface Props {
-  show?: boolean;
-  title?: string;
-  subtitle?: string;
+  show?: boolean
+  title?: string
+  subtitle?: string
 }
 
 withDefaults(defineProps<Props>(), {
   show: false,
-  title: "Loading...",
-  subtitle: "",
-});
+  title: 'Loading...',
+  subtitle: ''
+})
 
 defineEmits<{
-  close: [];
-}>();
+  close: []
+}>()
 </script>

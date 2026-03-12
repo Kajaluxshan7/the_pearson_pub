@@ -1,11 +1,11 @@
-import { DateTime } from "luxon";
+import { DateTime } from 'luxon'
 
 /**
  * Log errors only in development environment
  */
 function logError(message: string, error: unknown) {
   if (process.dev) {
-    console.error(message, error);
+    console.error(message, error)
   }
 }
 
@@ -15,7 +15,7 @@ function logError(message: string, error: unknown) {
  * Backend stores UTC, we convert at API boundaries.
  */
 export class TimezoneUtil {
-  private static readonly TIMEZONE = "America/Toronto";
+  private static readonly TIMEZONE = 'America/Toronto'
 
   /**
    * Convert UTC date from API to Toronto timezone for display
@@ -25,19 +25,27 @@ export class TimezoneUtil {
    */
   static formatToronto(
     utcDateLike: string | Date | null | undefined,
-    format = "MMMM d, yyyy h:mm a"
+    format = 'MMMM d, yyyy h:mm a',
+    includeTimezone = false
   ): string {
-    if (!utcDateLike) return "";
+    if (!utcDateLike) {
+      return ''
+    }
 
     try {
       const dt = DateTime.fromJSDate(new Date(utcDateLike), {
-        zone: "utc",
-      }).setZone(this.TIMEZONE);
+        zone: 'utc'
+      }).setZone(this.TIMEZONE)
 
-      return dt.toFormat(format);
+      const formatted = dt.toFormat(format)
+      if (includeTimezone) {
+        const tzAbbr = dt.offsetNameShort ?? 'EST'
+        return `${formatted} ${tzAbbr}`
+      }
+      return formatted
     } catch (error) {
-      logError("Error formatting Toronto time:", error);
-      return String(utcDateLike);
+      logError('Error formatting Toronto time:', error)
+      return String(utcDateLike)
     }
   }
 
@@ -49,17 +57,17 @@ export class TimezoneUtil {
    */
   static parseTorontoInputToISO(torontoLocal: string | Date): string {
     if (!torontoLocal) {
-      throw new Error("Toronto local date is required");
+      throw new Error('Toronto local date is required')
     }
 
     try {
       const dt = DateTime.fromJSDate(new Date(torontoLocal), {
-        zone: this.TIMEZONE,
-      });
-      return dt.toUTC().toISO() ?? "";
+        zone: this.TIMEZONE
+      })
+      return dt.toUTC().toISO() ?? ''
     } catch (error) {
-      logError("Error parsing Toronto input:", error);
-      throw new Error(`Invalid date format: ${torontoLocal}`);
+      logError('Error parsing Toronto input:', error)
+      throw new Error(`Invalid date format: ${torontoLocal}`)
     }
   }
 
@@ -69,17 +77,19 @@ export class TimezoneUtil {
    * @returns String in YYYY-MM-DDTHH:MM format for HTML datetime-local inputs
    */
   static formatForDateTimeInput(utcDateLike: string | Date | null): string {
-    if (!utcDateLike) return "";
+    if (!utcDateLike) {
+      return ''
+    }
 
     try {
       const dt = DateTime.fromJSDate(new Date(utcDateLike), {
-        zone: "utc",
-      }).setZone(this.TIMEZONE);
+        zone: 'utc'
+      }).setZone(this.TIMEZONE)
 
-      return dt.toFormat("yyyy-MM-dd'T'HH:mm");
+      return dt.toFormat("yyyy-MM-dd'T'HH:mm")
     } catch (error) {
-      logError("Error formatting for datetime input:", error);
-      return "";
+      logError('Error formatting for datetime input:', error)
+      return ''
     }
   }
 
@@ -89,7 +99,7 @@ export class TimezoneUtil {
    * @returns Formatted date string
    */
   static formatTorontoDate(utcDateLike: string | Date | null): string {
-    return this.formatToronto(utcDateLike, "MMMM d, yyyy");
+    return this.formatToronto(utcDateLike, 'MMMM d, yyyy', false)
   }
 
   /**
@@ -98,7 +108,7 @@ export class TimezoneUtil {
    * @returns Formatted date string in MM/dd/yyyy format
    */
   static formatTorontoDateShort(utcDateLike: string | Date | null): string {
-    return this.formatToronto(utcDateLike, "MM/dd/yyyy");
+    return this.formatToronto(utcDateLike, 'MM/dd/yyyy', false)
   }
 
   /**
@@ -107,7 +117,7 @@ export class TimezoneUtil {
    * @returns Formatted time string
    */
   static formatTorontoTime(utcDateLike: string | Date | null): string {
-    return this.formatToronto(utcDateLike, "h:mm a");
+    return this.formatToronto(utcDateLike, 'h:mm a')
   }
 
   /**
@@ -116,7 +126,7 @@ export class TimezoneUtil {
    * @returns Formatted time string
    */
   static formatTorontoTimeOnly(utcDateLike: string | Date | null): string {
-    return this.formatToronto(utcDateLike, "h:mm a");
+    return this.formatToronto(utcDateLike, 'h:mm a')
   }
 
   /**
@@ -124,7 +134,7 @@ export class TimezoneUtil {
    * @returns Current DateTime object in Toronto timezone
    */
   static nowToronto(): DateTime {
-    return DateTime.now().setZone(this.TIMEZONE);
+    return DateTime.now().setZone(this.TIMEZONE)
   }
 
   /**
@@ -132,7 +142,7 @@ export class TimezoneUtil {
    * @returns Current DateTime object in UTC
    */
   static nowUTC(): DateTime {
-    return DateTime.utc();
+    return DateTime.utc()
   }
 
   /**
@@ -144,12 +154,12 @@ export class TimezoneUtil {
     try {
       const dt = date
         ? DateTime.fromJSDate(new Date(date)).setZone(this.TIMEZONE)
-        : this.nowToronto();
+        : this.nowToronto()
 
-      return dt.offsetNameShort === "EDT";
+      return dt.offsetNameShort === 'EDT'
     } catch (error) {
-      logError("Error checking DST:", error);
-      return false;
+      logError('Error checking DST:', error)
+      return false
     }
   }
 
@@ -159,30 +169,30 @@ export class TimezoneUtil {
    * @returns Object with timezone details
    */
   static getTimezoneInfo(date?: Date | string): {
-    timezone: string;
-    abbreviation: string;
-    offset: string;
-    isDST: boolean;
+    timezone: string
+    abbreviation: string
+    offset: string
+    isDST: boolean
   } {
     try {
       const dt = date
         ? DateTime.fromJSDate(new Date(date)).setZone(this.TIMEZONE)
-        : this.nowToronto();
+        : this.nowToronto()
 
       return {
         timezone: this.TIMEZONE,
-        abbreviation: dt.offsetNameShort ?? "EST",
-        offset: dt.toFormat("ZZ"),
-        isDST: this.isDaylightSavingTime(date),
-      };
+        abbreviation: dt.offsetNameShort ?? 'EST',
+        offset: dt.toFormat('ZZ'),
+        isDST: this.isDaylightSavingTime(date)
+      }
     } catch (error) {
-      logError("Error getting timezone info:", error);
+      logError('Error getting timezone info:', error)
       return {
         timezone: this.TIMEZONE,
-        abbreviation: "EST",
-        offset: "-05:00",
-        isDST: false,
-      };
+        abbreviation: 'EST',
+        offset: '-05:00',
+        isDST: false
+      }
     }
   }
 
@@ -193,24 +203,26 @@ export class TimezoneUtil {
    * @returns Formatted range (e.g., "11:00 AM - 12:00 AM")
    */
   static formatOperationHours(openTime: string, closeTime: string): string {
-    if (!openTime || !closeTime) return "Closed";
+    if (!openTime || !closeTime) {
+      return 'Closed'
+    }
 
     try {
-      const today = this.nowToronto().toFormat("yyyy-MM-dd");
+      const today = this.nowToronto().toFormat('yyyy-MM-dd')
       const openDt = DateTime.fromISO(`${today}T${openTime}`, {
-        zone: this.TIMEZONE,
-      });
+        zone: this.TIMEZONE
+      })
       const closeDt = DateTime.fromISO(`${today}T${closeTime}`, {
-        zone: this.TIMEZONE,
-      });
+        zone: this.TIMEZONE
+      })
 
-      const openFormatted = openDt.toFormat("h:mm a");
-      const closeFormatted = closeDt.toFormat("h:mm a");
+      const openFormatted = openDt.toFormat('h:mm a')
+      const closeFormatted = closeDt.toFormat('h:mm a')
 
-      return `${openFormatted} - ${closeFormatted}`;
+      return `${openFormatted} - ${closeFormatted}`
     } catch (error) {
-      logError("Error formatting operation hours:", error);
-      return "Closed";
+      logError('Error formatting operation hours:', error)
+      return 'Closed'
     }
   }
 
@@ -222,41 +234,40 @@ export class TimezoneUtil {
    */
   static isWithinBusinessHours(openTime: string, closeTime: string): boolean {
     try {
-      if (!openTime || !closeTime) return false;
+      if (!openTime || !closeTime) {
+        return false
+      }
 
-      const now = this.nowToronto();
-      const today = now.toFormat("yyyy-MM-dd");
+      const now = this.nowToronto()
+      const today = now.toFormat('yyyy-MM-dd')
 
       const openDt = DateTime.fromISO(`${today}T${openTime}`, {
-        zone: this.TIMEZONE,
-      });
+        zone: this.TIMEZONE
+      })
       let closeDt = DateTime.fromISO(`${today}T${closeTime}`, {
-        zone: this.TIMEZONE,
-      });
+        zone: this.TIMEZONE
+      })
 
       // Handle overnight hours (e.g., 20:30 to 11:30 next day)
       if (closeDt <= openDt) {
-        closeDt = closeDt.plus({ days: 1 });
+        closeDt = closeDt.plus({ days: 1 })
 
         // Check if we're currently within the overnight period
         // This could be either:
         // 1. Same day after opening time (e.g., Saturday 9 PM when open at 8:30 PM)
         // 2. Next day before closing time (e.g., Sunday 10 AM when closing at 11:30 AM)
 
-        if (
-          now >= openDt ||
-          now <= closeDt.minus({ days: 1 }).plus({ days: 1 })
-        ) {
-          return true;
+        if (now >= openDt || now <= closeDt.minus({ days: 1 }).plus({ days: 1 })) {
+          return true
         }
 
-        return false;
+        return false
       }
 
-      return now >= openDt && now <= closeDt;
+      return now >= openDt && now <= closeDt
     } catch (error) {
-      logError("Error checking business hours:", error);
-      return false;
+      logError('Error checking business hours:', error)
+      return false
     }
   }
 
@@ -266,12 +277,14 @@ export class TimezoneUtil {
    * @returns true if valid
    */
   static isValidDateTime(dateString: string): boolean {
-    if (!dateString) return false;
+    if (!dateString) {
+      return false
+    }
     try {
-      const dt = DateTime.fromJSDate(new Date(dateString));
-      return dt.isValid;
+      const dt = DateTime.fromJSDate(new Date(dateString))
+      return dt.isValid
     } catch {
-      return false;
+      return false
     }
   }
 
@@ -280,13 +293,13 @@ export class TimezoneUtil {
    */
   static formatTime(timeString: string): string {
     try {
-      const [hours, minutes] = timeString.split(":").map(Number);
-      const period = hours >= 12 ? "PM" : "AM";
-      const displayHour = hours % 12 || 12;
-      return `${displayHour}:${minutes.toString().padStart(2, "0")} ${period}`;
+      const [hours, minutes] = timeString.split(':').map(Number)
+      const period = hours >= 12 ? 'PM' : 'AM'
+      const displayHour = hours % 12 || 12
+      return `${displayHour}:${minutes.toString().padStart(2, '0')} ${period}`
     } catch (error) {
-      logError("Error formatting time:", error);
-      return timeString;
+      logError('Error formatting time:', error)
+      return timeString
     }
   }
 
@@ -296,56 +309,53 @@ export class TimezoneUtil {
   static calculateEventStatus(
     startDate: string | Date,
     endDate: string | Date
-  ): "upcoming" | "current" | "ended" {
+  ): 'upcoming' | 'current' | 'ended' {
     try {
-      const now = this.nowToronto().toJSDate(); // Use Toronto time instead of system time
-      const start =
-        typeof startDate === "string" ? new Date(startDate) : startDate;
-      const end = typeof endDate === "string" ? new Date(endDate) : endDate;
+      const now = this.nowToronto().toJSDate() // Use Toronto time instead of system time
+      const start = typeof startDate === 'string' ? new Date(startDate) : startDate
+      const end = typeof endDate === 'string' ? new Date(endDate) : endDate
 
-      if (now < start) return "upcoming";
-      if (now >= start && now <= end) return "current";
-      return "ended";
+      if (now < start) {
+        return 'upcoming'
+      }
+      if (now >= start && now <= end) {
+        return 'current'
+      }
+      return 'ended'
     } catch (error) {
-      logError("Error calculating event status:", error);
-      return "upcoming";
+      logError('Error calculating event status:', error)
+      return 'upcoming'
     }
   }
 
   /**
    * Format event date range
    */
-  static formatEventDateRange(
-    startDate: string | Date,
-    endDate?: string | Date
-  ): string {
+  static formatEventDateRange(startDate: string | Date, endDate?: string | Date): string {
     try {
-      const start =
-        typeof startDate === "string" ? new Date(startDate) : startDate;
+      const start = typeof startDate === 'string' ? new Date(startDate) : startDate
 
       if (!endDate) {
-        return this.formatTorontoTime(start);
+        return this.formatTorontoTime(start)
       }
 
-      const end = typeof endDate === "string" ? new Date(endDate) : endDate;
+      const end = typeof endDate === 'string' ? new Date(endDate) : endDate
 
       // Check if same day using Toronto timezone
-      const startDt = DateTime.fromJSDate(start).setZone(this.TIMEZONE);
-      const endDt = DateTime.fromJSDate(end).setZone(this.TIMEZONE);
+      const startDt = DateTime.fromJSDate(start).setZone(this.TIMEZONE)
+      const endDt = DateTime.fromJSDate(end).setZone(this.TIMEZONE)
 
-      if (startDt.hasSame(endDt, "day")) {
-        const dateStr = this.formatTorontoDate(start);
-        const startTime = this.formatTorontoTimeOnly(start);
-        const endTime = this.formatTorontoTimeOnly(end);
-        return `${dateStr} from ${startTime} to ${endTime}`;
+      if (startDt.hasSame(endDt, 'day')) {
+        const dateStr = this.formatTorontoDate(start)
+        const startTime = this.formatTorontoTimeOnly(start)
+        const endTime = this.formatTorontoTimeOnly(end)
+        return `${dateStr} from ${startTime} to ${endTime}`
       } else {
-        return `${this.formatTorontoTime(start)} - ${this.formatTorontoTime(
-          end
-        )}`;
+        return `${this.formatTorontoTime(start)} - ${this.formatTorontoTime(end)}`
       }
     } catch (error) {
-      logError("Error formatting event date range:", error);
-      return "";
+      logError('Error formatting event date range:', error)
+      return ''
     }
   }
 
@@ -354,11 +364,11 @@ export class TimezoneUtil {
    */
   static toISOString(date: string | Date): string {
     try {
-      const dateObj = typeof date === "string" ? new Date(date) : date;
-      return dateObj.toISOString();
+      const dateObj = typeof date === 'string' ? new Date(date) : date
+      return dateObj.toISOString()
     } catch (error) {
-      logError("Error converting to ISO string:", error);
-      return "";
+      logError('Error converting to ISO string:', error)
+      return ''
     }
   }
 
@@ -368,20 +378,17 @@ export class TimezoneUtil {
   static parseTorontoDate(dateString: string): Date {
     try {
       // Use Luxon for proper timezone handling
-      if (
-        !dateString.includes("T") ||
-        (!dateString.includes("+") && !dateString.includes("Z"))
-      ) {
+      if (!dateString.includes('T') || (!dateString.includes('+') && !dateString.includes('Z'))) {
         // Treat as Toronto local time
-        const dt = DateTime.fromISO(dateString, { zone: this.TIMEZONE });
-        return dt.toJSDate();
+        const dt = DateTime.fromISO(dateString, { zone: this.TIMEZONE })
+        return dt.toJSDate()
       }
       // Has timezone info, convert to Toronto time
-      const dt = DateTime.fromISO(dateString).setZone(this.TIMEZONE);
-      return dt.toJSDate();
+      const dt = DateTime.fromISO(dateString).setZone(this.TIMEZONE)
+      return dt.toJSDate()
     } catch (error) {
-      logError("Error parsing Toronto date:", error);
-      return new Date();
+      logError('Error parsing Toronto date:', error)
+      return new Date()
     }
   }
 
@@ -391,41 +398,33 @@ export class TimezoneUtil {
   static getRelativeTime(date: string | Date): string {
     try {
       const targetDt = DateTime.fromJSDate(
-        typeof date === "string" ? new Date(date) : date
-      ).setZone(this.TIMEZONE);
-      const nowDt = this.nowToronto();
+        typeof date === 'string' ? new Date(date) : date
+      ).setZone(this.TIMEZONE)
+      const nowDt = this.nowToronto()
 
-      const diff = targetDt
-        .diff(nowDt, ["days", "hours", "minutes"])
-        .toObject();
-      const { days = 0, hours = 0, minutes = 0 } = diff;
+      const diff = targetDt.diff(nowDt, ['days', 'hours', 'minutes']).toObject()
+      const { days = 0, hours = 0, minutes = 0 } = diff
 
       if (Math.abs(days) >= 1) {
         return days > 0
-          ? `in ${Math.ceil(days)} day${Math.ceil(days) > 1 ? "s" : ""}`
-          : `${Math.abs(Math.floor(days))} day${
-              Math.abs(Math.floor(days)) > 1 ? "s" : ""
-            } ago`;
+          ? `in ${Math.ceil(days)} day${Math.ceil(days) > 1 ? 's' : ''}`
+          : `${Math.abs(Math.floor(days))} day${Math.abs(Math.floor(days)) > 1 ? 's' : ''} ago`
       } else if (Math.abs(hours) >= 1) {
         return hours > 0
-          ? `in ${Math.ceil(hours)} hour${Math.ceil(hours) > 1 ? "s" : ""}`
-          : `${Math.abs(Math.floor(hours))} hour${
-              Math.abs(Math.floor(hours)) > 1 ? "s" : ""
-            } ago`;
+          ? `in ${Math.ceil(hours)} hour${Math.ceil(hours) > 1 ? 's' : ''}`
+          : `${Math.abs(Math.floor(hours))} hour${Math.abs(Math.floor(hours)) > 1 ? 's' : ''} ago`
       } else if (Math.abs(minutes) >= 1) {
         return minutes > 0
-          ? `in ${Math.ceil(minutes)} minute${
-              Math.ceil(minutes) > 1 ? "s" : ""
-            }`
+          ? `in ${Math.ceil(minutes)} minute${Math.ceil(minutes) > 1 ? 's' : ''}`
           : `${Math.abs(Math.floor(minutes))} minute${
-              Math.abs(Math.floor(minutes)) > 1 ? "s" : ""
-            } ago`;
+              Math.abs(Math.floor(minutes)) > 1 ? 's' : ''
+            } ago`
       } else {
-        return "now";
+        return 'now'
       }
     } catch (error) {
-      logError("Error getting relative time:", error);
-      return "";
+      logError('Error getting relative time:', error)
+      return ''
     }
   }
 
@@ -435,18 +434,20 @@ export class TimezoneUtil {
    * @returns Formatted time string (e.g., "11:00 AM")
    */
   static formatOperationTime(timeString: string): string {
-    if (!timeString) return "";
+    if (!timeString) {
+      return ''
+    }
 
     try {
-      const today = this.nowToronto().toFormat("yyyy-MM-dd");
+      const today = this.nowToronto().toFormat('yyyy-MM-dd')
       const dt = DateTime.fromISO(`${today}T${timeString}`, {
-        zone: this.TIMEZONE,
-      });
+        zone: this.TIMEZONE
+      })
 
-      return dt.toFormat("h:mm a");
+      return dt.toFormat('h:mm a')
     } catch (error) {
-      logError("Error formatting operation time:", error);
-      return timeString;
+      logError('Error formatting operation time:', error)
+      return timeString
     }
   }
 
@@ -457,22 +458,24 @@ export class TimezoneUtil {
    * @returns true if currently open, false if closed
    */
   static isCurrentlyOpen(openTime: string, closeTime: string): boolean {
-    if (!openTime || !closeTime) return false;
+    if (!openTime || !closeTime) {
+      return false
+    }
 
     try {
-      const now = this.nowToronto();
-      const today = now.toFormat("yyyy-MM-dd");
+      const now = this.nowToronto()
+      const today = now.toFormat('yyyy-MM-dd')
 
       const openDt = DateTime.fromISO(`${today}T${openTime}`, {
-        zone: this.TIMEZONE,
-      });
+        zone: this.TIMEZONE
+      })
       let closeDt = DateTime.fromISO(`${today}T${closeTime}`, {
-        zone: this.TIMEZONE,
-      });
+        zone: this.TIMEZONE
+      })
 
       // Handle overnight hours (e.g., 20:30 to 11:30 next day)
       if (closeDt <= openDt) {
-        closeDt = closeDt.plus({ days: 1 });
+        closeDt = closeDt.plus({ days: 1 })
 
         // For overnight hours, we need to check if current time is either:
         // 1. After opening time today, OR
@@ -480,17 +483,17 @@ export class TimezoneUtil {
 
         // Create a reference point for "tomorrow's" closing time
         const tomorrowCloseDt = DateTime.fromISO(`${today}T${closeTime}`, {
-          zone: this.TIMEZONE,
-        }).plus({ days: 1 });
+          zone: this.TIMEZONE
+        }).plus({ days: 1 })
 
         // Check if we're in the overnight period
-        return now >= openDt || now <= tomorrowCloseDt;
+        return now >= openDt || now <= tomorrowCloseDt
       }
 
-      return now >= openDt && now <= closeDt;
+      return now >= openDt && now <= closeDt
     } catch (error) {
-      logError("Error checking if currently open:", error);
-      return false;
+      logError('Error checking if currently open:', error)
+      return false
     }
   }
 
@@ -503,23 +506,23 @@ export class TimezoneUtil {
     isEnabled: boolean = true
   ): string {
     if (!isEnabled || !openTime || !closeTime) {
-      return "Closed";
+      return 'Closed'
     }
 
-    const isOpen = this.isCurrentlyOpen(openTime, closeTime);
+    const isOpen = this.isCurrentlyOpen(openTime, closeTime)
 
     if (isOpen) {
-      const closeFormatted = this.formatOperationTime(closeTime);
-      const isOvernight = this.isOvernightHours(openTime, closeTime);
+      const closeFormatted = this.formatOperationTime(closeTime)
+      const isOvernight = this.isOvernightHours(openTime, closeTime)
 
       if (isOvernight) {
-        return `Open until ${closeFormatted} tomorrow`;
+        return `Open until ${closeFormatted} tomorrow`
       } else {
-        return `Open until ${closeFormatted}`;
+        return `Open until ${closeFormatted}`
       }
     } else {
-      const openFormatted = this.formatOperationTime(openTime);
-      return `Opens at ${openFormatted}`;
+      const openFormatted = this.formatOperationTime(openTime)
+      return `Opens at ${openFormatted}`
     }
   }
 
@@ -530,18 +533,20 @@ export class TimezoneUtil {
    * @returns true if hours span overnight
    */
   static isOvernightHours(openTime: string, closeTime: string): boolean {
-    if (!openTime || !closeTime) return false;
+    if (!openTime || !closeTime) {
+      return false
+    }
 
     try {
-      const [openHour, openMin] = openTime.split(":").map(Number);
-      const [closeHour, closeMin] = closeTime.split(":").map(Number);
-      const openMinutes = openHour * 60 + openMin;
-      const closeMinutes = closeHour * 60 + closeMin;
+      const [openHour, openMin] = openTime.split(':').map(Number)
+      const [closeHour, closeMin] = closeTime.split(':').map(Number)
+      const openMinutes = openHour * 60 + openMin
+      const closeMinutes = closeHour * 60 + closeMin
 
-      return closeMinutes < openMinutes;
+      return closeMinutes < openMinutes
     } catch (error) {
-      logError("Error checking overnight hours:", error);
-      return false;
+      logError('Error checking overnight hours:', error)
+      return false
     }
   }
 }
