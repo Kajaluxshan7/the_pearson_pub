@@ -37,16 +37,9 @@ export default defineNuxtConfig({
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
-              if (id.includes('@nuxt/ui') || id.includes('@headlessui') || id.includes('@heroicons')) {
-                return 'ui'
-              }
-              if (id.includes('@vueuse')) {
-                return 'vueuse'
-              }
-              if (id.includes('luxon')) {
-                return 'luxon'
-              }
-              return 'vendor'
+              // Only split out large, independent libraries - let Vite handle the rest
+              if (id.includes('luxon')) return 'luxon'
+              if (id.includes('@vueuse')) return 'vueuse'
             }
           }
         }
