@@ -35,6 +35,14 @@ const currentImage = computed(() => {
   return images[currentImageIndex.value] || images[0]
 })
 
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  if (!img.dataset.fallback) {
+    img.dataset.fallback = '1'
+    img.src = '/images/food/default.jpg'
+  }
+}
+
 function isSeasonalAvailable(startDate: string, endDate: string): boolean {
   if (!startDate || !endDate) return false
   const now = new Date()
@@ -181,13 +189,13 @@ onUnmounted(() => {
                     :key="img"
                     class="absolute inset-0"
                   >
-                    <NuxtImg
+                    <img
                       :src="img"
                       :alt="`${selectedTab.title} image ${idx + 1}`"
                       class="w-full h-full object-cover transition-opacity duration-500"
-                      format="webp"
-                      quality="90"
-                      sizes="(min-width: 1024px) 50vw, 100vw"
+                      loading="eager"
+                      decoding="async"
+                      @error="handleImageError"
                     />
                   </div>
 
@@ -226,13 +234,13 @@ onUnmounted(() => {
                   </div>
                 </template>
                 <template v-else>
-                  <NuxtImg
+                  <img
                     :src="currentImage"
                     :alt="selectedTab.title"
                     class="w-full h-full object-cover"
-                    format="webp"
-                    quality="90"
-                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    loading="eager"
+                    decoding="async"
+                    @error="handleImageError"
                   />
                 </template>
               </div>

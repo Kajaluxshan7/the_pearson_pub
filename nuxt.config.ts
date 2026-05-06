@@ -192,7 +192,7 @@ export default defineNuxtConfig({
 
   image: {
     provider: 'ipx',
-    domains: ['api.thepearsonpubwhitby.ca'],
+    domains: ['api.thepearsonpubwhitby.ca', 'localhost'],
     quality: 80,
     format: ['webp', 'avif'],
     screens: {

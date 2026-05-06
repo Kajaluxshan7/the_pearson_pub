@@ -87,13 +87,69 @@
       </div>
 
       <!-- Loading Status Text -->
-      <div class="space-y-2">
-        <p class="text-gray-300 text-lg animate-pulse font-medium">
-          {{ currentText }}
-        </p>
-        <p v-if="subText" class="text-gray-400 text-sm">
+      <div class="space-y-3 min-h-[56px] flex flex-col items-center justify-center">
+        <transition name="text-fade" mode="out-in">
+          <p :key="currentText" class="text-gray-300 text-lg font-medium text-center">
+            {{ currentText }}
+          </p>
+        </transition>
+        <p v-if="subText" class="text-gray-400 text-sm text-center">
           {{ subText }}
         </p>
+      </div>
+
+      <!-- Step Indicators -->
+      <div v-if="steps.length > 0" class="mt-6">
+        <div class="flex items-center justify-center flex-wrap gap-1">
+          <template v-for="(step, idx) in steps" :key="step">
+            <div
+              :class="[
+                'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300',
+                idx < currentStep
+                  ? 'bg-yellow-500 text-gray-900'
+                  : idx === currentStep
+                  ? 'bg-yellow-500/20 border-2 border-yellow-500 text-yellow-400'
+                  : 'bg-gray-700 text-gray-500'
+              ]"
+            >
+              <svg v-if="idx < currentStep" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              <span v-else class="text-xs">{{ idx + 1 }}</span>
+            </div>
+            <div
+              v-if="idx < steps.length - 1"
+              :class="[
+                'w-5 h-0.5 transition-all duration-500',
+                idx < currentStep ? 'bg-yellow-500' : 'bg-gray-700'
+              ]"
+            />
+          </template>
+        </div>
+        <p class="text-center text-xs text-gray-500 mt-2">
+          {{ currentStep < steps.length ? steps[currentStep] : steps[steps.length - 1] }}
+        </p>
+      </div>
+
+      <!-- Error / Retry UI -->
+      <div v-if="error" class="mt-6 p-4 bg-red-900/30 border border-red-700/50 rounded-xl text-center">
+        <p class="text-red-400 text-sm mb-4">{{ error }}</p>
+        <div class="flex gap-3 justify-center">
+          <button
+            v-if="!retrying"
+            class="px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-semibold text-sm rounded-lg transition-colors"
+            @click="$emit('retry')"
+          >
+            Try Again
+          </button>
+          <span v-else class="text-yellow-400 text-sm">Retrying...</span>
+          <button
+            class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm rounded-lg transition-colors"
+            @click="$emit('fallback')"
+          >
+            Continue Offline
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -137,19 +193,26 @@ defineEmits<{
 
 // State
 const logoError = ref(false)
-const currentText = ref(props.texts[0])
+const currentText = ref(props.texts[0] ?? '')
 const textIndex = ref(0)
 
-// Cycling loading text
-onMounted(() => {
-  const interval = setInterval(() => {
-    textIndex.value = (textIndex.value + 1) % props.texts.length
-    currentText.value = props.texts[textIndex.value]
-  }, 2500)
+// Cycling loading text - properly placed at top level
+let textInterval: ReturnType<typeof setInterval> | null = null
 
-  onUnmounted(() => {
-    clearInterval(interval)
-  })
+onMounted(() => {
+  if (props.texts.length > 1) {
+    textInterval = setInterval(() => {
+      textIndex.value = (textIndex.value + 1) % props.texts.length
+      currentText.value = props.texts[textIndex.value]
+    }, 2500)
+  }
+})
+
+onUnmounted(() => {
+  if (textInterval) {
+    clearInterval(textInterval)
+    textInterval = null
+  }
 })
 
 // Connectivity check is handled by the parent (pages/index.vue) to allow
@@ -181,5 +244,21 @@ onMounted(() => {
 
 .animate-shimmer {
   animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Text cycling fade transition */
+.text-fade-enter-active,
+.text-fade-leave-active {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.text-fade-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.text-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 </style>
