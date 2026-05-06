@@ -12,14 +12,13 @@
     >
       <template #header>
         <div class="relative overflow-hidden aspect-square">
-          <NuxtImg
+          <img
             :src="imageUrl"
             class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-110"
             :alt="item.name"
-            format="webp"
-            quality="75"
             loading="lazy"
-            :placeholder="[400, 400, 75]"
+            decoding="async"
+            @error="(e) => { const t = e.target as HTMLImageElement; if (t && !t.src.includes('foods.jpg')) t.src = '/images/food/foods.jpg' }"
           />
 
           <!-- Badges -->
@@ -100,14 +99,13 @@
       <div class="flex flex-col sm:flex-row">
         <!-- Image -->
         <div class="sm:w-48 relative overflow-hidden">
-          <NuxtImg
+          <img
             :src="imageUrl"
             class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-110"
             :alt="item.name"
-            format="webp"
-            quality="75"
             loading="lazy"
-            :placeholder="[400, 200, 75]"
+            decoding="async"
+            @error="(e) => { const t = e.target as HTMLImageElement; if (t && !t.src.includes('foods.jpg')) t.src = '/images/food/foods.jpg' }"
           />
 
           <!-- Badges -->

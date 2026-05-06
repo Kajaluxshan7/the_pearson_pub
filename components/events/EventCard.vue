@@ -8,7 +8,7 @@
       <div class="relative overflow-hidden">
         <template v-if="event.images && event.images.length > 1">
           <div class="relative w-full" :class="isDetailView ? 'h-80 lg:h-96' : 'h-64 lg:h-80'">
-            <NuxtImg
+            <img
               v-for="(img, idx) in event.images"
               v-show="carouselIndex === idx"
               :key="img"
@@ -18,8 +18,9 @@
                 isDetailView ? 'h-80 lg:h-96' : 'h-64 lg:h-80'
               ]"
               :alt="event.title + ' image ' + (idx + 1)"
-              format="webp"
-              quality="80"
+              loading="eager"
+              decoding="async"
+              @error="(e) => { const t = e.target as HTMLImageElement; if (t && !t.src.includes('music.jpg')) t.src = '/images/entertainment/music.jpg' }"
             />
             <!-- Carousel Controls -->
             <button
@@ -53,12 +54,13 @@
           </div>
         </template>
         <template v-else>
-          <NuxtImg
+          <img
             :src="event.image || '/images/entertainment/music.jpg'"
             :alt="event.title"
             :class="['w-full object-cover', isDetailView ? 'h-80 lg:h-96' : 'h-64 lg:h-80']"
-            format="webp"
-            quality="80"
+            loading="eager"
+            decoding="async"
+            @error="(e) => { const t = e.target as HTMLImageElement; if (t && !t.src.includes('music.jpg')) t.src = '/images/entertainment/music.jpg' }"
           />
         </template>
 

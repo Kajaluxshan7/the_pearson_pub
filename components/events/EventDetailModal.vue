@@ -9,12 +9,12 @@
         >
           <!-- Blurred/Gradient background using current image -->
           <div class="absolute inset-0 z-0">
-            <NuxtImg
+            <img
               :src="currentImage"
               :alt="event.title"
               class="w-full h-full object-cover blur-xl scale-110 opacity-60"
-              format="webp"
-              quality="60"
+              loading="eager"
+              decoding="async"
               @error="handleImageError"
             />
             <div
@@ -24,7 +24,7 @@
 
           <!-- Centered 4:5 image -->
           <div class="relative z-10 flex items-center justify-center h-full w-full">
-            <NuxtImg
+            <img
               :src="currentImage"
               :alt="event.title"
               class="shadow-2xl rounded-2xl object-cover bg-white/10"
@@ -35,8 +35,8 @@
                 maxWidth: '90vw',
                 maxHeight: '90vw'
               }"
-              format="webp"
-              quality="90"
+              loading="eager"
+              decoding="async"
               @error="handleImageError"
             />
           </div>
@@ -84,12 +84,12 @@
               "
               @click="currentImageIndex = index"
             >
-              <NuxtImg
+              <img
                 :src="img"
                 :alt="event.title"
                 class="object-cover w-full h-full"
-                format="webp"
-                quality="60"
+                loading="eager"
+                decoding="async"
               />
             </button>
           </div>

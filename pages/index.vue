@@ -6,11 +6,6 @@
       v-show="initialLoading"
       :title="loadingConfig.title"
       :subtitle="loadingConfig.subtitle"
-      :progress="loadingProgress"
-      :current-step="currentLoadingStep"
-      :texts="loadingConfig.texts"
-      :steps="loadingConfig.steps"
-      :sub-text="loadingConfig.subText"
       :error="loadingError"
       :retrying="retryingConnection"
       @retry="handleRetry"
@@ -159,21 +154,9 @@ const canShowFallbackAfterTimeout = ref(false)
 // Loading configuration
 const loadingConfig = ref({
   title: 'The Pearson Pub',
-  subtitle: 'A traditional pub atmosphere with modern amenities in Whitby',
-  texts: [
-    'Preparing your experience...',
-    'Loading menu items...',
-    'Fetching latest events...',
-    "Getting today's specials...",
-    'Almost ready...'
-  ],
-  steps: ['Connect', 'Menu', 'Events', 'Hours', 'Specials'],
-  subText: ''
+  subtitle: 'A traditional pub atmosphere with modern amenities in Whitby'
 })
 
-// Loading progress and step tracking
-const loadingProgress = ref(0)
-const currentLoadingStep = ref(0)
 const loadingError = ref<string | null>(null)
 
 const showFallback = computed(() => {
@@ -196,13 +179,9 @@ const handleRetry = async () => {
   try {
     const isConnected = await checkConnectivity(true)
     if (isConnected) {
-      pageReady.value = false
-      await initializeDataWithProgress()
-    } else {
-      loadingError.value = 'Unable to connect to server. Please check your internet connection.'
+      initializeAllData().catch(() => {})
+      fetchTodayOperationStatus().catch(() => {})
     }
-  } catch (error) {
-    loadingError.value = 'Connection failed. Please try again.'
   } finally {
     retryingConnection.value = false
   }
@@ -216,82 +195,20 @@ const showFallbackMode = () => {
   markLoadingShown() // Mark loading as shown
 }
 
-// Initialize data with progress tracking and smooth progress animation
+// Initialize: only check backend health, then show page and load data in background
 const initializeDataWithProgress = async () => {
-  let progressTimer: ReturnType<typeof setInterval> | null = null
   try {
-    if (process.dev) console.log('Initializing page data with progress...')
-
-    // Reset progress
-    loadingProgress.value = 0
-    currentLoadingStep.value = 0
-    loadingConfig.value.subText = ''
     loadingError.value = null
-
-    // Start a smooth fake-progress timer to give visual feedback while work runs
-    progressTimer = setInterval(() => {
-      // Increment slowly but never reach 95% so we can complete to 100% when real work finishes
-      if (loadingProgress.value < 90) {
-        const bump = Math.random() * 6 + 2 // 2-8%
-        loadingProgress.value = Math.min(90, Math.round(loadingProgress.value + bump))
-      }
-    }, 250)
-
-    // Step 1: quick connectivity check
-    currentLoadingStep.value = 0
-    loadingProgress.value = Math.max(5, loadingProgress.value)
-    loadingConfig.value.subText = 'Checking connectivity...'
-    const isConnected = await checkConnectivity()
-
-    if (!isConnected) {
-      console.warn('Backend not available, using static content')
-      // fast-forward progress to indicate completion of offline path
-      loadingProgress.value = 100
-      loadingConfig.value.subText = 'Offline mode'
-      pageReady.value = true
-      return
-    }
-
-    // Step 2: start real initialization
-    currentLoadingStep.value = 1
-    loadingConfig.value.subText = 'Loading restaurant data...'
-    loadingProgress.value = Math.max(20, loadingProgress.value)
-
-    // Run the heavy initializer
-    await initializeAllData()
-
-    // Simulate a few named steps to give users clearer progress
-    const progressSteps = [40, 60, 80, 95]
-    const stepNames = ['Menu loaded', 'Events loaded', 'Hours loaded', 'Specials loaded']
-
-    for (let i = 0; i < progressSteps.length; i++) {
-      // small delay to allow the UI to show progress changes
-      // but don't stall if things finished quickly
-      await new Promise(resolve => setTimeout(resolve, 220))
-      loadingProgress.value = progressSteps[i]
-      currentLoadingStep.value = i + 2
-      loadingConfig.value.subText = stepNames[i]
-    }
-
-    // Finalize
-    loadingConfig.value.subText = 'Finalizing...'
-    loadingProgress.value = 100
-    await new Promise(resolve => setTimeout(resolve, 300))
-
+    // Single health check — just ping /health/time
+    await checkConnectivity()
+    // Whether reachable or not, show the page immediately
     pageReady.value = true
-  } catch (error: any) {
-    console.error('Failed to initialize data:', error)
-    loadingError.value = null // don't show raw error
+    // Kick off all data loading in the background (non-blocking)
+    initializeAllData().catch(() => {})
+    fetchTodayOperationStatus().catch(() => {})
+  } catch {
     pageReady.value = true
   } finally {
-    // Clear progress timer
-    if (progressTimer) {
-      clearInterval(progressTimer)
-    }
-    // Ensure final progress is 100 when finishing normally
-    if (loadingProgress.value < 100) {
-      loadingProgress.value = 100
-    }
     initialLoading.value = false
     markLoadingShown()
   }

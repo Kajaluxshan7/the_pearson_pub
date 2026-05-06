@@ -218,12 +218,12 @@ useHead({
           <!-- Image Section -->
           <div class="relative">
             <div class="aspect-square rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-xl">
-              <NuxtImg
+              <img
                 :src="currentImage"
                 :alt="menuItem.name"
                 class="w-full h-full object-cover transition-opacity duration-300"
-                format="webp"
-                quality="85"
+                loading="eager"
+                decoding="async"
                 @error="handleImageError"
               />
             </div>

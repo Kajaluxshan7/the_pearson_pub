@@ -69,67 +69,13 @@
       </div>
 
       <!-- Progress Bar -->
-      <div v-if="showProgress" class="mb-6 max-w-sm mx-auto">
-        <div class="flex justify-between text-sm text-gray-400 mb-2">
-          <span>Loading...</span>
-          <span>{{ Math.round(progress) }}%</span>
-        </div>
-        <div class="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
-          <div
-            class="h-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 rounded-full transition-all duration-500 ease-out shadow-lg"
-            :style="{ width: progress + '%' }"
-          >
-            <div
-              class="h-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"
-            />
-          </div>
-        </div>
-      </div>
+      <!-- (removed) -->
 
       <!-- Loading Status Text -->
-      <div class="space-y-3 min-h-[56px] flex flex-col items-center justify-center">
-        <transition name="text-fade" mode="out-in">
-          <p :key="currentText" class="text-gray-300 text-lg font-medium text-center">
-            {{ currentText }}
-          </p>
-        </transition>
-        <p v-if="subText" class="text-gray-400 text-sm text-center">
-          {{ subText }}
-        </p>
-      </div>
+      <!-- (removed) -->
 
       <!-- Step Indicators -->
-      <div v-if="steps.length > 0" class="mt-6">
-        <div class="flex items-center justify-center flex-wrap gap-1">
-          <template v-for="(step, idx) in steps" :key="step">
-            <div
-              :class="[
-                'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300',
-                idx < currentStep
-                  ? 'bg-yellow-500 text-gray-900'
-                  : idx === currentStep
-                  ? 'bg-yellow-500/20 border-2 border-yellow-500 text-yellow-400'
-                  : 'bg-gray-700 text-gray-500'
-              ]"
-            >
-              <svg v-if="idx < currentStep" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              <span v-else class="text-xs">{{ idx + 1 }}</span>
-            </div>
-            <div
-              v-if="idx < steps.length - 1"
-              :class="[
-                'w-5 h-0.5 transition-all duration-500',
-                idx < currentStep ? 'bg-yellow-500' : 'bg-gray-700'
-              ]"
-            />
-          </template>
-        </div>
-        <p class="text-center text-xs text-gray-500 mt-2">
-          {{ currentStep < steps.length ? steps[currentStep] : steps[steps.length - 1] }}
-        </p>
-      </div>
+      <!-- (removed) -->
 
       <!-- Error / Retry UI -->
       <div v-if="error" class="mt-6 p-4 bg-red-900/30 border border-red-700/50 rounded-xl text-center">
@@ -156,18 +102,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 
 interface Props {
   title?: string
   subtitle?: string
   logoUrl?: string
-  progress?: number
-  showProgress?: boolean
-  texts?: string[]
-  steps?: string[]
-  currentStep?: number
-  subText?: string
   error?: string | null
   retrying?: boolean
 }
@@ -176,12 +116,6 @@ const props = withDefaults(defineProps<Props>(), {
   title: 'The Pearson Pub',
   subtitle: 'A traditional pub atmosphere with modern amenities in Whitby',
   logoUrl: '/pearson-pub-logo.png',
-  progress: 0,
-  showProgress: true,
-  texts: () => [],
-  steps: () => ['Menu', 'Events', 'Hours', 'Specials', 'Ready'],
-  currentStep: 0,
-  subText: '',
   error: null,
   retrying: false
 })
@@ -193,27 +127,6 @@ defineEmits<{
 
 // State
 const logoError = ref(false)
-const currentText = ref(props.texts[0] ?? '')
-const textIndex = ref(0)
-
-// Cycling loading text - properly placed at top level
-let textInterval: ReturnType<typeof setInterval> | null = null
-
-onMounted(() => {
-  if (props.texts.length > 1) {
-    textInterval = setInterval(() => {
-      textIndex.value = (textIndex.value + 1) % props.texts.length
-      currentText.value = props.texts[textIndex.value]
-    }, 2500)
-  }
-})
-
-onUnmounted(() => {
-  if (textInterval) {
-    clearInterval(textInterval)
-    textInterval = null
-  }
-})
 
 // Connectivity check is handled by the parent (pages/index.vue) to allow
 // grace periods and avoid premature redirects; do not auto-navigate here.
@@ -229,36 +142,7 @@ onUnmounted(() => {
   }
 }
 
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(200%);
-  }
-}
-
 .animate-spin-reverse {
   animation: spin-reverse 3s linear infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 2s ease-in-out infinite;
-}
-
-/* Text cycling fade transition */
-.text-fade-enter-active,
-.text-fade-leave-active {
-  transition: opacity 0.35s ease, transform 0.35s ease;
-}
-
-.text-fade-enter-from {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-.text-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
 }
 </style>

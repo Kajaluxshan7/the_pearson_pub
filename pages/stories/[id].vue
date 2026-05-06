@@ -27,12 +27,12 @@
       <section class="relative h-[40vh] md:h-[50vh] lg:h-[60vh] overflow-hidden">
         <!-- Image Container with 16:9 aspect ratio -->
         <div class="absolute inset-0 aspect-video bg-black">
-          <NuxtImg
+          <img
             :src="getCurrentStoryImage(story)"
             :alt="story.title"
             class="w-full h-full object-cover"
-            format="webp"
-            quality="90"
+            loading="eager"
+            decoding="async"
             @error="handleImageError"
           />
           <div
@@ -210,12 +210,12 @@
               class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-500 hover:scale-105"
             >
               <div class="relative h-64 overflow-hidden">
-                <NuxtImg
+                <img
                   :src="getStoryImage(relatedStory)"
                   :alt="relatedStory.title"
                   class="w-full h-full object-cover transform group-hover:scale-110 transition-all duration-700"
-                  format="webp"
-                  quality="80"
+                  loading="lazy"
+                  decoding="async"
                   @error="handleImageError"
                 />
                 <div

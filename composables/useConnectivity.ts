@@ -126,8 +126,8 @@ export const useConnectivity = () => {
     }
   }
 
-  // Comprehensive connectivity check
-  const checkConnectivity = async (retryOnFail = true): Promise<boolean> => {
+  // Comprehensive connectivity check — health endpoint only
+  const checkConnectivity = async (retryOnFail = false): Promise<boolean> => {
     updateOnlineStatus()
 
     if (!status.value.isOnline) {
@@ -135,29 +135,7 @@ export const useConnectivity = () => {
       return false
     }
 
-    // Try health endpoint first, then fallback to API endpoint
-    let isReachable = await checkBackendHealth(5000)
-
-    if (!isReachable) {
-      isReachable = await checkBackendAlternative(5000)
-    }
-
-    // Retry logic
-    if (!isReachable && retryOnFail && status.value.retryCount < status.value.maxRetries) {
-      status.value.retryCount++
-      if (process.dev) {
-        console.log(
-          `Backend unreachable, retry ${status.value.retryCount}/${status.value.maxRetries}`
-        )
-      }
-
-      // Wait before retry (exponential backoff)
-      await new Promise(resolve => setTimeout(resolve, 1000 * status.value.retryCount))
-
-      return await checkConnectivity(false) // Don't retry recursively
-    }
-
-    return isReachable
+    return await checkBackendHealth(5000)
   }
 
   // Quick check without retries

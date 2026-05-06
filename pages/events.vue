@@ -218,14 +218,12 @@
               >
                 <!-- Image Container - Made taller for better visibility -->
                 <div class="relative overflow-hidden h-100">
-                  <NuxtImg
+                  <img
                     :src="getCurrentEventImage(event)"
                     :alt="event.title"
                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    format="webp"
-                    quality="85"
-                    sizes="(min-width:1280px) 33vw, (min-width:768px) 50vw, 100vw"
-                    loading="lazy"
+                    loading="eager"
+                    decoding="async"
                     @error="handleImageError"
                   />
                   <!-- Status Badge -->
@@ -347,13 +345,12 @@
                 <div class="flex flex-col lg:flex-row">
                   <!-- Image - Improved aspect ratio -->
                   <div class="lg:w-96 relative overflow-hidden">
-                    <NuxtImg
+                    <img
                       :src="getCurrentEventImage(event)"
                       :alt="event.title"
                       class="w-full h-80 lg:h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      format="webp"
-                      quality="85"
-                      loading="lazy"
+                      loading="eager"
+                      decoding="async"
                       @error="handleImageError"
                     />
 
