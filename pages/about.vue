@@ -29,8 +29,7 @@
           <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2" />
         </div>
         <h1
-          class="text-5xl md:text-7xl font-bold mb-6 leading-tight"
-          style="font-family: 'Cinzel', 'Georgia', serif"
+          class="text-5xl md:text-7xl font-bold mb-6 leading-tight font-serif"
         >
           Our <span class="text-yellow-400">Story</span>
         </h1>
@@ -65,8 +64,7 @@
             </div>
 
             <h2
-              class="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight"
-              style="font-family: 'Cinzel', 'Georgia', serif"
+              class="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight font-serif"
             >
               Our <span class="text-yellow-600 dark:text-yellow-400">Heritage</span>
             </h2>
@@ -159,8 +157,7 @@
             <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2" />
           </div>
           <h2
-            class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6"
-            style="font-family: 'Cinzel', 'Georgia', serif"
+            class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 font-serif"
           >
             Our <span class="text-yellow-600 dark:text-yellow-400">Stories</span>
           </h2>
@@ -302,8 +299,7 @@
             <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2" />
           </div>
           <h2
-            class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6"
-            style="font-family: 'Cinzel', 'Georgia', serif"
+            class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 font-serif"
           >
             Our <span class="text-yellow-600 dark:text-yellow-400">Values</span>
           </h2>
@@ -354,8 +350,7 @@
             <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2" />
           </div>
           <h2
-            class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6"
-            style="font-family: 'Cinzel', 'Georgia', serif"
+            class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 font-serif"
           >
             The People Behind
             <span class="text-yellow-600 dark:text-yellow-400">The Experience</span>
@@ -395,7 +390,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { publicApi } from '~/composables/usePublicApi'
 import type { ApiStory } from '~/composables/usePublicApi'
 import StoryModal from '~/features/stories/components/StoryModal.vue'
@@ -483,21 +478,32 @@ const getStorySubtitle = (story: ApiStory) => {
 }
 
 // Initialize image rotation for stories with multiple images
+const imageRotationIntervals: ReturnType<typeof setInterval>[] = []
+
 const initializeImageRotation = () => {
+  // Clear any existing intervals
+  imageRotationIntervals.forEach(id => clearInterval(id))
+  imageRotationIntervals.length = 0
+
   stories.value.forEach(story => {
     if (story.images && story.images.length > 1) {
       // Initialize index for this story
       currentImageIndexes.value[story.id] = 0
 
       // Set up rotation interval for this story
-      setInterval(() => {
+      const intervalId = setInterval(() => {
         const currentIndex = currentImageIndexes.value[story.id] || 0
         const nextIndex = (currentIndex + 1) % story.images.length
         currentImageIndexes.value[story.id] = nextIndex
-      }, 3000) // Change image every 3 seconds
+      }, 3000)
+      imageRotationIntervals.push(intervalId)
     }
   })
 }
+
+onUnmounted(() => {
+  imageRotationIntervals.forEach(id => clearInterval(id))
+})
 
 // Simple fade-in animations on mount
 onMounted(() => {

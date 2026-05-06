@@ -182,6 +182,7 @@
 
 <script setup lang="ts">
 import { usePublicApi } from '@/composables/usePublicApi'
+import DOMPurify from 'isomorphic-dompurify'
 
 interface Props {
   storyId?: string
@@ -276,11 +277,12 @@ const formatStoryContent = (content: string) => {
     return ''
   }
 
-  // Convert line breaks to paragraphs
-  return content
+  // Convert line breaks to paragraphs and sanitize
+  const html = content
     .split('\n\n')
     .map(paragraph => `<p class="mb-4">${paragraph.trim()}</p>`)
     .join('')
+  return DOMPurify.sanitize(html)
 }
 
 // Modal actions

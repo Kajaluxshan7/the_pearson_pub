@@ -23,8 +23,7 @@
           <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2" />
         </div>
         <h1
-          class="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 leading-tight"
-          style="font-family: 'Cinzel', 'Georgia', serif"
+          class="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 leading-tight font-serif"
         >
           Contact <span class="text-yellow-400">Us</span>
         </h1>
@@ -52,8 +51,7 @@
               </div>
 
               <h2
-                class="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight"
-                style="font-family: 'Cinzel', 'Georgia', serif"
+                class="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight font-serif"
               >
                 Get in <span class="text-yellow-600 dark:text-yellow-400">Touch</span>
               </h2>
@@ -228,8 +226,7 @@
             <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2" />
           </div>
           <h2
-            class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6"
-            style="font-family: 'Cinzel', 'Georgia', serif"
+            class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 font-serif"
           >
             Visit <span class="text-yellow-600 dark:text-yellow-400">Our Pub</span>
           </h2>
@@ -481,7 +478,7 @@ const submitForm = async () => {
       }
     })
 
-    console.log('Contact form response:', response)
+    if (process.dev) console.log('Contact form response:', response)
 
     // Success
     form.value = {

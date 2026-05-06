@@ -108,8 +108,6 @@ interface Props {
   logoUrl?: string
   progress?: number
   showProgress?: boolean
-  showSteps?: boolean
-  showPreview?: boolean
   texts?: string[]
   steps?: string[]
   currentStep?: number
@@ -124,8 +122,6 @@ const props = withDefaults(defineProps<Props>(), {
   logoUrl: '/pearson-pub-logo.png',
   progress: 0,
   showProgress: true,
-  showSteps: true,
-  showPreview: true,
   texts: () => [],
   steps: () => ['Menu', 'Events', 'Hours', 'Specials', 'Ready'],
   currentStep: 0,

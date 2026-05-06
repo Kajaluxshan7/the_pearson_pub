@@ -26,8 +26,7 @@
           <div class="w-12 lg:w-16 h-1 bg-yellow-500 mx-auto mt-2" />
         </div>
         <h1
-          class="text-3xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-tight"
-          style="font-family: 'Cinzel', 'Georgia', serif"
+          class="text-3xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-tight font-serif"
         >
           Our <span class="text-yellow-400">Menu</span>
         </h1>
@@ -279,8 +278,7 @@
             <!-- Category Header -->
             <div class="text-center mb-12">
               <h2
-                class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4"
-                style="font-family: 'Cinzel', 'Georgia', serif"
+                class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4 font-serif"
               >
                 {{ category.name }}
               </h2>
@@ -300,215 +298,26 @@
 
             <!-- Grid View -->
             <div v-if="viewMode === 'grid'" :class="gridClasses">
-              <div
+              <MenuItemCard
                 v-for="(item, index) in paginatedItems(category).items"
                 :key="item.id"
-                class="menu-card transition-all duration-500 transform hover:scale-105 cursor-pointer"
-                :style="{ animationDelay: `${index * 100}ms` }"
-                @click="() => showItemDetails(item)"
-              >
-                <!-- Square Menu Item Card -->
-                <UCard
-                  class="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0 h-full flex flex-col"
-                  :class="{ 'opacity-50 pointer-events-none': !item.isAvailable }"
-                >
-                  <template #header>
-                    <div class="relative overflow-hidden aspect-square">
-                      <NuxtImg
-                        :src="getImageUrl(item) || '/images/default-placeholder.jpg'"
-                        class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-110"
-                        :alt="item.name"
-                        format="webp"
-                        quality="75"
-                        loading="lazy"
-                        :placeholder="[400, 400, 75]"
-                      />
-
-                      <!-- Badges -->
-                      <div class="absolute top-3 left-3 flex flex-col gap-2">
-                        <UBadge
-                          v-if="!item.isAvailable"
-                          color="gray"
-                          variant="solid"
-                          class="font-semibold text-xs"
-                        >
-                          Sold Out
-                        </UBadge>
-                      </div>
-
-                      <!-- Dietary Icons -->
-                      <div class="absolute bottom-3 left-3 flex gap-1">
-                        <UBadge
-                          v-if="item.dietaryInfo?.isVegetarian"
-                          color="green"
-                          variant="subtle"
-                          class="text-xs flex items-center"
-                        >
-                          <UIcon name="i-heroicons-sparkles" class="w-3 h-3 mr-1" />
-                          V
-                        </UBadge>
-                        <UBadge
-                          v-if="item.dietaryInfo?.isVegan"
-                          color="emerald"
-                          variant="subtle"
-                          class="text-xs"
-                        >
-                          VG
-                        </UBadge>
-                        <UBadge
-                          v-if="item.dietaryInfo?.isGlutenFree"
-                          color="blue"
-                          variant="subtle"
-                          class="text-xs"
-                        >
-                          GF
-                        </UBadge>
-                      </div>
-                      <!-- Price Badge -->
-                      <div v-if="item.price && item.price > 0" class="absolute top-3 right-3">
-                        <UBadge color="yellow" variant="solid" class="font-bold text-sm">
-                          ${{ item.price }}
-                        </UBadge>
-                      </div>
-                    </div>
-                  </template>
-
-                  <div class="p-0 flex flex-col flex-grow">
-                    <h3
-                      class="text-lg font-semibold mb-2 line-clamp-2 flex-grow"
-                      :class="
-                        item.isAvailable
-                          ? 'text-gray-900 dark:text-white'
-                          : 'text-red-600 dark:text-red-400'
-                      "
-                    >
-                      {{ item.name }}
-                    </h3>
-                  </div>
-                </UCard>
-              </div>
+                :item="item"
+                :view-mode="'grid'"
+                :index="index"
+                @click="showItemDetails(item)"
+              />
             </div>
 
             <!-- List View -->
             <div v-else class="space-y-4">
-              <div
+              <MenuItemCard
                 v-for="(item, index) in paginatedItems(category).items"
                 :key="item.id"
-                class="menu-card transition-all duration-500 cursor-pointer"
-                :style="{ animationDelay: `${index * 100}ms` }"
-                @click="() => showItemDetails(item)"
-              >
-                <UCard
-                  class="group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border-0"
-                  :class="{ 'opacity-50 pointer-events-none': !item.isAvailable }"
-                >
-                  <div class="flex flex-col sm:flex-row">
-                    <!-- Image -->
-                    <div class="sm:w-48 relative overflow-hidden">
-                      <NuxtImg
-                        :src="getImageUrl(item) || '/images/menu/menuItemDefault.jpg'"
-                        class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-110"
-                        :alt="item.name"
-                        format="webp"
-                        quality="75"
-                        loading="lazy"
-                        :placeholder="[400, 200, 75]"
-                      />
-
-                      <!-- Badges -->
-                      <div class="absolute top-3 left-3 flex flex-col gap-2">
-                        <UBadge
-                          v-if="!item.isAvailable"
-                          color="gray"
-                          variant="solid"
-                          class="font-semibold text-xs"
-                        >
-                          Sold Out
-                        </UBadge>
-                      </div>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="flex-1 p-6">
-                      <div class="flex justify-between items-start mb-4">
-                        <div class="flex-1">
-                          <h3
-                            class="text-xl font-bold mb-2"
-                            :class="
-                              item.isAvailable
-                                ? 'text-gray-900 dark:text-white'
-                                : 'text-red-600 dark:text-red-400'
-                            "
-                          >
-                            {{ item.name }}
-                          </h3>
-                          <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                            {{ item.description }}
-                          </p>
-
-                          <!-- Dietary Info -->
-                          <div class="flex flex-wrap gap-2 mb-4">
-                            <UBadge
-                              v-if="item.dietaryInfo?.isVegetarian"
-                              color="green"
-                              variant="subtle"
-                              class="text-xs flex items-center"
-                            >
-                              <UIcon name="i-heroicons-sparkles" class="w-3 h-3 mr-1" />
-                              Vegetarian
-                            </UBadge>
-                            <UBadge
-                              v-if="item.dietaryInfo?.isVegan"
-                              color="emerald"
-                              variant="subtle"
-                              class="text-xs"
-                            >
-                              Vegan
-                            </UBadge>
-                            <UBadge
-                              v-if="item.dietaryInfo?.isGlutenFree"
-                              color="blue"
-                              variant="subtle"
-                              class="text-xs"
-                            >
-                              Gluten Free
-                            </UBadge>
-                          </div>
-
-                          <!-- Availability Status -->
-                          <div class="mb-4">
-                            <UBadge
-                              :color="item.isAvailable ? 'green' : 'red'"
-                              variant="solid"
-                              class="text-sm"
-                            >
-                              {{ item.isAvailable ? 'Available' : 'Not Available' }}
-                            </UBadge>
-                          </div>
-                        </div>
-
-                        <!-- Price and Action -->
-                        <div class="text-right ml-4">
-                          <p
-                            v-if="item.price && item.price > 0"
-                            class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-4"
-                          >
-                            ${{ item.price }}
-                          </p>
-                          <UButton
-                            color="yellow"
-                            variant="solid"
-                            size="md"
-                            :disabled="!item.isAvailable"
-                          >
-                            View Details
-                          </UButton>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </UCard>
-              </div>
+                :item="item"
+                :view-mode="'list'"
+                :index="index"
+                @click="showItemDetails(item)"
+              />
             </div>
             <!-- Modern Pagination with Icons -->
             <div
@@ -789,6 +598,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useLandingPageData } from '~/composables/useLandingPageData'
 import { usePerformance } from '~/composables/usePerformance'
 import SkeletonCard from '~/components/loading/SkeletonCard.vue'
+import MenuItemCard from '~/components/menu/MenuItemCard.vue'
 import type { MenuItem, MenuCategory } from '~/types/menu'
 
 // SSR/SSG: useAsyncData for menu data
@@ -990,15 +800,6 @@ const filteredItemsCount = computed(() => {
     }).length
   }
 })
-
-// Debug watch for categories
-watch(
-  categories,
-  newCategories => {
-    newCategories.forEach((cat, index) => {})
-  },
-  { immediate: true }
-)
 
 const hasActiveFilters = computed(() => {
   return searchQuery.value || availabilityFilter.value !== 'all' || sortBy.value !== 'name'
@@ -1288,9 +1089,6 @@ const updateCategoryPage = (categoryId: string, page: number | string) => {
   // Convert string to number for page numbers
   const pageNum = typeof page === 'string' ? parseInt(page) : page
 
-  console.log(`Updating page for category ${categoryId} to page ${pageNum}`)
-  console.log('Before update:', JSON.stringify(categoryPages.value))
-
   // Find the category to determine max pages
   const category = categories.value.find(cat => cat.id === categoryId)
   let maxPage = 1
@@ -1309,8 +1107,6 @@ const updateCategoryPage = (categoryId: string, page: number | string) => {
     [categoryId]: validPage
   }
 
-  console.log('After update:', JSON.stringify(categoryPages.value))
-  console.log(`Page set to ${validPage} (requested: ${pageNum}, max: ${maxPage})`)
 }
 
 const gridClasses = computed(() => {

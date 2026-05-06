@@ -6,13 +6,15 @@ export default {
     './layouts/**/*.vue',
     './pages/**/*.vue',
     './plugins/**/*.{js,ts}',
+    './features/**/*.{vue,js,ts}',
     './app.vue',
     './error.vue'
   ],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif']
+        sans: ['Inter', 'sans-serif'],
+        serif: ['Cinzel', 'Georgia', 'serif']
       },
       colors: {
         primary: {

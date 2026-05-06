@@ -55,8 +55,7 @@
               </span>
             </div>
             <h1
-              class="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight"
-              style="font-family: 'Cinzel', 'Georgia', serif"
+              class="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight font-serif"
             >
               {{ story.title }}
             </h1>
@@ -243,10 +242,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 // Import the API methods
 import { publicApi } from '~/composables/usePublicApi'
+import DOMPurify from 'isomorphic-dompurify'
 
 // Meta tags
 useHead({
@@ -339,11 +339,12 @@ const formatStoryContent = (content: string) => {
     return ''
   }
 
-  // Convert line breaks to paragraphs
-  return content
+  // Convert line breaks to paragraphs and sanitize
+  const html = content
     .split('\n\n')
     .map(paragraph => `<p class="mb-4">${paragraph.trim()}</p>`)
     .join('')
+  return DOMPurify.sanitize(html)
 }
 
 // Sharing functions
@@ -387,11 +388,19 @@ const copyLink = async () => {
 }
 
 // Auto-rotate images if there are multiple
+let imageRotationInterval: ReturnType<typeof setInterval> | null = null
+
 onMounted(() => {
   if (story.value?.images && story.value.images.length > 1) {
-    setInterval(() => {
+    imageRotationInterval = setInterval(() => {
       nextImage()
-    }, 5000) // Change image every 5 seconds
+    }, 5000)
+  }
+})
+
+onUnmounted(() => {
+  if (imageRotationInterval) {
+    clearInterval(imageRotationInterval)
   }
 })
 </script>

@@ -23,7 +23,6 @@ export default defineNuxtPlugin(() => {
         if (process.dev) {
           console.log('Page reload detected, clearing dev session state')
         }
-        sessionStorage.removeItem('pearson-pub-visited')
         sessionStorage.removeItem('background-data-loaded')
       }
     }

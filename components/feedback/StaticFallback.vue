@@ -25,7 +25,6 @@
         <!-- Title -->
         <h1
           class="text-5xl md:text-6xl font-bold mb-4 font-serif text-gray-900 dark:text-white"
-          style="font-family: 'Cinzel', 'Georgia', serif"
         >
           The
           <span class="text-yellow-600 dark:text-yellow-400">Pearson Pub</span>
@@ -48,8 +47,7 @@
           <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2" />
         </div>
         <h2
-          class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
-          style="font-family: 'Cinzel', 'Georgia', serif"
+          class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 font-serif"
         >
           Visit Our
           <span class="text-yellow-600 dark:text-yellow-400">Pub</span>

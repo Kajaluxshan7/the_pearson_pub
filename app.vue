@@ -6,7 +6,7 @@
         <!-- Use NuxtLayout for proper Nuxt 3 structure -->
         <NuxtLayout>
           <LayoutHeader />
-          <main class="flex-grow">
+          <main id="main-content" class="flex-grow">
             <NuxtPage />
           </main>
           <LayoutFooter />
@@ -36,11 +36,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import LayoutHeader from '~/components/layout/Header.vue'
 import LayoutFooter from '~/components/layout/Footer.vue'
 
-// Set light mode as default — useColorMode is auto-imported by @nuxt/ui via @nuxtjs/color-mode
-const colorMode = useColorMode()
-if (colorMode) {
-  colorMode.preference = 'light'
-}
+// Color mode is managed by @nuxtjs/color-mode with 'light' fallback (nuxt.config.ts)
 
 // Scroll position
 const scrollY = ref(0)

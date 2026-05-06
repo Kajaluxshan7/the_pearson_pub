@@ -26,8 +26,7 @@
           <div class="w-12 lg:w-16 h-1 bg-yellow-500 mx-auto mt-2" />
         </div>
         <h1
-          class="text-3xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-tight"
-          style="font-family: 'Cinzel', 'Georgia', serif"
+          class="text-3xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-tight font-serif"
         >
           Events &amp; <span class="text-yellow-400">Entertainment</span>
         </h1>
@@ -148,8 +147,7 @@
         <div class="text-center mb-12">
           <div>
             <h2
-              class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3"
-              style="font-family: 'Cinzel', 'Georgia', serif"
+              class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 font-serif"
             >
               {{ getResultsTitle() }}
             </h2>
@@ -477,253 +475,7 @@
     </section>
 
     <!-- Event Detail Modal -->
-    <UModal v-model="isEventModalOpen" :ui="{ width: 'max-w-full sm:max-w-6xl' }">
-      <div class="relative">
-        <!-- Event Content -->
-        <div v-if="selectedEvent" class="max-h-[80vh] overflow-y-auto">
-          <!-- Cinematic Hero Section with 16:9 aspect ratio -->
-          <div
-            class="relative aspect-video bg-black overflow-hidden flex items-center justify-center"
-          >
-            <!-- Blurred/Gradient background using current image -->
-            <div class="absolute inset-0 z-0">
-              <NuxtImg
-                :src="getCurrentEventImage(selectedEvent)"
-                :alt="selectedEvent.title"
-                class="w-full h-full object-cover blur-xl scale-110 opacity-60"
-                format="webp"
-                quality="60"
-                @error="handleImageError"
-              />
-              <div
-                class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"
-              />
-            </div>
-
-            <!-- Centered 4:5 image -->
-            <div class="relative z-10 flex items-center justify-center h-full w-full">
-              <NuxtImg
-                :src="getCurrentEventImage(selectedEvent)"
-                :alt="selectedEvent.title"
-                class="shadow-2xl rounded-2xl object-cover bg-white/10"
-                :style="{
-                  width: 'clamp(180px,60vw,360px)',
-                  height: 'clamp(220px,45vh,480px)',
-                  aspectRatio: '4/5',
-                  maxWidth: '90vw',
-                  maxHeight: '90vw'
-                }"
-                format="webp"
-                quality="90"
-                @error="handleImageError"
-              />
-            </div>
-
-            <!-- Close Button -->
-            <button
-              class="absolute top-3 right-3 sm:top-6 sm:right-6 bg-black/60 hover:bg-black/80 text-white p-2 sm:p-3 rounded-full shadow-lg transition-all duration-300 backdrop-blur-md z-30"
-              @click="closeEventModal"
-            >
-              <UIcon name="i-heroicons-x-mark" class="w-6 h-6" />
-            </button>
-
-            <!-- Image Navigation for Multiple Images -->
-            <div
-              v-if="selectedEvent.images && selectedEvent.images.length > 1"
-              class="absolute top-1/2 left-2 right-2 sm:left-8 sm:right-8 flex justify-between items-center transform -translate-y-1/2 z-20"
-            >
-              <button
-                class="bg-black/60 hover:bg-yellow-500 text-white p-3 rounded-full shadow-lg transition-all duration-300 backdrop-blur-md"
-                @click="previousEventImage"
-              >
-                <UIcon name="i-heroicons-chevron-left" class="w-6 h-6" />
-              </button>
-              <button
-                class="bg-black/60 hover:bg-yellow-500 text-white p-3 rounded-full shadow-lg transition-all duration-300 backdrop-blur-md"
-                @click="nextEventImage"
-              >
-                <UIcon name="i-heroicons-chevron-right" class="w-6 h-6" />
-              </button>
-            </div>
-
-            <!-- Thumbnails Carousel -->
-            <div
-              v-if="selectedEvent.images && selectedEvent.images.length > 1"
-              class="absolute bottom-2 sm:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 sm:space-x-3 z-20"
-            >
-              <button
-                v-for="(img, index) in selectedEvent.images"
-                :key="index"
-                class="w-8 h-10 sm:w-12 sm:h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 shadow-lg"
-                :class="
-                  index === getCurrentImageIndex(selectedEvent.id)
-                    ? 'border-yellow-500 scale-105'
-                    : 'border-transparent opacity-70 hover:opacity-100'
-                "
-                @click="setCurrentEventImage(index)"
-              >
-                <NuxtImg
-                  :src="img"
-                  :alt="selectedEvent.title"
-                  class="object-cover w-full h-full"
-                  format="webp"
-                  quality="60"
-                />
-              </button>
-            </div>
-
-            <!-- Status Badge -->
-            <div class="absolute top-3 left-3 sm:top-6 sm:left-6 z-30">
-              <div
-                :class="[
-                  'px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg backdrop-blur-md',
-                  getStatusColor(selectedEvent.status) === 'green'
-                    ? 'bg-green-500/90 text-white'
-                    : getStatusColor(selectedEvent.status) === 'blue'
-                    ? 'bg-blue-500/90 text-white'
-                    : 'bg-gray-500/90 text-white'
-                ]"
-              >
-                {{ getStatusLabel(selectedEvent.status) }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Event Content Section -->
-          <div class="p-4 sm:p-8 bg-white dark:bg-gray-900 rounded-b-3xl shadow-2xl mt-[-2px]">
-            <!-- Event Title -->
-            <div class="mb-6">
-              <h1
-                class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2"
-              >
-                {{ selectedEvent.title }}
-              </h1>
-              <p
-                v-if="selectedEvent.date"
-                class="text-lg text-yellow-600 dark:text-yellow-400 font-medium"
-              >
-                {{ formatEventDateRange(selectedEvent.date, selectedEvent.endDate || '') }}
-              </p>
-            </div>
-
-            <!-- Event Description -->
-            <div
-              v-if="selectedEvent.description || selectedEvent.fullDescription"
-              class="prose prose-lg dark:prose-invert max-w-none mb-6 sm:mb-8"
-            >
-              <div
-                v-html="
-                  formatEventContent(selectedEvent.fullDescription || selectedEvent.description)
-                "
-              />
-            </div>
-
-            <!-- Event Details Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <!-- Date -->
-              <div v-if="selectedEvent.date" class="flex items-start space-x-4">
-                <div
-                  class="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center flex-shrink-0"
-                >
-                  <UIcon
-                    name="i-heroicons-calendar"
-                    class="w-6 h-6 text-yellow-600 dark:text-yellow-400"
-                  />
-                </div>
-                <div class="flex-1">
-                  <p class="font-semibold text-gray-900 dark:text-white text-lg">Event Date</p>
-                  <p class="text-gray-600 dark:text-gray-400">
-                    {{ formatEventDateRange(selectedEvent.date, selectedEvent.endDate || '') }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Time -->
-              <div v-if="selectedEvent.time" class="flex items-start space-x-4">
-                <div
-                  class="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center flex-shrink-0"
-                >
-                  <UIcon
-                    name="i-heroicons-clock"
-                    class="w-6 h-6 text-yellow-600 dark:text-yellow-400"
-                  />
-                </div>
-                <div class="flex-1">
-                  <p class="font-semibold text-gray-900 dark:text-white text-lg">Time</p>
-                  <p class="text-gray-600 dark:text-gray-400">
-                    {{ selectedEvent.time.replace(/\s*\/?\s*\b(EST|EDT)\b\s*/g, '').trim() }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Location -->
-              <div v-if="selectedEvent.location" class="flex items-start space-x-4">
-                <div
-                  class="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center flex-shrink-0"
-                >
-                  <UIcon
-                    name="i-heroicons-map-pin"
-                    class="w-6 h-6 text-yellow-600 dark:text-yellow-400"
-                  />
-                </div>
-                <div class="flex-1">
-                  <p class="font-semibold text-gray-900 dark:text-white text-lg">Location</p>
-                  <p class="text-gray-600 dark:text-gray-400">
-                    {{ selectedEvent.location }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Price -->
-              <div v-if="selectedEvent.price" class="flex items-start space-x-4">
-                <div
-                  class="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center flex-shrink-0"
-                >
-                  <UIcon
-                    name="i-heroicons-currency-dollar"
-                    class="w-6 h-6 text-yellow-600 dark:text-yellow-400"
-                  />
-                </div>
-                <div class="flex-1">
-                  <p class="font-semibold text-gray-900 dark:text-white text-lg">Entry Fee</p>
-                  <p class="text-gray-600 dark:text-gray-400">Free for all</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div
-              class="flex flex-col sm:flex-row sm:items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700 gap-4"
-            >
-              <div class="flex items-center space-x-4 text-gray-600 dark:text-gray-400" />
-
-              <div class="flex space-x-3">
-                <UButton
-                  color="yellow"
-                  variant="solid"
-                  size="lg"
-                  class="shadow-lg"
-                  @click="shareEvent"
-                >
-                  <UIcon name="i-heroicons-share" class="w-5 h-5 mr-2" />
-                  Share Event
-                </UButton>
-                <UButton
-                  color="gray"
-                  variant="outline"
-                  size="lg"
-                  class="shadow-lg"
-                  @click="addToCalendar"
-                >
-                  <UIcon name="i-heroicons-calendar" class="w-5 h-5 mr-2" />
-                  Add to Calendar
-                </UButton>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </UModal>
+    <EventDetailModal v-model="isEventModalOpen" :event="selectedEvent" />
 
     <!-- Weekly Schedule Section -->
     <WeeklyEntertainment />
@@ -1037,61 +789,6 @@ const updateCurrentImage = (event: any, index: number) => {
   }
 }
 
-const setCurrentEventImage = (index: number) => {
-  if (selectedEvent.value && selectedEvent.value.id) {
-    setCurrentImage(selectedEvent.value.id, index)
-  }
-}
-
-const previousEventImage = () => {
-  if (selectedEvent.value && selectedEvent.value.images && selectedEvent.value.images.length > 1) {
-    const currentIndex = getCurrentImageIndex(selectedEvent.value.id)
-    const newIndex = currentIndex === 0 ? selectedEvent.value.images.length - 1 : currentIndex - 1
-    setCurrentImage(selectedEvent.value.id, newIndex)
-  }
-}
-
-const nextEventImage = () => {
-  if (selectedEvent.value && selectedEvent.value.images && selectedEvent.value.images.length > 1) {
-    const currentIndex = getCurrentImageIndex(selectedEvent.value.id)
-    const newIndex = (currentIndex + 1) % selectedEvent.value.images.length
-    setCurrentImage(selectedEvent.value.id, newIndex)
-  }
-}
-
-const formatEventContent = (content: string) => {
-  if (!content) {
-    return ''
-  }
-  // Basic HTML formatting for event content
-  return content.replace(/\n/g, '<br>')
-}
-
-const addToCalendar = () => {
-  if (!selectedEvent.value) {
-    return
-  }
-
-  const event = selectedEvent.value
-  const startDate = new Date(event.date || '')
-  const endDate = event.endDate
-    ? new Date(event.endDate)
-    : new Date(startDate.getTime() + 2 * 60 * 60 * 1000) // Default 2 hours
-
-  const formatDateForCalendar = (date: Date) => {
-    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
-  }
-
-  const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-    event.title
-  )}&dates=${formatDateForCalendar(startDate)}/${formatDateForCalendar(
-    endDate
-  )}&details=${encodeURIComponent(event.description || '')}&location=${encodeURIComponent(
-    event.location || 'The Pearson Pub, Whitby'
-  )}`
-
-  window.open(calendarUrl, '_blank')
-}
 
 const handleImageError = (event: any) => {
   // Prevent infinite loop by only setting fallback if not already set
@@ -1200,48 +897,19 @@ const showEventDetails = (event: Event) => {
   isEventModalOpen.value = true
 }
 
-const closeEventModal = () => {
-  isEventModalOpen.value = false
-  selectedEvent.value = null
-}
-
 const refreshEvents = async () => {
   error.value = null
   await fetchEventsData()
 }
 
-const shareEvent = async () => {
-  if (!selectedEvent.value) {
-    return
-  }
-
-  const shareData = {
-    title: `${selectedEvent.value.title} - The Pearson Pub`,
-    text: selectedEvent.value.description,
-    url: window.location.origin + '/events'
-  }
-
-  try {
-    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-      await navigator.share(shareData)
-    } else {
-      // Fallback to clipboard
-      await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`)
-      // You could add a toast notification here
-    }
-  } catch (err) {
-    console.log('Error sharing:', err)
-    // Fallback to clipboard
-    try {
-      await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`)
-    } catch (clipboardErr) {
-      console.log('Clipboard fallback failed:', clipboardErr)
-    }
-  }
-}
-
 // Image rotation for events with multiple images
+const eventImageIntervals: ReturnType<typeof setInterval>[] = []
+
 const initializeImageRotation = () => {
+  // Clear existing intervals
+  eventImageIntervals.forEach(id => clearInterval(id))
+  eventImageIntervals.length = 0
+
   allEvents.value.forEach(event => {
     if (event.images && event.images.length > 1) {
       // Initialize index
@@ -1250,14 +918,19 @@ const initializeImageRotation = () => {
       }
 
       // Start rotation
-      setInterval(() => {
+      const intervalId = setInterval(() => {
         const currentIndex = currentImageIndexes.value[event.id] || 0
         const nextIndex = (currentIndex + 1) % event.images.length
         currentImageIndexes.value[event.id] = nextIndex
-      }, 4000) // Change image every 4 seconds
+      }, 4000)
+      eventImageIntervals.push(intervalId)
     }
   })
 }
+
+onUnmounted(() => {
+  eventImageIntervals.forEach(id => clearInterval(id))
+})
 
 // Responsive view mode
 const checkViewMode = () => {

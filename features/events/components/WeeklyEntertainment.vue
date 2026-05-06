@@ -12,8 +12,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
       <div class="text-center mb-12 lg:mb-16">
         <h2
-          class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4"
-          style="font-family: 'Cinzel', 'Georgia', serif"
+          class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 font-serif"
         >
           Weekly <span class="text-yellow-600 dark:text-yellow-400">Schedule</span>
         </h2>

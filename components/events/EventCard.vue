@@ -25,6 +25,7 @@
             <button
               v-if="event.images.length > 1"
               class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all"
+              aria-label="Previous image"
               @click="previousImage"
             >
               <UIcon name="i-heroicons-chevron-left" class="w-5 h-5" />
@@ -32,17 +33,20 @@
             <button
               v-if="event.images.length > 1"
               class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all"
+              aria-label="Next image"
               @click="nextImage"
             >
               <UIcon name="i-heroicons-chevron-right" class="w-5 h-5" />
             </button>
             <!-- Carousel Indicators -->
             <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2">
-              <span
+              <button
                 v-for="(img, idx) in event.images"
                 :key="idx"
                 class="w-2 h-2 rounded-full cursor-pointer transition-all"
                 :class="carouselIndex === idx ? 'bg-yellow-500' : 'bg-gray-300 hover:bg-gray-400'"
+                :aria-label="`Go to image ${idx + 1}`"
+                :aria-current="carouselIndex === idx ? 'true' : undefined"
                 @click="carouselIndex = idx"
               />
             </div>
@@ -443,6 +447,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import type { Event } from '~/types/events'
+import DOMPurify from 'isomorphic-dompurify'
 
 const props = defineProps<{
   event: Event
@@ -519,7 +524,7 @@ const getCategoryColor = (category: string) => {
 }
 
 const formatDescription = (description: string) => {
-  return description.replace(/\n/g, '<br>')
+  return DOMPurify.sanitize(description.replace(/\n/g, '<br>'))
 }
 
 const handleBooking = () => {

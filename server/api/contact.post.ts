@@ -14,6 +14,15 @@ function logMessage(message: string, data?: unknown) {
   }
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 function logError(message: string, data?: unknown) {
   if (process.dev) {
     if (data) {
@@ -83,17 +92,24 @@ export default defineEventHandler(async (event: H3Event) => {
       }
     })
 
+    // Escape user input for safe HTML rendering
+    const safeFirstName = escapeHtml(firstName)
+    const safeLastName = escapeHtml(lastName)
+    const safeEmail = escapeHtml(email)
+    const safeSubject = escapeHtml(subject)
+    const safeMessage = escapeHtml(message)
+
     // Prepare email content with modern template
     const mailOptions = {
-      from: `"${firstName} ${lastName}" <${smtpUser}>`,
+      from: `"${safeFirstName} ${safeLastName}" <${smtpUser}>`,
       replyTo: email,
       to: config.contactEmail || process.env.NUXT_CONTACT_EMAIL || 'contact@thepearsonpubwhitby.ca',
-      subject: `🍺 New Contact Form Submission - The Pearson Pub | ${subject}`,
+      subject: `New Contact Form Submission - The Pearson Pub | ${safeSubject}`,
       text: `
-        Name: ${firstName} ${lastName}
-        Email: ${email}
-        Subject: ${subject}
-        Message: ${message}
+        Name: ${safeFirstName} ${safeLastName}
+        Email: ${safeEmail}
+        Subject: ${safeSubject}
+        Message: ${safeMessage}
       `,
       html: `
         <html lang="en">
@@ -218,21 +234,21 @@ export default defineEventHandler(async (event: H3Event) => {
               <div class="message-details">
                 <div class="info-row">
                   <div class="info-label">Name:</div>
-                  <div class="info-value">${firstName} ${lastName}</div>
+                  <div class="info-value">${safeFirstName} ${safeLastName}</div>
                 </div>
                 <div class="info-row">
                   <div class="info-label">Email:</div>
-                  <div class="info-value">${email}</div>
+                  <div class="info-value">${safeEmail}</div>
                 </div>
                 <div class="info-row">
                   <div class="info-label">Subject:</div>
-                  <div class="info-value">${subject}</div>
+                  <div class="info-value">${safeSubject}</div>
                 </div>
                 <div class="info-row">
                   <div class="info-label">Message:</div>
                 </div>
                 <div class="message-content">
-                  ${message.replace(/\n/g, '<br>')}
+                  ${safeMessage.replace(/\n/g, '<br>')}
                 </div>
               </div>
             </div>
