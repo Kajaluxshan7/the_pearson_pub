@@ -359,7 +359,9 @@ const isVisible = ref({
 })
 
 // Refs for intersection observer
-const aboutSectionRef = ref(null)
+// AboutSection exposes `aboutRef`; fall back to the component root element.
+// Typed explicitly because a bare `ref(null)` narrows `.value` to `never`.
+const aboutSectionRef = ref<{ aboutRef?: HTMLElement | null; $el?: HTMLElement } | null>(null)
 
 // Intersection observer callback
 const handleIntersection = (

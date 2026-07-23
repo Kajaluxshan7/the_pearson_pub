@@ -118,20 +118,9 @@
 
         <!-- Story Content Section -->
         <div class="p-4 sm:p-8 bg-white dark:bg-gray-900 rounded-b-3xl shadow-2xl mt-[-2px]">
-          <!-- Full Description -->
-          <div
-            v-if="story.fullDescription || story.content"
-            class="prose prose-lg dark:prose-invert max-w-none mb-6 sm:mb-8"
-          >
-            <div
-              v-html="
-                formatStoryContent(story.fullDescription || story.content || story.description)
-              "
-            />
-          </div>
-
-          <!-- Fallback if no full content -->
-          <div v-else class="mb-6 sm:mb-8">
+          <!-- Story description. The API exposes `description` only - there is no
+               rich-text field on the backend Story entity, so this is the whole body. -->
+          <div class="mb-6 sm:mb-8">
             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
               {{ story.description }}
             </p>
@@ -182,7 +171,7 @@
 
 <script setup lang="ts">
 import { usePublicApi } from '@/composables/usePublicApi'
-import DOMPurify from 'isomorphic-dompurify'
+import type { ApiStory } from '@/composables/usePublicApi'
 
 interface Props {
   storyId?: string
@@ -199,7 +188,7 @@ const { getStoryById } = usePublicApi()
 
 // Reactive state
 const currentImageIndex = ref(0)
-const story = ref<any>(null)
+const story = ref<ApiStory | null>(null)
 const loading = ref(false)
 const error = ref<any>(null)
 
@@ -269,20 +258,6 @@ const previousImage = () => {
 
 const setCurrentImage = (index: number) => {
   currentImageIndex.value = index
-}
-
-// Content formatting
-const formatStoryContent = (content: string) => {
-  if (!content) {
-    return ''
-  }
-
-  // Convert line breaks to paragraphs and sanitize
-  const html = content
-    .split('\n\n')
-    .map(paragraph => `<p class="mb-4">${paragraph.trim()}</p>`)
-    .join('')
-  return DOMPurify.sanitize(html)
 }
 
 // Modal actions

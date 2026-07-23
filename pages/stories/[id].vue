@@ -117,20 +117,9 @@
       <!-- Story Content Section -->
       <section class="py-16 bg-white dark:bg-gray-800">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <!-- Full Description -->
-          <div
-            v-if="story.fullDescription || story.content"
-            class="prose prose-lg dark:prose-invert max-w-none"
-          >
-            <div
-              v-html="
-                formatStoryContent(story.fullDescription || story.content || story.description)
-              "
-            />
-          </div>
-
-          <!-- Fallback if no full content -->
-          <div v-else class="text-center py-12">
+          <!-- Story description. The API exposes `description` only - there is no
+               rich-text field on the backend Story entity, so this is the whole body. -->
+          <div class="text-center py-12">
             <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
               {{ story.description }}
             </p>
@@ -155,13 +144,6 @@
                       class="w-5 h-5 mr-3 text-yellow-500"
                     />
                     <span>{{ story.category || 'Story' }}</span>
-                  </div>
-                  <div
-                    v-if="story.location"
-                    class="flex items-center text-gray-600 dark:text-gray-400"
-                  >
-                    <UIcon name="i-heroicons-map-pin" class="w-5 h-5 mr-3 text-yellow-500" />
-                    <span>{{ story.location }}</span>
                   </div>
                 </div>
               </div>
@@ -246,7 +228,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 // Import the API methods
 import { publicApi } from '~/composables/usePublicApi'
-import DOMPurify from 'isomorphic-dompurify'
+import type { ApiStory } from '~/composables/usePublicApi'
 
 // Meta tags
 useHead({
@@ -266,9 +248,13 @@ const {
   data: story,
   pending,
   error
-} = await useAsyncData(`story-${storyId}`, () => publicApi.getStoryById(storyId as string), {
-  default: () => ({} as any)
-})
+} = await useAsyncData<ApiStory>(
+  `story-${storyId}`,
+  () => publicApi.getStoryById(storyId as string),
+  {
+    default: () => ({}) as ApiStory
+  }
+)
 
 // Fetch related stories
 const { data: relatedStories } = await useFetch('/public-api/stories', {
@@ -331,20 +317,6 @@ const previousImage = () => {
 
 const setCurrentImage = (index: number) => {
   currentImageIndex.value = index
-}
-
-// Content formatting
-const formatStoryContent = (content: string) => {
-  if (!content) {
-    return ''
-  }
-
-  // Convert line breaks to paragraphs and sanitize
-  const html = content
-    .split('\n\n')
-    .map(paragraph => `<p class="mb-4">${paragraph.trim()}</p>`)
-    .join('')
-  return DOMPurify.sanitize(html)
 }
 
 // Sharing functions

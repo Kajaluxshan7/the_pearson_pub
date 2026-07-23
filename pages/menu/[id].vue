@@ -44,8 +44,11 @@ const fetchMenuItem = async () => {
     // Fetch all items for navigation
     try {
       const allResponse = await itemsApi.getAll()
-      if (allResponse?.items) {
-        allMenuItems.value = allResponse.items
+      // itemsApi.getAll() returns PaginatedResponse<ApiItem>, whose array lives
+      // on `data` - reading `.items` here always yielded undefined, which left
+      // allMenuItems empty and silently disabled prev/next navigation.
+      if (allResponse?.data) {
+        allMenuItems.value = allResponse.data
       } else if (Array.isArray(allResponse)) {
         allMenuItems.value = allResponse
       }
