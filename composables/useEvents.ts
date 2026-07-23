@@ -19,7 +19,7 @@ export const useEvents = () => {
       image: '/images/entertainment/music.jpg',
       images: [
         '/images/entertainment/music.jpg',
-        '/images/entertainment/music2.jpg',
+        '/images/entertainment/eventDefault.jpg',
         '/images/pub/interior-main.jpg'
       ],
       location: 'Main Hall',
@@ -147,7 +147,7 @@ export const useEvents = () => {
       image: '/images/food/foods.jpg',
       images: [
         '/images/food/foods.jpg',
-        '/images/food/foods2.jpg',
+        '/images/food/signature_dishes.jpg',
         '/images/pub/interior-main.jpg'
       ],
       location: 'Garden Area',

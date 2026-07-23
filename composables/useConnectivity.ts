@@ -19,7 +19,9 @@ export const useConnectivity = () => {
     maxRetries: 3
   })
 
-  let apiBaseUrl = 'http://localhost:5000'
+  let apiBaseUrl = process.dev
+    ? 'http://localhost:5000'
+    : 'https://api.thepearsonpubwhitby.ca'
   try {
     const config = useRuntimeConfig()
     apiBaseUrl = (config.public.apiBaseUrl as string) || apiBaseUrl

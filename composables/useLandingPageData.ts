@@ -142,8 +142,11 @@ export const useLandingPageData = () => {
       startDate: startDateFormatted, // Use formatted date instead of UTC string
       startDateTime: apiEvent.start_date,
       endDateTime: apiEvent.end_date,
-      image: apiEvent.images?.[0] || '/images/events/default.jpg',
-      images: apiEvent.images?.length > 0 ? apiEvent.images : ['/images/events/default.jpg'],
+      image: apiEvent.images?.[0] || '/images/entertainment/eventDefault.jpg',
+      images:
+        apiEvent.images?.length > 0
+          ? apiEvent.images
+          : ['/images/entertainment/eventDefault.jpg'],
       location: 'The Pearson Pub',
       venue: {
         name: 'The Pearson Pub',

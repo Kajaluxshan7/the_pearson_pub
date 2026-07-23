@@ -31,7 +31,7 @@ const selectedTab = computed(() => {
 
 const currentImage = computed(() => {
   const images = selectedTab.value?.images
-  if (!images?.length) return '/images/food/default.jpg'
+  if (!images?.length) return '/images/food/foods.jpg'
   return images[currentImageIndex.value] || images[0]
 })
 
@@ -39,7 +39,7 @@ const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
   if (!img.dataset.fallback) {
     img.dataset.fallback = '1'
-    img.src = '/images/food/default.jpg'
+    img.src = '/images/food/foods.jpg'
   }
 }
 

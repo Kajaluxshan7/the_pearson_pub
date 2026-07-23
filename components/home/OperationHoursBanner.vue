@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { TimezoneUtil } from '~/utils/timezone'
+
 interface TodayStatus {
   todayHours?: {
     day: string
@@ -15,47 +17,11 @@ const props = defineProps<{
 }>()
 
 function isCurrentlyOpen(day: string, openTime: string, closeTime: string): boolean {
-  if (!openTime || !closeTime) return false
-
-  const now = new Date()
-  const torontoTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Toronto' }))
-  const currentTime = torontoTime.toTimeString().slice(0, 5)
-
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-  const todayDay = days[torontoTime.getDay()]
-
-  const timeToMinutes = (time: string) => {
-    const [hours, minutes] = time.split(':').map(Number)
-    return hours * 60 + minutes
-  }
-
-  const currentMinutes = timeToMinutes(currentTime)
-  const openMinutes = timeToMinutes(openTime)
-  const closeMinutes = timeToMinutes(closeTime)
-
-  if (closeMinutes < openMinutes) {
-    if (day.toLowerCase() === todayDay && currentMinutes >= openMinutes) return true
-    const dayIndex = days.indexOf(day.toLowerCase())
-    const nextDay = days[(dayIndex + 1) % 7]
-    if (todayDay === nextDay && currentMinutes <= closeMinutes) return true
-    return false
-  }
-
-  if (day.toLowerCase() !== todayDay) return false
-  return currentMinutes >= openMinutes && currentMinutes <= closeMinutes
+  return TimezoneUtil.isCurrentlyOpen(openTime, closeTime, day)
 }
 
 function formatOperationTime(time: string): string {
-  if (!time) return 'Not set'
-  try {
-    const [hours, minutes] = time.split(':')
-    const hour = parseInt(hours, 10)
-    const ampm = hour >= 12 ? 'PM' : 'AM'
-    const displayHour = hour % 12 || 12
-    return `${displayHour}:${minutes} ${ampm}`
-  } catch {
-    return time
-  }
+  return time ? TimezoneUtil.formatOperationTime(time) : 'Not set'
 }
 </script>
 

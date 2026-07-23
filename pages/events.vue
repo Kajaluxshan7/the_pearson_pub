@@ -709,24 +709,15 @@ const formatEventMonth = (dateString: string) => {
   if (!dateString) {
     return ''
   }
-  try {
-    const date = TimezoneUtil.parseTorontoInputToISO(dateString)
-    return TimezoneUtil.formatToronto(date, 'MMM', false).toUpperCase()
-  } catch {
-    return ''
-  }
+  return TimezoneUtil.formatToronto(dateString, 'MMM', false).toUpperCase()
 }
 
 const formatEventDay = (dateString: string) => {
   if (!dateString) {
     return ''
   }
-  try {
-    const date = new Date(dateString)
-    return date.getDate().toString()
-  } catch {
-    return ''
-  }
+  // Must be the Toronto day-of-month, not the viewer's local one
+  return TimezoneUtil.formatToronto(dateString, 'd')
 }
 
 const formatEventDateRange = (startDate: string, endDate: string) => {

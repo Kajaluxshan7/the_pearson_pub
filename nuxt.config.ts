@@ -1,3 +1,9 @@
+const defaultApiBaseUrl =
+  process.env.NODE_ENV === 'production'
+    ? 'https://api.thepearsonpubwhitby.ca'
+    : 'http://localhost:5000'
+const apiBaseUrl = process.env.NUXT_PUBLIC_API_BASE_URL || defaultApiBaseUrl
+
 export default defineNuxtConfig({
   devtools: { enabled: false },
   ssr: true,
@@ -59,7 +65,7 @@ export default defineNuxtConfig({
     contactEmail: process.env.NUXT_CONTACT_EMAIL,
 
     public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:5000',
+      apiBaseUrl,
       appName: process.env.NUXT_PUBLIC_APP_NAME || 'The Pearson Pub',
       appDescription:
         process.env.NUXT_PUBLIC_APP_DESCRIPTION ||
@@ -172,7 +178,7 @@ export default defineNuxtConfig({
         // Preconnect to API domain for faster data fetching
         {
           rel: 'preconnect',
-          href: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
+          href: apiBaseUrl
         },
         // Preload hero background image for better LCP
         {

@@ -397,9 +397,14 @@ const addToCalendar = () => {
   }
 
   const event = props.event
-  const startDate = new Date(event.date || '')
-  const endDate = event.endDate
-    ? new Date(event.endDate)
+
+  // `event.date` / `event.endDate` are pre-formatted Toronto DISPLAY strings
+  // ("2025-08-15") and carry no time of day - a date-only ISO string parses as
+  // UTC midnight, which would export the event at 8 PM the previous day.
+  // `startDateTime` / `endDateTime` hold the real UTC instants, so use those.
+  const startDate = new Date(event.startDateTime || event.date || '')
+  const endDate = event.endDateTime
+    ? new Date(event.endDateTime)
     : new Date(startDate.getTime() + 2 * 60 * 60 * 1000)
 
   const formatDateForCalendar = (date: Date) => {

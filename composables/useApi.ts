@@ -3,6 +3,9 @@ import { publicApi } from './usePublicApi'
 
 // Cached base URL — resolved once and reused to avoid useRuntimeConfig() context loss in async callbacks
 let _cachedBaseUrl: string | null = null
+const defaultApiBaseUrl = process.dev
+  ? 'http://localhost:5000'
+  : 'https://api.thepearsonpubwhitby.ca'
 
 // Function to get API base URL from runtime config (with persistent cache)
 const getApiBaseUrl = () => {
@@ -19,7 +22,7 @@ const getApiBaseUrl = () => {
   } catch {
     // useRuntimeConfig() not available — use cached or fallback
   }
-  return _cachedBaseUrl || 'http://localhost:5000'
+  return _cachedBaseUrl || defaultApiBaseUrl
 }
 
 // Cached $fetch client — reuse the same instance for connection efficiency

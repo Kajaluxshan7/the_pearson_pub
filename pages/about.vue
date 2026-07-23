@@ -394,6 +394,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { publicApi } from '~/composables/usePublicApi'
 import type { ApiStory } from '~/composables/usePublicApi'
 import StoryModal from '~/features/stories/components/StoryModal.vue'
+import { TimezoneUtil } from '~/utils/timezone'
 
 // Simple animation state
 const animationState = ref({
@@ -431,14 +432,13 @@ const loadStories = async () => {
         // Map API fields to template expectations
         image:
           story.image ||
-          (story.images && story.images.length > 0 ? story.images[0] : '/images/placeholder.jpg'),
+          (story.images && story.images.length > 0
+            ? story.images[0]
+            : '/images/pub/interior-main.jpg'),
         category: 'Story', // Default category since backend doesn't have this field
         icon: 'i-heroicons-heart', // Default icon
         date: story.createdAt
-          ? new Date(story.createdAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long'
-            })
+          ? TimezoneUtil.formatToronto(story.createdAt, 'MMMM yyyy')
           : 'Recently'
       }))
     }
@@ -454,7 +454,7 @@ const loadStories = async () => {
 // Get current image for a story
 const getCurrentImage = (story: ApiStory) => {
   if (!story.images || story.images.length === 0) {
-    return story.image || '/images/placeholder.jpg'
+    return story.image || '/images/pub/interior-main.jpg'
   }
 
   if (story.images.length === 1) {

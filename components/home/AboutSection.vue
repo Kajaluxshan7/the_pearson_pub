@@ -104,16 +104,20 @@ defineExpose({ aboutRef })
                   class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   format="webp"
                   quality="85"
+                  width="600"
+                  sizes="sm:100vw md:50vw lg:300px"
                   loading="lazy"
                 />
               </div>
               <div class="aspect-[4/5] rounded-2xl overflow-hidden shadow-xl group">
                 <NuxtImg
-                  src="/images/food/foods.jpg"
-                  alt="Delicious Food - Gourmet dishes"
+                  src="/images/food/signature_dishes.jpg"
+                  alt="Signature Dishes - Our chef's featured plates"
                   class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   format="webp"
                   quality="85"
+                  width="600"
+                  sizes="sm:100vw md:50vw lg:300px"
                   loading="lazy"
                 />
               </div>
@@ -121,21 +125,25 @@ defineExpose({ aboutRef })
             <div class="space-y-4 lg:space-y-6 pt-8 lg:pt-12">
               <div class="aspect-[4/5] rounded-2xl overflow-hidden shadow-xl group">
                 <NuxtImg
-                  src="/images/pub/bar.jpg"
+                  src="/images/pub/interior-bar.jpg"
                   alt="Bar Area - Stylish bar with craft cocktails"
                   class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   format="webp"
                   quality="85"
+                  width="600"
+                  sizes="sm:100vw md:50vw lg:300px"
                   loading="lazy"
                 />
               </div>
               <div class="aspect-[4/5] rounded-2xl overflow-hidden shadow-xl group">
                 <NuxtImg
-                  src="/images/pub/exterior.jpg"
-                  alt="Restaurant Exterior - Welcoming storefront"
+                  src="/images/entertainment/music.jpg"
+                  alt="Live Entertainment - Music nights at the pub"
                   class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   format="webp"
                   quality="85"
+                  width="600"
+                  sizes="sm:100vw md:50vw lg:300px"
                   loading="lazy"
                 />
               </div>
@@ -165,7 +173,7 @@ defineExpose({ aboutRef })
                 </div>
                 <div class="aspect-[4/5] relative">
                   <div class="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
-                    Welcome to Our Pub
+                    Live Entertainment
                   </div>
                 </div>
               </div>

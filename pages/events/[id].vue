@@ -124,10 +124,10 @@
                 <UIcon name="i-heroicons-calendar-days" class="h-5 w-5 text-gray-400" />
                 <div>
                   <p class="font-medium text-gray-900">
-                    {{ formatEventDate(event.date || event.startDate || '') }}
+                    {{ formatEventDate(event.startDateTime || event.date || event.startDate || '') }}
                   </p>
                   <p class="text-sm text-gray-600">
-                    {{ formatEventDay(event.date || event.startDate || '') }}
+                    {{ formatEventDay(event.startDateTime || event.date || event.startDate || '') }}
                   </p>
                 </div>
               </div>
@@ -187,6 +187,7 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLandingPageData } from '~/composables/useLandingPageData'
+import { TimezoneUtil } from '~/utils/timezone'
 
 const route = useRoute()
 const router = useRouter()
@@ -222,34 +223,28 @@ const getBadgeClass = (category: string) => {
 }
 
 const formatEventDate = (dateString: string) => {
-  try {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  } catch (error) {
-    return dateString
+  if (!dateString) {
+    return ''
   }
+  return TimezoneUtil.formatToronto(dateString, 'EEEE, MMMM d, yyyy')
 }
 
 const formatEventDay = (dateString: string) => {
-  try {
-    const date = new Date(dateString)
-    const today = new Date()
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today'
-    } else if (date.toDateString() === tomorrow.toDateString()) {
-      return 'Tomorrow'
-    }
-    return ''
-  } catch (error) {
+  if (!dateString) {
     return ''
   }
+
+  // Compare calendar days in Toronto, not in the viewer's own timezone
+  const eventDay = TimezoneUtil.formatToronto(dateString, 'yyyy-MM-dd')
+  const today = TimezoneUtil.nowToronto()
+
+  if (eventDay === today.toFormat('yyyy-MM-dd')) {
+    return 'Today'
+  }
+  if (eventDay === today.plus({ days: 1 }).toFormat('yyyy-MM-dd')) {
+    return 'Tomorrow'
+  }
+  return ''
 }
 
 const handleImageError = (event: Event) => {

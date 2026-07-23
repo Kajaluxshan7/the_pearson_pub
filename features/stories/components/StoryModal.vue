@@ -244,12 +244,12 @@ const getCurrentStoryImage = (story: any) => {
   if (story.images && story.images.length > 0) {
     return story.images[currentImageIndex.value] || story.images[0]
   }
-  return story.image || '/images/stories/default.jpg'
+  return story.image || '/images/pub/interior-main.jpg'
 }
 
 const handleImageError = (event: any) => {
-  if (event.target && !event.target.src.includes('/images/stories/default.jpg')) {
-    event.target.src = '/images/stories/default.jpg'
+  if (event.target && !event.target.src.includes('/images/pub/interior-main.jpg')) {
+    event.target.src = '/images/pub/interior-main.jpg'
   }
 }
 
