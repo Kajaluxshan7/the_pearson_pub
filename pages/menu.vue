@@ -54,12 +54,15 @@
                 />
                 <input
                   v-model="searchQuery"
-                  type="text"
+                  type="search"
+                  aria-label="Search menu items"
                   placeholder="Search delicious menu items..."
-                  class="w-full pl-8 pr-8 py-2 rounded-2xl border-2 border-gray-200 dark:border-gray-600 focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/20 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 shadow-sm hover:shadow-md focus:shadow-lg"
+                  class="w-full pl-11 pr-11 py-2.5 rounded-2xl border-2 border-gray-200 dark:border-gray-600 focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/20 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 shadow-sm hover:shadow-md focus:shadow-lg"
                 />
                 <button
                   v-if="searchQuery"
+                  type="button"
+                  aria-label="Clear search"
                   class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
                   @click="searchQuery = ''"
                 >
@@ -102,7 +105,7 @@
                   :class="[
                     'px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-2',
                     viewMode === 'grid'
-                      ? 'bg-yellow-500 text-white shadow-md'
+                      ? 'bg-yellow-500 text-gray-900 shadow-md'
                       : 'text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-600'
                   ]"
                   @click="viewMode = 'grid'"
@@ -114,7 +117,7 @@
                   :class="[
                     'px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-2',
                     viewMode === 'list'
-                      ? 'bg-yellow-500 text-white shadow-md'
+                      ? 'bg-yellow-500 text-gray-900 shadow-md'
                       : 'text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-600'
                   ]"
                   @click="viewMode = 'list'"
@@ -142,8 +145,8 @@
                 :class="[
                   'group relative px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 text-center border-2',
                   activeCategory === 'all'
-                    ? 'bg-yellow-500 text-white border-yellow-500 shadow-lg shadow-yellow-500/25 scale-105'
-                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:scale-102'
+                    ? 'bg-yellow-500 text-gray-900 border-yellow-500 shadow-lg shadow-yellow-500/25'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:-translate-y-1'
                 ]"
                 @click="selectCategory('all')"
               >
@@ -159,7 +162,7 @@
                 key="more"
                 :class="[
                   'group relative px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 text-center border-2',
-                  'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:scale-102'
+                  'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:-translate-y-1'
                 ]"
                 @click="isCategoryModalOpen = true"
               >
@@ -331,7 +334,7 @@
                   :class="[
                     'flex items-center justify-center w-10 h-10 rounded-xl border-2 transition-all duration-200',
                     paginatedItems(category).hasPrevPage
-                      ? 'border-yellow-500 bg-yellow-500 text-white hover:bg-yellow-600 hover:border-yellow-600 shadow-md hover:shadow-lg'
+                      ? 'border-yellow-500 bg-yellow-500 text-gray-900 hover:bg-yellow-600 hover:border-yellow-600 shadow-md hover:shadow-lg'
                       : 'border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                   ]"
                   @click="updateCategoryPage(category.id, paginatedItems(category).currentPage - 1)"
@@ -347,7 +350,7 @@
                       :class="[
                         'flex items-center justify-center w-10 h-10 rounded-xl border-2 transition-all duration-200 font-semibold',
                         page === paginatedItems(category).currentPage
-                          ? 'border-yellow-500 bg-yellow-500 text-white shadow-md'
+                          ? 'border-yellow-500 bg-yellow-500 text-gray-900 shadow-md'
                           : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
                       ]"
                       @click="updateCategoryPage(category.id, page)"
@@ -364,7 +367,7 @@
                   :class="[
                     'flex items-center justify-center w-10 h-10 rounded-xl border-2 transition-all duration-200',
                     paginatedItems(category).hasNextPage
-                      ? 'border-yellow-500 bg-yellow-500 text-white hover:bg-yellow-600 hover:border-yellow-600 shadow-md hover:shadow-lg'
+                      ? 'border-yellow-500 bg-yellow-500 text-gray-900 hover:bg-yellow-600 hover:border-yellow-600 shadow-md hover:shadow-lg'
                       : 'border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                   ]"
                   @click="updateCategoryPage(category.id, paginatedItems(category).currentPage + 1)"
@@ -538,7 +541,7 @@
           <div
             v-for="(info, index) in dietaryInfo"
             :key="index"
-            class="flex flex-col items-center p-6 rounded-xl bg-gray-50 dark:bg-gray-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+            class="flex flex-col items-center p-6 rounded-xl bg-gray-50 dark:bg-gray-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
           >
             <UIcon
               :name="info.icon"
@@ -564,8 +567,8 @@
             :class="[
               'group relative px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 text-left border-2',
               activeCategory === category.id
-                ? 'bg-yellow-500 text-white border-yellow-500 shadow-lg shadow-yellow-500/25 scale-105'
-                : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:scale-102'
+                ? 'bg-yellow-500 text-gray-900 border-yellow-500 shadow-lg shadow-yellow-500/25'
+                : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:-translate-y-1'
             ]"
             @click="
               () => {

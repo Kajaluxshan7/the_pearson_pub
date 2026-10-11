@@ -112,14 +112,14 @@
               <img
                 src="/images/pub/interior-bar.jpg"
                 alt="Pub Bar"
-                class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
             </div>
 
             <!-- Floating testimonial card -->
             <div
-              class="absolute -bottom-8 -left-8 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-sm transform hover:scale-105 transition-transform duration-300"
+              class="absolute -bottom-8 -left-8 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-sm transform hover:-translate-y-1 transition-transform duration-300"
             >
               <div class="flex items-center space-x-4 mb-4">
                 <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
@@ -196,7 +196,7 @@
           <div
             v-for="(story, index) in stories"
             :key="story.id || index"
-            class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-500 hover:scale-105 cursor-pointer"
+            class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-500 hover:-translate-y-1 cursor-pointer"
             @click="openStoryModal(story.id)"
           >
             <div class="relative h-100 overflow-hidden">
@@ -204,7 +204,7 @@
                 :key="getCurrentImage(story)"
                 :src="getCurrentImage(story)"
                 :alt="story.title"
-                class="w-full h-full object-cover transform group-hover:scale-110 transition-all duration-700"
+                class="w-full h-full object-cover transform group-hover:scale-105 transition-all duration-500"
               />
               <div
                 class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-300"
@@ -312,7 +312,7 @@
           <div
             v-for="(value, index) in values"
             :key="index"
-            class="group text-center p-8 bg-gray-50 dark:bg-gray-700 rounded-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-gray-200 dark:border-gray-600"
+            class="group text-center p-8 bg-gray-50 dark:bg-gray-700 rounded-2xl transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border border-gray-200 dark:border-gray-600"
             :style="{ animationDelay: `${index * 200}ms` }"
           >
             <div class="relative mb-6">
@@ -321,7 +321,7 @@
               >
                 <UIcon
                   :name="value.icon"
-                  class="w-10 h-10 text-yellow-600 dark:text-yellow-400 group-hover:scale-110 transition-transform duration-300"
+                  class="w-10 h-10 text-yellow-600 dark:text-yellow-400 group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
             </div>
@@ -364,7 +364,7 @@
           <div
             v-for="(member, index) in teamMembers"
             :key="index"
-            class="group text-center bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:shadow-2xl transform transition-all duration-300 hover:scale-105"
+            class="group text-center bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:shadow-2xl transform transition-all duration-300 hover:-translate-y-1"
           >
             <div class="relative mb-6">
               <div

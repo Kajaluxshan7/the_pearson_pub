@@ -239,7 +239,7 @@ export default defineNuxtConfig({
   googleFonts: {
     families: {
       Inter: [400, 600, 700],
-      Cinzel: [400, 600]
+      Cinzel: [400, 600, 700]
     },
     download: true,
     base64: false,

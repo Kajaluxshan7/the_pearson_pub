@@ -26,12 +26,12 @@
         <div
           v-for="(schedule, index) in weeklySchedule"
           :key="index"
-          class="group bg-gray-50 dark:bg-gray-700 rounded-xl p-6 lg:p-8 text-center transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-gray-200 dark:border-gray-600 hover:border-yellow-400 dark:hover:border-yellow-500"
+          class="group bg-gray-50 dark:bg-gray-700 rounded-xl p-6 lg:p-8 text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border border-gray-200 dark:border-gray-600 hover:border-yellow-400 dark:hover:border-yellow-500"
         >
           <div class="mb-6">
             <UIcon
               :name="schedule.icon"
-              class="w-12 h-12 lg:w-16 lg:h-16 text-yellow-600 dark:text-yellow-400 mx-auto group-hover:scale-110 transition-transform duration-300"
+              class="w-12 h-12 lg:w-16 lg:h-16 text-yellow-600 dark:text-yellow-400 mx-auto group-hover:scale-105 transition-transform duration-300"
             />
           </div>
 
@@ -81,7 +81,7 @@
               color="yellow"
               variant="outline"
               size="sm"
-              class="group-hover:bg-yellow-500 group-hover:text-white transition-all duration-300"
+              class="group-hover:bg-yellow-500 group-hover:text-gray-900 transition-all duration-300"
             >
               {{ schedule.ctaText || 'Learn More' }}
             </UButton>

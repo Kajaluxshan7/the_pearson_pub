@@ -137,9 +137,6 @@
                       autocomplete="given-name"
                       size="lg"
                     />
-                    <p v-if="formErrors.firstName" class="text-red-600 text-sm mt-1">
-                      {{ formErrors.firstName }}
-                    </p>
                   </UFormGroup>
 
                   <UFormGroup label="Last Name" required :error="formErrors.lastName">
@@ -150,9 +147,6 @@
                       autocomplete="family-name"
                       size="lg"
                     />
-                    <p v-if="formErrors.lastName" class="text-red-600 text-sm mt-1">
-                      {{ formErrors.lastName }}
-                    </p>
                   </UFormGroup>
                 </div>
                 <UFormGroup label="Email" required :error="formErrors.email" class="mt-6">
@@ -165,9 +159,6 @@
                     size="lg"
                     class="w-full"
                   />
-                  <p v-if="formErrors.email" class="text-red-600 text-sm mt-1">
-                    {{ formErrors.email }}
-                  </p>
                 </UFormGroup>
 
                 <UFormGroup label="Subject" required :error="formErrors.subject">
@@ -177,9 +168,6 @@
                     :error="!!formErrors.subject"
                     size="lg"
                   />
-                  <p v-if="formErrors.subject" class="text-red-600 text-sm mt-1">
-                    {{ formErrors.subject }}
-                  </p>
                 </UFormGroup>
 
                 <UFormGroup label="Message" required :error="formErrors.message">
@@ -190,9 +178,6 @@
                     :error="!!formErrors.message"
                     size="lg"
                   />
-                  <p v-if="formErrors.message" class="text-red-600 text-sm mt-1">
-                    {{ formErrors.message }}
-                  </p>
                 </UFormGroup>
 
                 <UButton

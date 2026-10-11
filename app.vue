@@ -17,10 +17,11 @@
           <UButton
             v-show="scrollY > 500"
             icon="i-heroicons-arrow-up"
-            color="yellow"
+            color="gray"
             variant="solid"
-            class="fixed bottom-10 left-1/2 transform -translate-x-1/2 rounded-full shadow-lg z-40"
-            size="xs"
+            aria-label="Back to top"
+            class="fixed bottom-20 right-5 w-12 h-12 justify-center rounded-full shadow-lg z-40"
+            size="lg"
             @click="scrollToTop"
           />
         </ClientOnly>
@@ -61,7 +62,7 @@ const scrollToTop = () => {
 onMounted(() => {
   // Setup scroll tracking for scroll-to-top button
   if (typeof window !== 'undefined') {
-    window.addEventListener('scroll', updateScroll)
+    window.addEventListener('scroll', updateScroll, { passive: true })
     updateScroll()
   }
 })
@@ -76,13 +77,24 @@ onUnmounted(() => {
 <style>
 .page-enter-active,
 .page-leave-active {
-  transition: all 0.3s;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .page-enter-from,
 .page-leave-to {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(8px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @keyframes spin {

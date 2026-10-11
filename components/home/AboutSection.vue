@@ -101,7 +101,7 @@ defineExpose({ aboutRef })
                 <NuxtImg
                   src="/images/pub/interior-main.jpg"
                   alt="Restaurant Interior - Cozy dining atmosphere"
-                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   format="webp"
                   quality="85"
                   width="600"
@@ -113,7 +113,7 @@ defineExpose({ aboutRef })
                 <NuxtImg
                   src="/images/food/signature_dishes.jpg"
                   alt="Signature Dishes - Our chef's featured plates"
-                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   format="webp"
                   quality="85"
                   width="600"
@@ -127,7 +127,7 @@ defineExpose({ aboutRef })
                 <NuxtImg
                   src="/images/pub/interior-bar.jpg"
                   alt="Bar Area - Stylish bar with craft cocktails"
-                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   format="webp"
                   quality="85"
                   width="600"
@@ -139,7 +139,7 @@ defineExpose({ aboutRef })
                 <NuxtImg
                   src="/images/entertainment/music.jpg"
                   alt="Live Entertainment - Music nights at the pub"
-                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   format="webp"
                   quality="85"
                   width="600"

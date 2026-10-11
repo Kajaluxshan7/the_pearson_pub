@@ -74,7 +74,7 @@ const handleScroll = () => {
 
 onMounted(() => {
   if (process.client) {
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
     lastScrollPosition.value = window.scrollY
   }
 })
@@ -140,7 +140,7 @@ watch(isOpen, async (open) => {
   <!-- Skip to main content link -->
   <a
     href="#main-content"
-    class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60] focus:px-4 focus:py-2 focus:bg-yellow-500 focus:text-white focus:rounded-lg focus:shadow-lg focus:outline-none"
+    class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60] focus:px-4 focus:py-2 focus:bg-yellow-500 focus:text-gray-900 focus:rounded-lg focus:shadow-lg focus:outline-none"
   >
     Skip to main content
   </a>
@@ -199,7 +199,7 @@ watch(isOpen, async (open) => {
         <!-- Dark Mode Toggle Right -->
         <div class="hidden md:flex items-center space-x-4">
           <button
-            class="p-3 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 transition-all duration-300 hover:shadow-lg"
+            class="p-3 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800  transition-all duration-300 hover:shadow-lg"
             aria-label="Toggle dark mode"
             @click="isDark = !isDark"
           >
@@ -209,7 +209,7 @@ watch(isOpen, async (open) => {
         <div class="md:hidden flex items-center space-x-4">
           <!-- Dark Mode Toggle Mobile -->
           <button
-            class="p-3 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 transition-all duration-300"
+            class="p-3 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800  transition-all duration-300"
             aria-label="Toggle dark mode"
             @click="isDark = !isDark"
           >
@@ -218,7 +218,7 @@ watch(isOpen, async (open) => {
 
           <!-- Mobile Menu Button -->
           <button
-            class="p-3 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 transition-all duration-300"
+            class="p-3 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800  transition-all duration-300"
             :aria-expanded="isOpen"
             aria-controls="mobile-menu"
             aria-label="Toggle navigation menu"
@@ -269,7 +269,7 @@ watch(isOpen, async (open) => {
               v-for="(item, index) in navigationItems"
               :key="index"
               :to="item.path"
-              class="block px-4 py-3 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-105 text-center"
+              class="block px-4 py-3 rounded-xl text-base font-semibold transition-colors duration-200 text-center"
               :class="[
                 index === activeIndex
                   ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 shadow-md'
@@ -287,7 +287,7 @@ watch(isOpen, async (open) => {
 
   <a
     :href="callLink"
-    class="fixed bottom-5 right-5 z-50 bg-yellow-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-yellow-600 transition-colors duration-200"
+    class="fixed bottom-5 right-5 z-50 bg-yellow-500 text-gray-900 rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-yellow-600 transition-colors duration-200"
     aria-label="Call Us"
   >
     <UIcon name="i-heroicons-phone" class="w-5 h-5" />

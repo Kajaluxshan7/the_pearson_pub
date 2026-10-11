@@ -2,7 +2,7 @@
   <!-- Grid View -->
   <div
     v-if="viewMode === 'grid'"
-    class="menu-card transition-all duration-500 transform hover:scale-105 cursor-pointer"
+    class="menu-card transition-all duration-500 transform hover:-translate-y-1 cursor-pointer"
     :style="{ animationDelay: `${index * 100}ms` }"
     @click="$emit('click')"
   >
@@ -14,7 +14,7 @@
         <div class="relative overflow-hidden aspect-square">
           <img
             :src="imageUrl"
-            class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-110"
+            class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-105"
             :alt="item.name"
             loading="lazy"
             decoding="async"
@@ -101,7 +101,7 @@
         <div class="sm:w-48 relative overflow-hidden">
           <img
             :src="imageUrl"
-            class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-110"
+            class="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-105"
             :alt="item.name"
             loading="lazy"
             decoding="async"

@@ -234,14 +234,14 @@ useHead({
             <!-- Image Navigation -->
             <div v-if="itemImages.length > 1" class="absolute top-1/2 left-3 right-3 flex justify-between items-center -translate-y-1/2">
               <button
-                class="bg-black/60 hover:bg-yellow-500 text-white p-2 rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm"
+                class="bg-black/60 hover:bg-yellow-500 hover:text-gray-900 text-white p-2 rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm"
                 aria-label="Previous image"
                 @click="previousImage"
               >
                 <UIcon name="i-heroicons-chevron-left" class="w-5 h-5" />
               </button>
               <button
-                class="bg-black/60 hover:bg-yellow-500 text-white p-2 rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm"
+                class="bg-black/60 hover:bg-yellow-500 hover:text-gray-900 text-white p-2 rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm"
                 aria-label="Next image"
                 @click="nextImage"
               >

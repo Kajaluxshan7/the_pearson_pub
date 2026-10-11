@@ -47,13 +47,14 @@
             <div class="relative">
               <input
                 v-model="searchQuery"
-                type="text"
+                type="search"
+                aria-label="Search events"
                 placeholder="Search events..."
-                class="w-full pl-8 pr-2 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm"
+                class="w-full pl-11 pr-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm"
               />
               <UIcon
                 name="i-heroicons-magnifying-glass"
-                class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
               />
             </div>
           </div>
@@ -78,7 +79,7 @@
                 :class="[
                   'px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-2',
                   viewMode === 'grid'
-                    ? 'bg-yellow-500 text-white shadow-md'
+                    ? 'bg-yellow-500 text-gray-900 shadow-md'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="viewMode = 'grid'"
@@ -90,7 +91,7 @@
                 :class="[
                   'px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-2',
                   viewMode === 'list'
-                    ? 'bg-yellow-500 text-white shadow-md'
+                    ? 'bg-yellow-500 text-gray-900 shadow-md'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="viewMode = 'list'"
@@ -205,7 +206,7 @@
             <div
               v-for="(event, index) in filteredEvents"
               :key="event.id"
-              class="event-card group transform transition-all duration-500 hover:scale-[1.02] cursor-pointer"
+              class="event-card group transform transition-all duration-500 hover:-translate-y-1 cursor-pointer"
               tabindex="0"
               role="button"
               :aria-label="`View details for ${event.title}`"
@@ -221,8 +222,8 @@
                   <img
                     :src="getCurrentEventImage(event)"
                     :alt="event.title"
-                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    loading="eager"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                     decoding="async"
                     @error="handleImageError"
                   />
@@ -348,8 +349,8 @@
                     <img
                       :src="getCurrentEventImage(event)"
                       :alt="event.title"
-                      class="w-full h-80 lg:h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      loading="eager"
+                      class="w-full h-80 lg:h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
                       decoding="async"
                       @error="handleImageError"
                     />

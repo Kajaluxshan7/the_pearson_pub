@@ -18,7 +18,7 @@
                 isDetailView ? 'h-80 lg:h-96' : 'h-64 lg:h-80'
               ]"
               :alt="event.title + ' image ' + (idx + 1)"
-              loading="eager"
+              loading="lazy"
               decoding="async"
               @error="(e) => { const t = e.target as HTMLImageElement; if (t && !t.src.includes('music.jpg')) t.src = '/images/entertainment/music.jpg' }"
             />
@@ -58,7 +58,7 @@
             :src="event.image || '/images/entertainment/music.jpg'"
             :alt="event.title"
             :class="['w-full object-cover', isDetailView ? 'h-80 lg:h-96' : 'h-64 lg:h-80']"
-            loading="eager"
+            loading="lazy"
             decoding="async"
             @error="(e) => { const t = e.target as HTMLImageElement; if (t && !t.src.includes('music.jpg')) t.src = '/images/entertainment/music.jpg' }"
           />

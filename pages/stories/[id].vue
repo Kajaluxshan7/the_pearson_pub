@@ -14,7 +14,7 @@
         </p>
         <NuxtLink
           to="/about"
-          class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg transition-colors"
+          class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-6 py-3 rounded-lg transition-colors"
         >
           Back to Stories
         </NuxtLink>
@@ -155,7 +155,7 @@
                 </h3>
                 <div class="flex space-x-4">
                   <button
-                    class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+                    class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
                     @click="shareStory"
                   >
                     <UIcon name="i-heroicons-share" class="w-4 h-4" />
@@ -189,13 +189,13 @@
               v-for="relatedStory in relatedStories"
               :key="relatedStory.id"
               :to="`/stories/${relatedStory.id}`"
-              class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-500 hover:scale-105"
+              class="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-500 hover:-translate-y-1"
             >
               <div class="relative h-64 overflow-hidden">
                 <img
                   :src="getStoryImage(relatedStory)"
                   :alt="relatedStory.title"
-                  class="w-full h-full object-cover transform group-hover:scale-110 transition-all duration-700"
+                  class="w-full h-full object-cover transform group-hover:scale-105 transition-all duration-500"
                   loading="lazy"
                   decoding="async"
                   @error="handleImageError"

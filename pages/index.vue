@@ -145,10 +145,10 @@ const { shouldShowLoading, markLoadingShown, isFirstVisit, getVisitCount } = use
 // Start with loader visible for both server and client to keep SSR and client render consistent.
 // onMounted will decide whether to keep the full-screen loader (hard reload / first visit)
 // or hide it immediately for SPA navigations and run background initialization.
-const initialLoading = ref(true)
+const initialLoading = ref(false)
 const retryingConnection = ref(false)
 const forceFallback = ref(false)
-const pageReady = ref(false)
+const pageReady = ref(true)
 const canShowFallbackAfterTimeout = ref(false)
 
 // Loading configuration
@@ -404,31 +404,11 @@ onMounted(async () => {
   // Always initialize data on mount - no complex loading logic
   if (process.client) {
     // Decide whether to show full-screen loader or hide it immediately for SPA navigations.
-    const showLoader = shouldShowLoading()
-
-    if (showLoader) {
-      // Hard reload / first visit: keep loader visible and await initialization
-      pageReady.value = false // keep hidden until loader completes
-      await initializeDataWithProgress()
-      // initialization will set pageReady = true and clear initialLoading in finally
-      initialLoading.value = false
-      clearTimeout(safetyTimeout) // Clear safety timeout on successful load
-    } else {
-      // SPA navigation: hide loader immediately to avoid flash, then initialize in background
-      initialLoading.value = false
-      pageReady.value = true // Show content immediately - data will refresh in background
-      clearTimeout(safetyTimeout) // Clear safety timeout for SPA nav
-
-      initializeDataWithProgress().catch(error => {
-        console.warn('Background data loading failed:', error)
-        // Continue with static content if data loading fails
-      })
-
-      // Load operation status in background
-      fetchTodayOperationStatus().catch(error => {
-        console.warn('Operation status loading failed:', error)
-      })
-    }
+    // Render content immediately (hero is static) and load data in the background.
+    // Sections show their own skeletons while data arrives.
+    clearTimeout(safetyTimeout)
+    markLoadingShown()
+    initializeDataWithProgress().catch(() => {})
 
     // Start a short grace period before showing offline fallback to avoid flicker on hard reloads
     canShowFallbackAfterTimeout.value = false

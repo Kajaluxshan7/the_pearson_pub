@@ -76,13 +76,13 @@
             class="absolute top-1/2 left-2 right-2 sm:left-8 sm:right-8 flex justify-between items-center transform -translate-y-1/2 z-20"
           >
             <button
-              class="bg-black/60 hover:bg-yellow-500 text-white p-3 rounded-full shadow-lg transition-all duration-300 backdrop-blur-md"
+              class="bg-black/60 hover:bg-yellow-500 hover:text-gray-900 text-white p-3 rounded-full shadow-lg transition-all duration-300 backdrop-blur-md"
               @click="previousImage"
             >
               <UIcon name="i-heroicons-chevron-left" class="w-6 h-6" />
             </button>
             <button
-              class="bg-black/60 hover:bg-yellow-500 text-white p-3 rounded-full shadow-lg transition-all duration-300 backdrop-blur-md"
+              class="bg-black/60 hover:bg-yellow-500 hover:text-gray-900 text-white p-3 rounded-full shadow-lg transition-all duration-300 backdrop-blur-md"
               @click="nextImage"
             >
               <UIcon name="i-heroicons-chevron-right" class="w-6 h-6" />
@@ -109,7 +109,7 @@
                 :src="img"
                 :alt="story.title"
                 class="object-cover w-full h-full"
-                loading="eager"
+                loading="lazy"
                 decoding="async"
               />
             </button>
@@ -148,7 +148,7 @@
 
             <div class="flex space-x-2">
               <button
-                class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 sm:p-3 rounded-full shadow-lg transition-colors flex items-center"
+                class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 p-2 sm:p-3 rounded-full shadow-lg transition-colors flex items-center"
                 title="Share"
                 @click="shareStory"
               >

@@ -52,7 +52,8 @@ function isSeasonalAvailable(startDate: string, endDate: string): boolean {
 const previousSpecialImage = () => {
   const images = selectedTab.value?.images
   if (!images?.length || images.length <= 1) return
-  currentImageIndex.value = currentImageIndex.value === 0 ? images.length - 1 : currentImageIndex.value - 1
+  currentImageIndex.value =
+    currentImageIndex.value === 0 ? images.length - 1 : currentImageIndex.value - 1
 }
 
 const nextSpecialImage = () => {
@@ -86,11 +87,17 @@ const startImageRotation = () => {
 }
 
 const stopSpecialRotation = () => {
-  if (specialSwapInterval) { clearInterval(specialSwapInterval); specialSwapInterval = null }
+  if (specialSwapInterval) {
+    clearInterval(specialSwapInterval)
+    specialSwapInterval = null
+  }
 }
 
 const stopImageRotation = () => {
-  if (imageSwapInterval) { clearInterval(imageSwapInterval); imageSwapInterval = null }
+  if (imageSwapInterval) {
+    clearInterval(imageSwapInterval)
+    imageSwapInterval = null
+  }
 }
 
 const goToMenuCategory = () => {
@@ -123,18 +130,22 @@ watch(activeSpecialTab, () => {
   nextTick(() => startImageRotation())
 })
 
-watch(() => props.tabs, (tabs) => {
-  if (tabs.length > 0 && !tabs.find(tab => tab.id === activeSpecialTab.value)) {
-    activeSpecialTab.value = tabs[0].id
-  }
-  stopSpecialRotation()
-  stopImageRotation()
-  currentImageIndex.value = 0
-  nextTick(() => {
-    startSpecialRotation()
-    startImageRotation()
-  })
-}, { deep: true })
+watch(
+  () => props.tabs,
+  tabs => {
+    if (tabs.length > 0 && !tabs.find(tab => tab.id === activeSpecialTab.value)) {
+      activeSpecialTab.value = tabs[0].id
+    }
+    stopSpecialRotation()
+    stopImageRotation()
+    currentImageIndex.value = 0
+    nextTick(() => {
+      startSpecialRotation()
+      startImageRotation()
+    })
+  },
+  { deep: true }
+)
 
 onMounted(() => {
   startSpecialRotation()
@@ -157,7 +168,9 @@ onUnmounted(() => {
       <!-- Specials Title -->
       <div class="mb-16 text-center" data-aos="fade-up">
         <div class="inline-block mb-4">
-          <span class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase">
+          <span
+            class="text-yellow-600 dark:text-yellow-400 font-semibold text-lg tracking-wide uppercase"
+          >
             Chef's Recommendations
           </span>
           <div class="w-16 h-1 bg-yellow-500 mx-auto mt-2" />
@@ -166,8 +179,8 @@ onUnmounted(() => {
           Today's <span class="text-yellow-600 dark:text-yellow-400">Specials</span>
         </h2>
         <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-          Discover our handcrafted daily selections, featuring the finest seasonal ingredients
-          and chef's special creations
+          Discover our handcrafted daily selections, featuring the finest seasonal ingredients and
+          chef's special creations
         </p>
       </div>
 
@@ -193,7 +206,7 @@ onUnmounted(() => {
                       :src="img"
                       :alt="`${selectedTab.title} image ${idx + 1}`"
                       class="w-full h-full object-cover transition-opacity duration-500"
-                      loading="eager"
+                      loading="lazy"
                       decoding="async"
                       @error="handleImageError"
                     />
@@ -238,7 +251,7 @@ onUnmounted(() => {
                     :src="currentImage"
                     :alt="selectedTab.title"
                     class="w-full h-full object-cover"
-                    loading="eager"
+                    loading="lazy"
                     decoding="async"
                     @error="handleImageError"
                   />
